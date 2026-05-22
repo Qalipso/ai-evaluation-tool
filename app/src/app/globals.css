@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: #0b0b14;
+  color: #e7e7f0;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+* {
+  border-color: #23233a;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0b14;
+}
+::-webkit-scrollbar-thumb {
+  background: #2e2e4a;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a5a;
+}
+
+.heat-supported {
+  background: rgba(62, 207, 142, 0.18);
+  border-bottom: 1px solid rgba(62, 207, 142, 0.5);
+}
+.heat-partial {
+  background: rgba(245, 165, 36, 0.18);
+  border-bottom: 1px solid rgba(245, 165, 36, 0.5);
+}
+.heat-unsupported {
+  background: rgba(239, 68, 68, 0.18);
+  border-bottom: 1px dashed rgba(239, 68, 68, 0.6);
+}
+.heat-contradicted {
+  background: rgba(239, 68, 68, 0.32);
+  border-bottom: 1px solid rgba(239, 68, 68, 0.9);
+  text-decoration: line-through;
+  text-decoration-color: rgba(239, 68, 68, 0.7);
+}
+
+/* Wiki markdown rendering */
+.prose-wiki {
+  color: #c8c8d8;
+  line-height: 1.75;
+  font-size: 0.9rem;
+}
+.prose-wiki h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #e7e7f0;
+  margin-bottom: 0.25rem;
+  margin-top: 1.5rem;
+  border-bottom: 1px solid #23233a;
+  padding-bottom: 0.5rem;
+}
+.prose-wiki h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e7e7f0;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+.prose-wiki h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #d0d0e0;
+  margin-top: 1.25rem;
+  margin-bottom: 0.35rem;
+}
+.prose-wiki p {
+  margin-bottom: 0.75rem;
+}
+.prose-wiki strong {
+  color: #e7e7f0;
+  font-weight: 600;
+}
+.prose-wiki code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8em;
+  background: rgba(124, 108, 255, 0.1);
+  border: 1px solid rgba(124, 108, 255, 0.2);
+  border-radius: 3px;
+  padding: 0.1em 0.4em;
+  color: #b8acff;
+}
+.prose-wiki pre {
+  background: #12121e;
+  border: 1px solid #23233a;
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+.prose-wiki pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #c8c8d8;
+  font-size: 0.85rem;
+}
+.prose-wiki ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+  space-y: 0.25rem;
+}
+.prose-wiki ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.prose-wiki li {
+  margin-bottom: 0.2rem;
+}
+.prose-wiki hr {
+  border-color: #23233a;
+  margin: 1.5rem 0;
+}
+.prose-wiki table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin: 1rem 0;
+}
+.prose-wiki th {
+  background: #16162a;
+  color: #9090b0;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #23233a;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.prose-wiki td {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #23233a;
+  color: #c0c0d4;
+  vertical-align: top;
+}
+.prose-wiki tr:nth-child(even) td {
+  background: rgba(255,255,255,0.02);
+}
+.prose-wiki blockquote {
+  border-left: 3px solid #7c6cff;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #9090b0;
+  font-style: italic;
+}

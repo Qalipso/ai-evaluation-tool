@@ -1,0 +1,23 @@
+{
+  "overall_quality": 78.5,
+  "active_projects": 5,
+  "recent_runs_30d": 8,
+  "failed_cases": 27,
+  "high_risk_runs": 2,
+  "pipeline_health": [
+    { "stage": "Input", "score": 100, "label": "5 projects" },
+    { "stage": "Rubric Engine", "score": 100, "label": "5 active rubrics" },
+    { "stage": "Scoring", "score": 96, "label": "8 runs evaluated" },
+    { "stage": "Claim Pipeline", "score": 91, "label": "25 claims processed" },
+    { "stage": "Safety Layer", "score": 100, "label": "4 findings flagged" },
+    { "stage": "Human Review", "score": 78, "label": "10 cases in queue" },
+    { "stage": "Reports", "score": 0, "label": "0 generated · V1" }
+  ],
+  "quality_breakdown": [
+    { "evaluator": "Deterministic Checks", "score": 94, "cases": 92, "pass_rate": 0.97 },
+    { "evaluator": "Semantic Similarity", "score": 81, "cases": 64, "pass_rate": 0.78 },
+    { "evaluator": "LLM Judge", "score": 76, "cases": 124, "pass_rate": 0.71 },
+    { "evaluator": "Claim Pipeline", "score": 68, "cases": 92, "pass_rate": 0.62 },
+    { "evaluator": "Safety Gate", "score": 100, "cases": 124, "pass_rate": 0.97 }
+  ]
+}
