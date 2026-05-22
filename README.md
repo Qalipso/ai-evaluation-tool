@@ -126,21 +126,6 @@ Outcome: an evaluation harness that catches "plausible-looking but useless" outp
 
 ---
 
-## What this project proves in my portfolio
-
-This artifact is built to show, without me having to claim it, that I can:
-
-- **Think in product terms about AI quality.** Not "the model said X." Rather "what are the dimensions of being good, what is the threshold, what does failure look like, who reviews."
-- **Decompose a hard, fuzzy problem** (evaluation) into a usable system (rubrics, scoring, reports, human review, regressions).
-- **Distinguish concepts that often blur** — evaluation vs testing vs monitoring, hallucination vs ungroundedness, LLM judge vs deterministic check vs human review.
-- **Design behavior, not just features.** The `behavior-spec.md` describes what the system does *and refuses to do*.
-- **Communicate to multiple audiences.** README for stakeholders, wiki for reviewers, architecture for engineers, acceptance criteria for QA.
-- **Take a position.** This tool has opinions (e.g. "LLM-as-judge alone is insufficient for safety dimensions"). A serious AI PM brings opinions, not just features.
-
-This is the kind of internal platform an AI product team would actually build once they have shipped one painful release.
-
----
-
 ## Roadmap (summary)
 
 - **MVP** — Rubric Builder, Evaluation Runner, Hallucination Heat Map, basic report.
