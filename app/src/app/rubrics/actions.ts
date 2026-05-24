@@ -4,7 +4,7 @@ import path from "path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-const rubricsPath = path.join(process.cwd(), "..", "mock-data", "rubrics.json");
+const rubricsPath = path.join(process.cwd(), "mock-data", "rubrics.json");
 
 type Dimension = { id: string; name: string; method: string; weight: number; threshold: number };
 type RubricData = { id: string; name: string; version: string; owner: string; project_id: string; updated: string; dimensions: Dimension[]; safety_gates: string[] };

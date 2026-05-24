@@ -1,0 +1,366 @@
+[
+  {
+    "id": "shadow-daily-reflection-v1.1",
+    "name": "Shadow Daily Reflection",
+    "version": "1.1",
+    "owner": "shadow-team",
+    "project_id": "shadow-daily-reflection",
+    "updated": "2026-05-04",
+    "dimensions": [
+      {
+        "id": "life_area_accuracy",
+        "name": "Life-area classification accuracy",
+        "method": "deterministic",
+        "weight": 0.15,
+        "threshold": 80
+      },
+      {
+        "id": "emotional_nuance",
+        "name": "Emotional nuance",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 70
+      },
+      {
+        "id": "non_judgmental_tone",
+        "name": "Non-judgmental tone",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 75
+      },
+      {
+        "id": "useful_next_step",
+        "name": "Useful next step",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 65
+      },
+      {
+        "id": "memory_relevance",
+        "name": "Memory relevance",
+        "method": "claim_pipeline",
+        "weight": 0.1,
+        "threshold": 70
+      },
+      {
+        "id": "completeness",
+        "name": "Completeness",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 70
+      },
+      {
+        "id": "hallucination_risk",
+        "name": "Hallucination risk",
+        "method": "claim_pipeline",
+        "weight": 0.15,
+        "threshold": 80
+      },
+      {
+        "id": "tone_fit",
+        "name": "Tone fit",
+        "method": "llm_judge",
+        "weight": 0.05,
+        "threshold": 70
+      },
+      {
+        "id": "consistency",
+        "name": "Consistency",
+        "method": "llm_judge",
+        "weight": 0.05,
+        "threshold": 70
+      },
+      {
+        "id": "actionability",
+        "name": "Actionability",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 65
+      }
+    ],
+    "safety_gates": [
+      "pii_leakage",
+      "medical_advice_without_disclaimer"
+    ]
+  },
+  {
+    "id": "rag-qa-v2.0",
+    "name": "RAG Documentation QA",
+    "version": "2.0",
+    "owner": "platform-team",
+    "project_id": "rag-docs-qa",
+    "updated": "2026-05-11",
+    "dimensions": [
+      {
+        "id": "groundedness",
+        "name": "Groundedness",
+        "method": "claim_pipeline",
+        "weight": 0.2,
+        "threshold": 80
+      },
+      {
+        "id": "hallucination_risk",
+        "name": "Hallucination risk",
+        "method": "claim_pipeline",
+        "weight": 0.15,
+        "threshold": 85
+      },
+      {
+        "id": "citation_correctness",
+        "name": "Citation correctness",
+        "method": "deterministic",
+        "weight": 0.1,
+        "threshold": 80
+      },
+      {
+        "id": "context_relevance",
+        "name": "Context relevance",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 70
+      },
+      {
+        "id": "accuracy",
+        "name": "Accuracy",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 75
+      },
+      {
+        "id": "completeness",
+        "name": "Completeness",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 70
+      },
+      {
+        "id": "actionability",
+        "name": "Actionability",
+        "method": "llm_judge",
+        "weight": 0.05,
+        "threshold": 65
+      },
+      {
+        "id": "tone_fit",
+        "name": "Tone fit",
+        "method": "llm_judge",
+        "weight": 0.05,
+        "threshold": 60
+      }
+    ],
+    "safety_gates": [
+      "pii_leakage",
+      "internal_data_exposure"
+    ]
+  },
+  {
+    "id": "booking-assistant-v1.3",
+    "name": "Booking Assistant",
+    "version": "1.3",
+    "owner": "area-mosa",
+    "project_id": "area-mosa-booking",
+    "updated": "2026-04-22",
+    "dimensions": [
+      {
+        "id": "intent_detection",
+        "name": "Intent detection",
+        "method": "deterministic",
+        "weight": 0.2,
+        "threshold": 90
+      },
+      {
+        "id": "booking_readiness",
+        "name": "Booking readiness",
+        "method": "deterministic",
+        "weight": 0.15,
+        "threshold": 85
+      },
+      {
+        "id": "human_handoff",
+        "name": "Proper human handoff",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 80
+      },
+      {
+        "id": "clear_answer",
+        "name": "Clear answer",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 75
+      },
+      {
+        "id": "tone_fit",
+        "name": "Tone fit",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 70
+      },
+      {
+        "id": "hallucination_risk",
+        "name": "Hallucination risk",
+        "method": "claim_pipeline",
+        "weight": 0.1,
+        "threshold": 85
+      },
+      {
+        "id": "actionability",
+        "name": "Actionability",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 70
+      },
+      {
+        "id": "consistency",
+        "name": "Consistency",
+        "method": "llm_judge",
+        "weight": 0.05,
+        "threshold": 70
+      }
+    ],
+    "safety_gates": [
+      "false_confirmation",
+      "pii_leakage"
+    ]
+  },
+  {
+    "id": "support-reply-v1.0",
+    "name": "Customer Support Reply",
+    "version": "1.0",
+    "owner": "cx-team",
+    "project_id": "customer-support",
+    "updated": "2026-05-09",
+    "dimensions": [
+      {
+        "id": "accuracy",
+        "name": "Accuracy",
+        "method": "llm_judge",
+        "weight": 0.15,
+        "threshold": 80
+      },
+      {
+        "id": "groundedness",
+        "name": "Groundedness",
+        "method": "claim_pipeline",
+        "weight": 0.15,
+        "threshold": 75
+      },
+      {
+        "id": "hallucination_risk",
+        "name": "Hallucination risk",
+        "method": "claim_pipeline",
+        "weight": 0.15,
+        "threshold": 85
+      },
+      {
+        "id": "completeness",
+        "name": "Completeness",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 75
+      },
+      {
+        "id": "tone_fit",
+        "name": "Tone fit",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 75
+      },
+      {
+        "id": "actionability",
+        "name": "Actionability",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 70
+      },
+      {
+        "id": "relevance",
+        "name": "Relevance",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 75
+      },
+      {
+        "id": "consistency",
+        "name": "Consistency",
+        "method": "llm_judge",
+        "weight": 0.05,
+        "threshold": 70
+      }
+    ],
+    "safety_gates": [
+      "pii_leakage",
+      "cross_customer_exposure"
+    ]
+  },
+  {
+    "id": "planner-v0.4",
+    "name": "AI Planner",
+    "version": "0.5",
+    "owner": "platform-team",
+    "project_id": "ai-planner",
+    "updated": "2026-05-22",
+    "dimensions": [
+      {
+        "id": "task_completion",
+        "name": "Task completion",
+        "method": "llm_judge",
+        "weight": 0.3,
+        "threshold": 75
+      },
+      {
+        "id": "plan_coherence",
+        "name": "Plan coherence",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 70
+      },
+      {
+        "id": "hallucination_risk",
+        "name": "Hallucination risk",
+        "method": "claim_pipeline",
+        "weight": 0.15,
+        "threshold": 85
+      },
+      {
+        "id": "accuracy",
+        "name": "Accuracy",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 75
+      },
+      {
+        "id": "actionability",
+        "name": "Actionability",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 70
+      },
+      {
+        "id": "completeness",
+        "name": "Completeness",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 70
+      },
+      {
+        "id": "tone_fit",
+        "name": "Tone fit",
+        "method": "llm_judge",
+        "weight": 0.1,
+        "threshold": 60
+      },
+      {
+        "id": "consistency",
+        "name": "Consistency",
+        "method": "llm_judge",
+        "weight": 0.05,
+        "threshold": 70
+      }
+    ],
+    "safety_gates": [
+      "destructive_action",
+      "false_confirmation"
+    ]
+  }
+]

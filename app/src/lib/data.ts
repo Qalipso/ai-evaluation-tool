@@ -1,8 +1,8 @@
-import projects from "../../../mock-data/projects.json";
-import rubrics from "../../../mock-data/rubrics.json";
-import runs from "../../../mock-data/runs.json";
-import cases from "../../../mock-data/cases.json";
-import models from "../../../mock-data/models.json";
+import projects from "../../mock-data/projects.json";
+import rubrics from "../../mock-data/rubrics.json";
+import runs from "../../mock-data/runs.json";
+import cases from "../../mock-data/cases.json";
+import models from "../../mock-data/models.json";
 
 // Explicit interfaces — guards against TypeScript inferring 'never' when JSON files are empty arrays
 export interface Project {

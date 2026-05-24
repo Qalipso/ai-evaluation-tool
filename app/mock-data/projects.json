@@ -1,0 +1,67 @@
+[
+  {
+    "id": "shadow-daily-reflection",
+    "name": "Shadow — Daily Reflection",
+    "description": "Personal life-analytics summaries from journal entries",
+    "active_rubric": "shadow-daily-reflection-v1.1",
+    "model": "gpt-4o",
+    "cases_total": 124,
+    "owner": "shadow-team",
+    "status": "active",
+    "judge_model": "",
+    "tags": "",
+    "notes": ""
+  },
+  {
+    "id": "rag-docs-qa",
+    "name": "RAG — Internal Docs QA",
+    "description": "Retrieval-augmented documentation assistant",
+    "active_rubric": "rag-qa-v2.0",
+    "model": "claude-sonnet-4-6",
+    "cases_total": 240,
+    "owner": "platform-team",
+    "status": "active",
+    "judge_model": "",
+    "tags": "",
+    "notes": ""
+  },
+  {
+    "id": "area-mosa-booking",
+    "name": "Area Mosa — Booking Assistant",
+    "description": "WhatsApp booking bot for hair salon",
+    "active_rubric": "booking-assistant-v1.3",
+    "model": "gpt-4o-mini",
+    "cases_total": 86,
+    "owner": "area-mosa",
+    "status": "active",
+    "judge_model": "",
+    "tags": "",
+    "notes": ""
+  },
+  {
+    "id": "customer-support",
+    "name": "Customer Support Reply",
+    "description": "First-response generator with KB retrieval",
+    "active_rubric": "support-reply-v1.0",
+    "model": "claude-sonnet-4-6",
+    "cases_total": 312,
+    "owner": "cx-team",
+    "status": "active",
+    "judge_model": "",
+    "tags": "",
+    "notes": ""
+  },
+  {
+    "id": "ai-planner",
+    "name": "AI Planning Assistant",
+    "description": "Multi-step task decomposition + report",
+    "active_rubric": "planner-v0.4",
+    "model": "claude-opus-4-6",
+    "cases_total": 48,
+    "owner": "platform-team",
+    "status": "paused",
+    "judge_model": "",
+    "tags": "",
+    "notes": ""
+  }
+]

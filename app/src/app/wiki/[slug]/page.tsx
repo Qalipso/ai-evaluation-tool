@@ -30,7 +30,7 @@ export default async function WikiArticlePage({
   const meta = getArticle(slug);
   if (!meta || meta.slug === "start-here") notFound();
 
-  const wikiPath = join(process.cwd(), "..", "wiki", `${slug}.md`);
+  const wikiPath = join(process.cwd(), "wiki", `${slug}.md`);
   if (!existsSync(wikiPath)) notFound();
 
   const content = readFileSync(wikiPath, "utf-8");

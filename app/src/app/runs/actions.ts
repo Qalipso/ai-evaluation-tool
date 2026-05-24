@@ -3,8 +3,8 @@ import fs from "fs";
 import path from "path";
 import { revalidatePath } from "next/cache";
 
-const runsPath = path.join(process.cwd(), "..", "mock-data", "runs.json");
-const casesPath = path.join(process.cwd(), "..", "mock-data", "cases.json");
+const runsPath = path.join(process.cwd(), "mock-data", "runs.json");
+const casesPath = path.join(process.cwd(), "mock-data", "cases.json");
 
 export async function deleteRun(id: string) {
   const runs: unknown[] = JSON.parse(fs.readFileSync(runsPath, "utf-8"));

@@ -4,8 +4,8 @@ import path from "path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-const projectsPath = path.join(process.cwd(), "..", "mock-data", "projects.json");
-const modelsPath = path.join(process.cwd(), "..", "mock-data", "models.json");
+const projectsPath = path.join(process.cwd(), "mock-data", "projects.json");
+const modelsPath = path.join(process.cwd(), "mock-data", "models.json");
 
 function readModels(): { id: string; provider: string; label: string }[] {
   const raw = fs.readFileSync(modelsPath, "utf-8").trim();
