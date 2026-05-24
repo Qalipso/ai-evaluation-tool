@@ -32,8 +32,8 @@ export async function createProject(formData: FormData) {
 
   if (!id || !name) throw new Error("id and name are required");
 
-  const projects = readProjects() as { id: string }[];
-  if (projects.some((p) => p.id === id)) throw new Error(`Project id "${id}" already exists`);
+  const projects = readProjects() as Record<string, unknown>[];
+  if (projects.some((p) => p["id"] === id)) throw new Error(`Project id "${id}" already exists`);
 
   projects.push({ id, name, description, owner, model, active_rubric, cases_total });
   writeProjects(projects);
@@ -53,8 +53,8 @@ export async function updateProject(id: string, formData: FormData) {
   const tags = ((formData.get("tags") as string | null) ?? "").trim();
   const notes = ((formData.get("notes") as string | null) ?? "").trim();
 
-  const projects = readProjects() as { id: string }[];
-  const idx = projects.findIndex((p) => p.id === id);
+  const projects = readProjects() as Record<string, unknown>[];
+  const idx = projects.findIndex((p) => p["id"] === id);
   if (idx === -1) throw new Error(`Project "${id}" not found`);
 
   projects[idx] = { ...projects[idx], name, description, owner, model, status, active_rubric, judge_model, tags, notes };
@@ -66,8 +66,8 @@ export async function updateProject(id: string, formData: FormData) {
 }
 
 export async function deleteProject(id: string) {
-  const projects = readProjects() as { id: string }[];
-  writeProjects(projects.filter((p) => p.id !== id));
+  const projects = readProjects() as Record<string, unknown>[];
+  writeProjects(projects.filter((p) => p["id"] !== id));
 
   revalidatePath("/projects");
   redirect("/projects");

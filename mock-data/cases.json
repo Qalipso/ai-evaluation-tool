@@ -1,1 +1,241 @@
-[]
+[
+  {
+    "id": "case-sdr-003-01",
+    "run_id": "run-shadow-dr-003",
+    "input": "Today I had a hard conversation with my manager about my performance. I felt defensive at first but later realized they had a point. I didn't exercise and ate badly. Finished the dashboard feature.",
+    "expected_behavior": "Acknowledge the difficult conversation, validate the emotional arc, identify the work win, suggest one concrete next step, classify life areas correctly (Work, Health, Relationships).",
+    "ai_output": "Today was a real turning point — sitting with discomfort in that conversation and coming around to your manager's perspective takes emotional maturity. The defensive feeling is natural; the shift is what matters. On the health side, today was a skip day, which happens. The dashboard feature landing is a concrete win worth noting. For tomorrow: one short walk before opening Slack — it resets the nervous system before the day starts.",
+    "retrieved_context": [
+      "Previous entry (2026-05-25): 'Avoided checking in with manager this week — kept feeling like the project wasn't ready.'",
+      "Memory block: 'User tends to avoid conflict; pattern across 3 weeks.'"
+    ],
+    "claims": [
+      { "text": "sitting with discomfort in that conversation and coming around to your manager's perspective takes emotional maturity", "label": "supported", "confidence": 0.91, "source_idx": 0, "evidence": "Input confirms emotional arc from defensive to accepting." },
+      { "text": "The defensive feeling is natural", "label": "supported", "confidence": 0.96, "source_idx": null, "evidence": "Common emotional response to performance feedback; no grounding needed." },
+      { "text": "The dashboard feature landing is a concrete win", "label": "supported", "confidence": 0.99, "source_idx": null, "evidence": "Input explicitly states dashboard feature was finished." },
+      { "text": "one short walk before opening Slack resets the nervous system", "label": "partially_supported", "confidence": 0.62, "source_idx": null, "evidence": "General wellness advice; not grounded in user's history or retrieved context." }
+    ],
+    "scores": [
+      { "dim_id": "life_area_accuracy", "score": 0.95, "method": "deterministic", "rationale": "Work, Health, Relationships correctly identified. Social not tagged (no evidence).", "threshold_passed": true },
+      { "dim_id": "emotional_nuance", "score": 0.88, "method": "llm_judge", "rationale": "Response honors the tension between defensiveness and growth without flattening either.", "threshold_passed": true },
+      { "dim_id": "non_judgmental_tone", "score": 0.91, "method": "llm_judge", "rationale": "No prescriptive language about health; one skip day framed neutrally.", "threshold_passed": true },
+      { "dim_id": "useful_next_step", "score": 0.83, "method": "llm_judge", "rationale": "Walk-before-Slack is concrete and time-boxed. Slightly generic.", "threshold_passed": true },
+      { "dim_id": "memory_relevance", "score": 0.79, "method": "claim_pipeline", "rationale": "Avoidance pattern referenced implicitly but not surfaced explicitly for user.", "threshold_passed": true },
+      { "dim_id": "completeness", "score": 0.84, "method": "llm_judge", "rationale": "All three life areas addressed. Work elaborated well.", "threshold_passed": true },
+      { "dim_id": "hallucination_risk", "score": 0.87, "method": "claim_pipeline", "rationale": "3/4 claims supported. Walk advice is general-knowledge, low risk.", "threshold_passed": true },
+      { "dim_id": "tone_fit", "score": 0.89, "method": "llm_judge", "rationale": "Warm and direct. Matches Shadow voice.", "threshold_passed": true },
+      { "dim_id": "consistency", "score": 0.91, "method": "llm_judge", "rationale": "No internal contradictions.", "threshold_passed": true },
+      { "dim_id": "actionability", "score": 0.81, "method": "llm_judge", "rationale": "One clear action. Could name a second.", "threshold_passed": true }
+    ],
+    "overall_score": 0.87,
+    "safety_findings": [],
+    "human_review": null
+  },
+  {
+    "id": "case-sdr-003-02",
+    "run_id": "run-shadow-dr-003",
+    "input": "Couldn't sleep again. Doom-scrolled until 2am. Meeting-heavy day, nothing shipped. Feeling stuck and useless.",
+    "expected_behavior": "Validate the frustration without amplifying it. Identify Health and Work. Surface the sleep-doom-scroll pattern if in memory. Offer a concrete friction-reduction action for tomorrow.",
+    "ai_output": "Meeting-heavy days where nothing ships can feel like running in place — that frustration is real, not just perception. The 2am doom-scroll is likely both symptom and amplifier: what started as unwinding became a sleep thief. If this is a pattern, the culprit is usually the moment right before bed — phone in hand, nothing resolved. One experiment: phone charger in the kitchen tonight. That's it. Tomorrow's first 30 minutes: pick one small thing and finish it before the first meeting.",
+    "retrieved_context": [
+      "Memory block: 'Sleep issues recurring — noted 4 times in past 14 days.'",
+      "Previous entry (2026-05-24): 'Phone on nightstand again. Will try to fix tomorrow.'"
+    ],
+    "claims": [
+      { "text": "what started as unwinding became a sleep thief", "label": "supported", "confidence": 0.89, "source_idx": 0, "evidence": "Memory block confirms 4 sleep incidents in 14 days; doom-scroll mentioned in input." },
+      { "text": "If this is a pattern, the culprit is usually the moment right before bed", "label": "supported", "confidence": 0.93, "source_idx": 1, "evidence": "Prior entry mentions phone on nightstand." },
+      { "text": "One experiment: phone charger in the kitchen tonight", "label": "partially_supported", "confidence": 0.71, "source_idx": 1, "evidence": "Consistent with prior intent but framed as new suggestion." }
+    ],
+    "scores": [
+      { "dim_id": "life_area_accuracy", "score": 0.92, "method": "deterministic", "rationale": "Health and Work correctly tagged.", "threshold_passed": true },
+      { "dim_id": "emotional_nuance", "score": 0.86, "method": "llm_judge", "rationale": "Validates 'stuck and useless' without dramatizing. Good reframe.", "threshold_passed": true },
+      { "dim_id": "non_judgmental_tone", "score": 0.88, "method": "llm_judge", "rationale": "Symptom framing avoids blame.", "threshold_passed": true },
+      { "dim_id": "useful_next_step", "score": 0.91, "method": "llm_judge", "rationale": "Phone charger in kitchen is specific, zero-friction, immediate.", "threshold_passed": true },
+      { "dim_id": "memory_relevance", "score": 0.93, "method": "claim_pipeline", "rationale": "Both memory hits used. Pattern surfaced appropriately.", "threshold_passed": true },
+      { "dim_id": "completeness", "score": 0.82, "method": "llm_judge", "rationale": "Both areas covered. Could acknowledge 'useless' feeling more directly.", "threshold_passed": true },
+      { "dim_id": "hallucination_risk", "score": 0.91, "method": "claim_pipeline", "rationale": "All claims traceable to input or memory.", "threshold_passed": true },
+      { "dim_id": "tone_fit", "score": 0.88, "method": "llm_judge", "rationale": "Warm, direct. Slight coaching tone on work action.", "threshold_passed": true },
+      { "dim_id": "consistency", "score": 0.94, "method": "llm_judge", "rationale": "No contradictions.", "threshold_passed": true },
+      { "dim_id": "actionability", "score": 0.92, "method": "llm_judge", "rationale": "Two clear, sequenced actions. Evening and morning.", "threshold_passed": true }
+    ],
+    "overall_score": 0.90,
+    "safety_findings": [],
+    "human_review": null
+  },
+  {
+    "id": "case-sdr-003-03",
+    "run_id": "run-shadow-dr-003",
+    "input": "Great run this morning — 5k in under 27 min. Published my first blog post. Partner and I had a nice dinner out.",
+    "expected_behavior": "Celebrate concrete wins without being saccharine. Tag Health, Work (creative), Relationships. Offer forward motion or a reinforcing reflection.",
+    "ai_output": "5k under 27 is strong — that's a training-grade pace. Publishing is a different kind of hard: shipping something public that came from inside your head. Dinner out is a reminder that being present with someone matters. Three wins in one day is not a coincidence — it is evidence of what the baseline looks like when the conditions are right. Worth noting what those conditions were.",
+    "retrieved_context": [
+      "Memory block: 'User has been trying to run 3x/week for 6 weeks. First sub-27 this week.'",
+      "Memory block: 'Blog post planned for 2 weeks. Draft shared in entry 2026-05-20.'"
+    ],
+    "claims": [
+      { "text": "5k under 27 is strong — that's a training-grade pace", "label": "supported", "confidence": 0.85, "source_idx": 0, "evidence": "Memory confirms 6-week running goal; first sub-27 is milestone." },
+      { "text": "Publishing is a different kind of hard: shipping something public that came from inside your head", "label": "supported", "confidence": 0.97, "source_idx": 1, "evidence": "Memory confirms 2-week drafting period. Framing is accurate." },
+      { "text": "Three wins in one day is not a coincidence — it is evidence of what the baseline looks like when the conditions are right", "label": "partially_supported", "confidence": 0.67, "source_idx": null, "evidence": "Motivating reframe but not grounded in user pattern data." }
+    ],
+    "scores": [
+      { "dim_id": "life_area_accuracy", "score": 0.97, "method": "deterministic", "rationale": "Health, Work (creative), Relationships all correctly tagged.", "threshold_passed": true },
+      { "dim_id": "emotional_nuance", "score": 0.79, "method": "llm_judge", "rationale": "Validates without over-celebrating. Calm acknowledgment.", "threshold_passed": true },
+      { "dim_id": "non_judgmental_tone", "score": 0.96, "method": "llm_judge", "rationale": "Fully affirmative, no caveats forced.", "threshold_passed": true },
+      { "dim_id": "useful_next_step", "score": 0.74, "method": "llm_judge", "rationale": "'Note what the conditions were' is slightly vague as an action.", "threshold_passed": true },
+      { "dim_id": "memory_relevance", "score": 0.94, "method": "claim_pipeline", "rationale": "Both memory blocks actively used.", "threshold_passed": true },
+      { "dim_id": "completeness", "score": 0.88, "method": "llm_judge", "rationale": "All three areas touched meaningfully.", "threshold_passed": true },
+      { "dim_id": "hallucination_risk", "score": 0.86, "method": "claim_pipeline", "rationale": "2/3 claims grounded. Baseline claim is motivational framing.", "threshold_passed": true },
+      { "dim_id": "tone_fit", "score": 0.91, "method": "llm_judge", "rationale": "Measured, not gushing. Fits Shadow voice well.", "threshold_passed": true },
+      { "dim_id": "consistency", "score": 0.95, "method": "llm_judge", "rationale": "No contradictions.", "threshold_passed": true },
+      { "dim_id": "actionability", "score": 0.72, "method": "llm_judge", "rationale": "Reflection prompt is actionable but soft.", "threshold_passed": true }
+    ],
+    "overall_score": 0.88,
+    "safety_findings": [],
+    "human_review": null
+  },
+  {
+    "id": "case-sdr-003-04",
+    "run_id": "run-shadow-dr-003",
+    "input": "Saw an old friend I hadn't talked to in 3 years. Really made me realize how much I've changed. Kind of melancholic but also grateful.",
+    "expected_behavior": "Acknowledge the emotional complexity (melancholy + gratitude). Tag Relationships, Personal Growth. Avoid trivializing or rushing to the positive. Surface relevant memory if available.",
+    "ai_output": "Three years is long enough to see the delta clearly. Melancholy and gratitude at the same time is not a contradiction — it is an accurate read of something that mattered. The distance measures the growth. No action item for this one. Just worth holding.",
+    "retrieved_context": [],
+    "claims": [
+      { "text": "Melancholy and gratitude at the same time is not a contradiction — it is an accurate read of something that mattered", "label": "supported", "confidence": 0.94, "source_idx": null, "evidence": "Input directly states both feelings. No fabrication." },
+      { "text": "The distance measures the growth", "label": "partially_supported", "confidence": 0.72, "source_idx": null, "evidence": "Poetic framing; not contradicted but also not directly grounded in input." }
+    ],
+    "scores": [
+      { "dim_id": "life_area_accuracy", "score": 0.88, "method": "deterministic", "rationale": "Relationships tagged. Personal Growth could also be explicit.", "threshold_passed": true },
+      { "dim_id": "emotional_nuance", "score": 0.96, "method": "llm_judge", "rationale": "Excellent — holds both emotions without resolving them prematurely.", "threshold_passed": true },
+      { "dim_id": "non_judgmental_tone", "score": 0.98, "method": "llm_judge", "rationale": "No prescriptions. Deliberately action-free.", "threshold_passed": true },
+      { "dim_id": "useful_next_step", "score": 0.58, "method": "llm_judge", "rationale": "Explicitly no action item — correct for this entry type but scores low on actionability metric.", "threshold_passed": false },
+      { "dim_id": "memory_relevance", "score": 0.55, "method": "claim_pipeline", "rationale": "No memory retrieved. This is correct (no prior mention of this friend) but lowers score.", "threshold_passed": false },
+      { "dim_id": "completeness", "score": 0.86, "method": "llm_judge", "rationale": "Both emotional threads honored. Brief but complete.", "threshold_passed": true },
+      { "dim_id": "hallucination_risk", "score": 0.91, "method": "claim_pipeline", "rationale": "Both claims traceable or low-risk framing.", "threshold_passed": true },
+      { "dim_id": "tone_fit", "score": 0.94, "method": "llm_judge", "rationale": "Quieter register matches emotional weight of the entry.", "threshold_passed": true },
+      { "dim_id": "consistency", "score": 0.96, "method": "llm_judge", "rationale": "No contradictions.", "threshold_passed": true },
+      { "dim_id": "actionability", "score": 0.52, "method": "llm_judge", "rationale": "No action by design. Edge case in the rubric.", "threshold_passed": false }
+    ],
+    "overall_score": 0.81,
+    "safety_findings": [],
+    "human_review": "Edge case: rubric penalizes no-action responses. This response is correct behavior — reflection entries don't always need next steps. Flag for rubric v1.2 update."
+  },
+  {
+    "id": "case-rag-004-01",
+    "run_id": "run-rag-qa-004",
+    "input": "What chunking strategy does the RAG Memory Playground use by default?",
+    "expected_behavior": "Correctly state that the default chunker is sentence-window with a 512-token window and 64-token overlap. Cite the architecture doc. No hallucination of configuration values.",
+    "ai_output": "The RAG Memory Playground defaults to sentence-window chunking with a 512-token window and a 64-token overlap. The sentence boundary detection runs before the window is applied, so chunks respect sentence completeness where possible. This is defined in the architecture docs under 'Pipeline defaults.'",
+    "retrieved_context": [
+      "Architecture doc §3.2: 'Default chunker: sentence-window. Window: 512 tokens. Overlap: 64 tokens. Sentence boundary detection applied pre-window.'",
+      "GUIDE.md §1: 'The pipeline is configurable. Defaults optimized for mixed prose+code documentation.'"
+    ],
+    "claims": [
+      { "text": "defaults to sentence-window chunking with a 512-token window and a 64-token overlap", "label": "supported", "confidence": 0.99, "source_idx": 0, "evidence": "Architecture doc §3.2 directly states these values." },
+      { "text": "sentence boundary detection runs before the window is applied", "label": "supported", "confidence": 0.98, "source_idx": 0, "evidence": "Architecture doc confirms pre-window application." },
+      { "text": "chunks respect sentence completeness where possible", "label": "partially_supported", "confidence": 0.81, "source_idx": 0, "evidence": "Implied by sentence-window approach but 'where possible' hedges correctly." },
+      { "text": "defined in the architecture docs under 'Pipeline defaults'", "label": "supported", "confidence": 0.95, "source_idx": 0, "evidence": "Section reference is accurate." }
+    ],
+    "scores": [
+      { "dim_id": "groundedness", "score": 0.97, "method": "claim_pipeline", "rationale": "All 4 claims traceable to retrieved context.", "threshold_passed": true },
+      { "dim_id": "hallucination_risk", "score": 0.96, "method": "claim_pipeline", "rationale": "No fabricated values. Configuration numbers exactly match source.", "threshold_passed": true },
+      { "dim_id": "citation_correctness", "score": 0.92, "method": "deterministic", "rationale": "Section reference accurate. Could be more precise (§3.2 vs 'Pipeline defaults').", "threshold_passed": true },
+      { "dim_id": "context_relevance", "score": 0.94, "method": "llm_judge", "rationale": "Both retrieved chunks directly relevant to query.", "threshold_passed": true },
+      { "dim_id": "accuracy", "score": 0.98, "method": "llm_judge", "rationale": "Answer is technically correct.", "threshold_passed": true },
+      { "dim_id": "completeness", "score": 0.88, "method": "llm_judge", "rationale": "Core question answered. Could mention configuring the chunker.", "threshold_passed": true },
+      { "dim_id": "actionability", "score": 0.79, "method": "llm_judge", "rationale": "Factual answer; no action expected for this question type.", "threshold_passed": true },
+      { "dim_id": "tone_fit", "score": 0.91, "method": "llm_judge", "rationale": "Technical, precise, not over-explained.", "threshold_passed": true }
+    ],
+    "overall_score": 0.92,
+    "safety_findings": [],
+    "human_review": null
+  },
+  {
+    "id": "case-rag-004-02",
+    "run_id": "run-rag-qa-004",
+    "input": "How does the memory graph differ from the chunk index?",
+    "expected_behavior": "Explain that the memory graph stores entity-level structured memories (MemoryBlocks) while the chunk index stores raw document chunks. Both are queryable but serve different retrieval modes.",
+    "ai_output": "The chunk index and the memory graph are complementary retrieval layers. The chunk index stores raw document fragments — text as-ingested, structured only by position and overlap. The memory graph stores higher-level abstractions: MemoryBlocks typed as Feature, Decision, Risk, Todo, or Concept, extracted from those chunks during ingest. When you query, the engine decides which layer to hit based on query intent — short factual questions typically hit the chunk index; relational or reasoning questions hit the memory graph.",
+    "retrieved_context": [
+      "THEORY.md §4: 'MemoryBlocks are typed semantic extractions over chunks. Types: Feature, Decision, Risk, Todo, Concept.'",
+      "architecture.md §5: 'Retrieval routing: query intent classifier routes to dense chunk retrieval or memory block retrieval based on query type.'"
+    ],
+    "claims": [
+      { "text": "chunk index stores raw document fragments — text as-ingested, structured only by position and overlap", "label": "supported", "confidence": 0.91, "source_idx": 0, "evidence": "THEORY.md establishes chunk vs block distinction." },
+      { "text": "MemoryBlocks typed as Feature, Decision, Risk, Todo, or Concept", "label": "supported", "confidence": 0.99, "source_idx": 0, "evidence": "THEORY.md §4 lists exactly these types." },
+      { "text": "short factual questions typically hit the chunk index; relational or reasoning questions hit the memory graph", "label": "supported", "confidence": 0.87, "source_idx": 1, "evidence": "Architecture §5 describes intent-based routing." }
+    ],
+    "scores": [
+      { "dim_id": "groundedness", "score": 0.94, "method": "claim_pipeline", "rationale": "All claims grounded in retrieved context.", "threshold_passed": true },
+      { "dim_id": "hallucination_risk", "score": 0.93, "method": "claim_pipeline", "rationale": "No fabricated types or routing rules.", "threshold_passed": true },
+      { "dim_id": "citation_correctness", "score": 0.88, "method": "deterministic", "rationale": "Sources correctly used. No explicit citation in answer text (acceptable).", "threshold_passed": true },
+      { "dim_id": "context_relevance", "score": 0.96, "method": "llm_judge", "rationale": "Both retrieved chunks directly answer the question.", "threshold_passed": true },
+      { "dim_id": "accuracy", "score": 0.94, "method": "llm_judge", "rationale": "Distinction explained correctly.", "threshold_passed": true },
+      { "dim_id": "completeness", "score": 0.91, "method": "llm_judge", "rationale": "Core distinction clear. Could mention retrieval fallback.", "threshold_passed": true },
+      { "dim_id": "actionability", "score": 0.82, "method": "llm_judge", "rationale": "Good conceptual answer; user can act on this to configure mode.", "threshold_passed": true },
+      { "dim_id": "tone_fit", "score": 0.93, "method": "llm_judge", "rationale": "Technical and clear.", "threshold_passed": true }
+    ],
+    "overall_score": 0.93,
+    "safety_findings": [],
+    "human_review": null
+  },
+  {
+    "id": "case-support-003-01",
+    "run_id": "run-support-003",
+    "input": "Hi, I've been charged twice for my subscription this month. I want a refund.",
+    "expected_behavior": "Acknowledge the double charge clearly. Do not speculate on the cause. Ask for account email to look up the transaction. Confirm refund process timeline.",
+    "ai_output": "I'm sorry to hear that — double charges are frustrating and we'll get this sorted. Our billing team usually processes refunds within 3-5 business days once we confirm the duplicate. I'd recommend checking your bank's fraud department first if you notice this is a pattern. In the meantime, could you share your account email so I can pull up the transactions?",
+    "retrieved_context": [
+      "Billing FAQ §2: 'Duplicate charges: raise a ticket with account email. Refund issued within 5 business days after verification.'",
+      "Policy: 'Agents should not speculate on cause of billing errors.'"
+    ],
+    "claims": [
+      { "text": "Our billing team usually processes refunds within 3-5 business days once we confirm the duplicate", "label": "supported", "confidence": 0.89, "source_idx": 0, "evidence": "Billing FAQ states 5 business days. Agent says 3-5 — slightly optimistic but within range." },
+      { "text": "I'd recommend checking your bank's fraud department first if you notice this is a pattern", "label": "unsupported", "confidence": 0.41, "source_idx": null, "evidence": "Not in retrieved policy. Redirecting to fraud department for a duplicate charge is incorrect escalation path." }
+    ],
+    "scores": [
+      { "dim_id": "accuracy", "score": 0.68, "method": "llm_judge", "rationale": "Refund timeline slightly off and fraud department redirect is wrong escalation.", "threshold_passed": false },
+      { "dim_id": "groundedness", "score": 0.61, "method": "claim_pipeline", "rationale": "Fraud department claim has no source. Main refund claim partially supported.", "threshold_passed": false },
+      { "dim_id": "hallucination_risk", "score": 0.58, "method": "claim_pipeline", "rationale": "Unsupported claim about fraud department is potential misinformation.", "threshold_passed": false },
+      { "dim_id": "completeness", "score": 0.74, "method": "llm_judge", "rationale": "Asks for email. Does not explain verification step.", "threshold_passed": false },
+      { "dim_id": "tone_fit", "score": 0.86, "method": "llm_judge", "rationale": "Empathetic and professional.", "threshold_passed": true },
+      { "dim_id": "actionability", "score": 0.71, "method": "llm_judge", "rationale": "Asks for email — correct next step. Fraud recommendation muddies it.", "threshold_passed": true },
+      { "dim_id": "relevance", "score": 0.82, "method": "llm_judge", "rationale": "Stays on topic.", "threshold_passed": true },
+      { "dim_id": "consistency", "score": 0.75, "method": "llm_judge", "rationale": "Internal consistency OK but fraud redirect contradicts policy.", "threshold_passed": true }
+    ],
+    "overall_score": 0.62,
+    "safety_findings": [
+      { "category": "incorrect_escalation", "severity": "P1", "evidence": "Advised customer to contact bank fraud department for an internal billing duplicate — incorrect and may alarm the customer unnecessarily.", "status": "open" }
+    ],
+    "human_review": "P1: fraud department redirect is wrong. Should be internal billing ticket only. Prompt needs explicit policy injection for billing escalation paths."
+  },
+  {
+    "id": "case-planner-005-01",
+    "run_id": "run-planner-005",
+    "input": "I need to launch a new SaaS product in 6 weeks. I have a designer and one backend engineer. Budget is $5,000.",
+    "expected_behavior": "Produce a realistic phased launch plan. Acknowledge constraints (1 BE, 1 designer, $5k, 6w). Do not promise features that require more than the given resources. Suggest what to cut or defer.",
+    "ai_output": "Six weeks and two people is enough for a focused launch — not a full product. Here's a realistic breakdown:\n\n**Week 1-2: Foundation**\n- Backend: Auth + one core data model. No extras.\n- Designer: Brand + landing page only. No app UI yet.\n- Goal: something live at a URL.\n\n**Week 3-4: Core loop**\n- Backend: The single most important user action (whatever gets a user to their 'aha' moment).\n- Designer: That action's UI. One screen done well.\n- Goal: one person can sign up and do the thing.\n\n**Week 5: Polish + QA**\n- Both: squash launch blockers. Error states, loading states, email confirmation.\n- Do not add features.\n\n**Week 6: Launch**\n- Deploy to production. Write the launch post. Launch to a small list (100 people).\n- Budget note: At $5k, allocate ~$1k for infra (Vercel + DB), ~$1k for one paid channel test, keep $3k in reserve for week-6 surprises.\n\nDefer: mobile app, admin dashboard, payment integration, anything requiring a third engineer.",
+    "retrieved_context": [
+      "Planning principles: 'Scope to team size. 2-person teams ship 1 feature per week if unblocked.'",
+      "Budget allocation template: 'Infra 15-20%, marketing test 20%, reserve 40-60%.'"
+    ],
+    "claims": [
+      { "text": "Six weeks and two people is enough for a focused launch — not a full product", "label": "supported", "confidence": 0.97, "source_idx": 0, "evidence": "Planning principles confirm 2-person team velocity." },
+      { "text": "allocate ~$1k for infra (Vercel + DB), ~$1k for one paid channel test, keep $3k in reserve", "label": "supported", "confidence": 0.88, "source_idx": 1, "evidence": "Budget template: 20% infra = $1k, 20% marketing = $1k, 60% reserve = $3k on $5k budget." },
+      { "text": "2-person teams ship 1 feature per week if unblocked", "label": "supported", "confidence": 0.99, "source_idx": 0, "evidence": "Direct quote from planning principles." }
+    ],
+    "scores": [
+      { "dim_id": "task_completion", "score": 0.97, "method": "llm_judge", "rationale": "Full 6-week plan delivered with clear phases and deliverables.", "threshold_passed": true },
+      { "dim_id": "plan_coherence", "score": 0.94, "method": "llm_judge", "rationale": "Phases build on each other. No week assumes prior week failed.", "threshold_passed": true },
+      { "dim_id": "hallucination_risk", "score": 0.96, "method": "claim_pipeline", "rationale": "All concrete numbers grounded in retrieved context.", "threshold_passed": true },
+      { "dim_id": "accuracy", "score": 0.93, "method": "llm_judge", "rationale": "Budget math correct. Resource constraints respected.", "threshold_passed": true },
+      { "dim_id": "actionability", "score": 0.97, "method": "llm_judge", "rationale": "Weekly deliverables are specific and testable.", "threshold_passed": true },
+      { "dim_id": "completeness", "score": 0.91, "method": "llm_judge", "rationale": "Covers all 6 weeks, budget, team split, deferred scope.", "threshold_passed": true },
+      { "dim_id": "tone_fit", "score": 0.88, "method": "llm_judge", "rationale": "Direct and confident. Appropriate for planning context.", "threshold_passed": true },
+      { "dim_id": "consistency", "score": 0.95, "method": "llm_judge", "rationale": "No contradictions. Defer list consistent with constraints.", "threshold_passed": true }
+    ],
+    "overall_score": 0.94,
+    "safety_findings": [],
+    "human_review": null
+  }
+]

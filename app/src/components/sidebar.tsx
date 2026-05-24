@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import clsx from "clsx";
 import {
   LayoutDashboard,
   BookOpen,
@@ -28,7 +32,14 @@ const navAdvanced = [
   { href: "/safety", label: "Safety Log", Icon: ShieldAlert, badge: "live" },
 ];
 
+function isActive(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(href + "/");
+}
+
 export function Sidebar() {
+  const pathname = usePathname();
+
   return (
     <aside className="w-60 shrink-0 border-r border-border-subtle bg-bg-panel flex flex-col">
       <div className="px-4 py-5 border-b border-border-subtle flex items-center gap-2">
@@ -43,35 +54,51 @@ export function Sidebar() {
 
       <nav className="px-2 py-3 flex-1 overflow-y-auto text-sm">
         <div className="px-2 pt-2 pb-1 text-[10px] uppercase tracking-wider text-text-muted">Core</div>
-        {navCore.map(({ href, label, Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className="flex items-center gap-2 px-2 py-1.5 rounded-md text-text-secondary hover:bg-bg-hover hover:text-text-primary"
-          >
-            <Icon size={15} />
-            <span>{label}</span>
-          </Link>
-        ))}
-
-        <div className="px-2 pt-4 pb-1 text-[10px] uppercase tracking-wider text-text-muted">Advanced</div>
-        {navAdvanced.map(({ href, label, Icon, badge }) => (
-          <Link
-            key={href}
-            href={href}
-            className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-md text-text-secondary hover:bg-bg-hover hover:text-text-primary"
-          >
-            <span className="flex items-center gap-2">
+        {navCore.map(({ href, label, Icon }) => {
+          const active = isActive(pathname, href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={clsx(
+                "flex items-center gap-2 px-2 py-1.5 rounded-md",
+                active
+                  ? "bg-brand/10 text-brand font-medium"
+                  : "text-text-secondary hover:bg-bg-hover hover:text-text-primary",
+              )}
+            >
               <Icon size={15} />
               <span>{label}</span>
-            </span>
-            {badge && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-brand-subtle text-text-primary uppercase tracking-wide">
-                {badge}
+            </Link>
+          );
+        })}
+
+        <div className="px-2 pt-4 pb-1 text-[10px] uppercase tracking-wider text-text-muted">Advanced</div>
+        {navAdvanced.map(({ href, label, Icon, badge }) => {
+          const active = isActive(pathname, href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={clsx(
+                "flex items-center justify-between gap-2 px-2 py-1.5 rounded-md",
+                active
+                  ? "bg-brand/10 text-brand font-medium"
+                  : "text-text-secondary hover:bg-bg-hover hover:text-text-primary",
+              )}
+            >
+              <span className="flex items-center gap-2">
+                <Icon size={15} />
+                <span>{label}</span>
               </span>
-            )}
-          </Link>
-        ))}
+              {badge && (
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-brand-subtle text-text-primary uppercase tracking-wide">
+                  {badge}
+                </span>
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
       <div className="px-4 py-3 border-t border-border-subtle text-[11px] text-text-muted leading-snug">
