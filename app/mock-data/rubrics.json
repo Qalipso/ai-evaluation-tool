@@ -1,5 +1,23 @@
 [
   {
+    "id": "helpfulness-v1.0",
+    "name": "Helpfulness",
+    "version": "1.0",
+    "owner": "demo",
+    "project_id": "shadow-daily-reflection",
+    "updated": "2026-05-25",
+    "dimensions": [
+      {
+        "id": "helpfulness",
+        "name": "Helpfulness",
+        "method": "llm_judge",
+        "weight": 1.0,
+        "threshold": 0.6
+      }
+    ],
+    "safety_gates": []
+  },
+  {
     "id": "shadow-daily-reflection-v1.1",
     "name": "Shadow Daily Reflection",
     "version": "1.1",

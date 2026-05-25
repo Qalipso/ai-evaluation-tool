@@ -6,6 +6,7 @@ import {
 } from "@/lib/data";
 import { DeleteRubricButton } from "./DeleteRubricButton";
 import { EditRubricForm } from "./EditRubricForm";
+import { RubricScorer } from "@/components/RubricScorer";
 
 export default async function RubricDetailPage({
   params,
@@ -165,6 +166,11 @@ export default async function RubricDetailPage({
             </div>
           </Card>
         </div>
+      )}
+
+      {/* Live LLM scorer — shown on rubrics with llm_judge dimensions */}
+      {!isEditing && rubric.dimensions.some((d) => d.method === "llm_judge") && (
+        <RubricScorer rubricId={id} />
       )}
 
       {/* Runs that used this rubric */}
