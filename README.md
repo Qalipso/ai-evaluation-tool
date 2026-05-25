@@ -1,5 +1,7 @@
 # AI Evaluation — Wiki + Tool
 
+> **Demo scope:** 1 rubric (Helpfulness) runs a real LLM call via GPT-4o-mini. All other routes use structured mock data. This is a product-spec-as-prototype — the full eval engine is roadmapped, not yet built.
+
 **An internal AI quality platform for teams shipping LLM-powered products.**
 
 > Most AI products fail not because the model is weak, but because the team has no honest way to answer one question:
