@@ -25,10 +25,10 @@ const METHOD_DESCRIPTIONS: Record<string, string> = {
 type DimRow = { id: string; name: string; method: string; weight: number; threshold: number };
 
 const DEFAULT_DIMS: DimRow[] = [
-  { id: "accuracy", name: "Accuracy", method: "llm_judge", weight: 0.25, threshold: 75 },
-  { id: "completeness", name: "Completeness", method: "llm_judge", weight: 0.25, threshold: 70 },
-  { id: "hallucination_risk", name: "Hallucination risk", method: "claim_pipeline", weight: 0.25, threshold: 80 },
-  { id: "tone_fit", name: "Tone fit", method: "llm_judge", weight: 0.25, threshold: 70 },
+  { id: "accuracy", name: "Accuracy", method: "llm_judge", weight: 0.25, threshold: 0.75 },
+  { id: "completeness", name: "Completeness", method: "llm_judge", weight: 0.25, threshold: 0.7 },
+  { id: "hallucination_risk", name: "Hallucination risk", method: "claim_pipeline", weight: 0.25, threshold: 0.8 },
+  { id: "tone_fit", name: "Tone fit", method: "llm_judge", weight: 0.25, threshold: 0.7 },
 ];
 
 function InfoTip({ text }: { text: string }) {
@@ -54,7 +54,7 @@ export function NewRubricForm({ projects }: { projects: Project[] }) {
   function addDim() {
     setDims((prev) => [
       ...prev,
-      { id: `dim_${Date.now()}`, name: "", method: "llm_judge", weight: 0, threshold: 70 },
+      { id: `dim_${Date.now()}`, name: "", method: "llm_judge", weight: 0, threshold: 0.7 },
     ]);
   }
 
@@ -196,11 +196,11 @@ export function NewRubricForm({ projects }: { projects: Project[] }) {
                   onChange={(e) => updateDim(i, "weight", parseFloat(e.target.value) || 0)}
                 />
                 <input
-                  type="number" min="0" max="100"
-                  title="Minimum score (0–100) for this dimension to count as passing. Cases below this threshold are flagged."
+                  type="number" min="0" max="1" step="0.05"
+                  title="Minimum score (0–1) for this dimension to count as passing. Cases below this threshold are flagged."
                   className="col-span-2 px-2 py-1.5 text-xs font-mono text-right bg-bg-panel border border-border-subtle rounded focus:outline-none focus:border-brand"
                   value={d.threshold}
-                  onChange={(e) => updateDim(i, "threshold", parseInt(e.target.value) || 0)}
+                  onChange={(e) => updateDim(i, "threshold", parseFloat(e.target.value) || 0)}
                 />
                 <button
                   type="button"

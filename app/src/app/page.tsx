@@ -119,7 +119,7 @@ export default function DashboardPage() {
                   {stage.label}
                 </div>
                 <div className="mt-2">
-                  <Bar value={stage.score} tone={tone} />
+                  <Bar value={stage.score} max={100} tone={tone} />
                 </div>
               </div>
             );
@@ -137,14 +137,14 @@ export default function DashboardPage() {
           </div>
           <div className="space-y-3">
             {dashboardData.quality_breakdown.map((ev) => {
-              const tone = scoreTone(ev.score, 75);
+              const tone = scoreTone(ev.score, 0.75);
               return (
                 <div key={ev.evaluator} className="space-y-1.5">
                   <div className="flex items-baseline justify-between text-sm">
                     <span>{ev.evaluator}</span>
                     <span className="tabular-nums font-mono text-xs">
-                      <span className="text-text-primary">{ev.score}</span>
-                      <span className="text-text-muted">/100</span>
+                      <span className="text-text-primary">{ev.score.toFixed(2)}</span>
+                      <span className="text-text-muted">/1.0</span>
                     </span>
                   </div>
                   <Bar value={ev.score} tone={tone} />

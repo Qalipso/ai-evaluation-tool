@@ -56,7 +56,7 @@ export default function RubricsPage() {
                       <div className="min-w-0">
                         <div className="truncate">{d.name}</div>
                         <div className="text-[10px] text-text-muted">
-                          {methodLabel[d.method] ?? d.method} · threshold ≥ {d.threshold}
+                          {methodLabel[d.method] ?? d.method} · threshold ≥ {d.threshold.toFixed(2)}
                         </div>
                       </div>
                       <div className="font-mono tabular-nums text-xs text-text-secondary shrink-0">

@@ -85,7 +85,7 @@ export default async function RunDetailPage({
             {verdictLabel[run.verdict]}
           </div>
           <div className={`text-sm font-mono ${verdictTone[run.verdict]}`}>
-            {run.overall_score.toFixed(1)}/100
+            {run.overall_score.toFixed(2)}/1.0
           </div>
         </div>
       </header>
@@ -140,10 +140,10 @@ export default async function RunDetailPage({
                                 : "text-bad"
                           }
                         >
-                          {d.avg.toFixed(1)}
+                          {d.avg.toFixed(2)}
                         </span>
                         <span className="text-text-muted">
-                          /{d.threshold}
+                          {" "}≥{d.threshold.toFixed(2)}
                         </span>
                         {!passed && (
                           <span className="text-bad ml-2">below</span>
@@ -211,7 +211,7 @@ export default async function RunDetailPage({
                         tone === "ok" ? "text-ok" : tone === "warn" ? "text-warn" : "text-bad"
                       }`}
                     >
-                      {c.overall_score.toFixed(1)}
+                      {c.overall_score.toFixed(2)}
                     </span>
                   </div>
                 </Link>
@@ -232,7 +232,7 @@ export default async function RunDetailPage({
                 Full detail →
               </Link>
               <span className={`text-sm font-mono ${verdictTone[run.verdict]}`}>
-                {sample.overall_score.toFixed(1)}/100
+                {sample.overall_score.toFixed(2)}/1.0
               </span>
             </div>
           </div>

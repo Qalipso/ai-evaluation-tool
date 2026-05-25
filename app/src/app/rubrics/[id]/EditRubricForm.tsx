@@ -44,7 +44,7 @@ export function EditRubricForm({ rubric, projects }: { rubric: Rubric; projects:
   function addDim() {
     setDims((prev) => [
       ...prev,
-      { id: `dim_${Date.now()}`, name: "", method: "llm_judge", weight: 0, threshold: 70 },
+      { id: `dim_${Date.now()}`, name: "", method: "llm_judge", weight: 0, threshold: 0.7 },
     ]);
   }
 
@@ -183,11 +183,12 @@ export function EditRubricForm({ rubric, projects }: { rubric: Rubric; projects:
                 <input
                   type="number"
                   min="0"
-                  max="100"
-                  title="Minimum score (0–100) for this dimension to count as passing. Cases below this threshold are flagged."
+                  max="1"
+                  step="0.05"
+                  title="Minimum score (0–1) for this dimension to count as passing. Cases below this threshold are flagged."
                   className="col-span-2 px-2 py-1.5 text-xs font-mono text-right bg-bg-panel border border-border-subtle rounded focus:outline-none focus:border-brand"
                   value={d.threshold}
-                  onChange={(e) => updateDim(i, "threshold", parseInt(e.target.value) || 0)}
+                  onChange={(e) => updateDim(i, "threshold", parseFloat(e.target.value) || 0)}
                 />
                 <button
                   type="button"

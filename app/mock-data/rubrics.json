@@ -12,70 +12,70 @@
         "name": "Life-area classification accuracy",
         "method": "deterministic",
         "weight": 0.15,
-        "threshold": 80
+        "threshold": 0.8
       },
       {
         "id": "emotional_nuance",
         "name": "Emotional nuance",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 70
+        "threshold": 0.7
       },
       {
         "id": "non_judgmental_tone",
         "name": "Non-judgmental tone",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 75
+        "threshold": 0.75
       },
       {
         "id": "useful_next_step",
         "name": "Useful next step",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 65
+        "threshold": 0.65
       },
       {
         "id": "memory_relevance",
         "name": "Memory relevance",
         "method": "claim_pipeline",
         "weight": 0.1,
-        "threshold": 70
+        "threshold": 0.7
       },
       {
         "id": "completeness",
         "name": "Completeness",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 70
+        "threshold": 0.7
       },
       {
         "id": "hallucination_risk",
         "name": "Hallucination risk",
         "method": "claim_pipeline",
         "weight": 0.15,
-        "threshold": 80
+        "threshold": 0.8
       },
       {
         "id": "tone_fit",
         "name": "Tone fit",
         "method": "llm_judge",
         "weight": 0.05,
-        "threshold": 70
+        "threshold": 0.7
       },
       {
         "id": "consistency",
         "name": "Consistency",
         "method": "llm_judge",
         "weight": 0.05,
-        "threshold": 70
+        "threshold": 0.7
       },
       {
         "id": "actionability",
         "name": "Actionability",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 65
+        "threshold": 0.65
       }
     ],
     "safety_gates": [
@@ -96,56 +96,56 @@
         "name": "Groundedness",
         "method": "claim_pipeline",
         "weight": 0.2,
-        "threshold": 80
+        "threshold": 0.8
       },
       {
         "id": "hallucination_risk",
         "name": "Hallucination risk",
         "method": "claim_pipeline",
         "weight": 0.15,
-        "threshold": 85
+        "threshold": 0.85
       },
       {
         "id": "citation_correctness",
         "name": "Citation correctness",
         "method": "deterministic",
         "weight": 0.1,
-        "threshold": 80
+        "threshold": 0.8
       },
       {
         "id": "context_relevance",
         "name": "Context relevance",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 70
+        "threshold": 0.7
       },
       {
         "id": "accuracy",
         "name": "Accuracy",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 75
+        "threshold": 0.75
       },
       {
         "id": "completeness",
         "name": "Completeness",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 70
+        "threshold": 0.7
       },
       {
         "id": "actionability",
         "name": "Actionability",
         "method": "llm_judge",
         "weight": 0.05,
-        "threshold": 65
+        "threshold": 0.65
       },
       {
         "id": "tone_fit",
         "name": "Tone fit",
         "method": "llm_judge",
         "weight": 0.05,
-        "threshold": 60
+        "threshold": 0.6
       }
     ],
     "safety_gates": [
@@ -166,56 +166,56 @@
         "name": "Intent detection",
         "method": "deterministic",
         "weight": 0.2,
-        "threshold": 90
+        "threshold": 0.9
       },
       {
         "id": "booking_readiness",
         "name": "Booking readiness",
         "method": "deterministic",
         "weight": 0.15,
-        "threshold": 85
+        "threshold": 0.85
       },
       {
         "id": "human_handoff",
         "name": "Proper human handoff",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 80
+        "threshold": 0.8
       },
       {
         "id": "clear_answer",
         "name": "Clear answer",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 75
+        "threshold": 0.75
       },
       {
         "id": "tone_fit",
         "name": "Tone fit",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 70
+        "threshold": 0.7
       },
       {
         "id": "hallucination_risk",
         "name": "Hallucination risk",
         "method": "claim_pipeline",
         "weight": 0.1,
-        "threshold": 85
+        "threshold": 0.85
       },
       {
         "id": "actionability",
         "name": "Actionability",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 70
+        "threshold": 0.7
       },
       {
         "id": "consistency",
         "name": "Consistency",
         "method": "llm_judge",
         "weight": 0.05,
-        "threshold": 70
+        "threshold": 0.7
       }
     ],
     "safety_gates": [
@@ -236,56 +236,56 @@
         "name": "Accuracy",
         "method": "llm_judge",
         "weight": 0.15,
-        "threshold": 80
+        "threshold": 0.8
       },
       {
         "id": "groundedness",
         "name": "Groundedness",
         "method": "claim_pipeline",
         "weight": 0.15,
-        "threshold": 75
+        "threshold": 0.75
       },
       {
         "id": "hallucination_risk",
         "name": "Hallucination risk",
         "method": "claim_pipeline",
         "weight": 0.15,
-        "threshold": 85
+        "threshold": 0.85
       },
       {
         "id": "completeness",
         "name": "Completeness",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 75
+        "threshold": 0.75
       },
       {
         "id": "tone_fit",
         "name": "Tone fit",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 75
+        "threshold": 0.75
       },
       {
         "id": "actionability",
         "name": "Actionability",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 70
+        "threshold": 0.7
       },
       {
         "id": "relevance",
         "name": "Relevance",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 75
+        "threshold": 0.75
       },
       {
         "id": "consistency",
         "name": "Consistency",
         "method": "llm_judge",
         "weight": 0.05,
-        "threshold": 70
+        "threshold": 0.7
       }
     ],
     "safety_gates": [
@@ -306,56 +306,56 @@
         "name": "Task completion",
         "method": "llm_judge",
         "weight": 0.3,
-        "threshold": 75
+        "threshold": 0.75
       },
       {
         "id": "plan_coherence",
         "name": "Plan coherence",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 70
+        "threshold": 0.7
       },
       {
         "id": "hallucination_risk",
         "name": "Hallucination risk",
         "method": "claim_pipeline",
         "weight": 0.15,
-        "threshold": 85
+        "threshold": 0.85
       },
       {
         "id": "accuracy",
         "name": "Accuracy",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 75
+        "threshold": 0.75
       },
       {
         "id": "actionability",
         "name": "Actionability",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 70
+        "threshold": 0.7
       },
       {
         "id": "completeness",
         "name": "Completeness",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 70
+        "threshold": 0.7
       },
       {
         "id": "tone_fit",
         "name": "Tone fit",
         "method": "llm_judge",
         "weight": 0.1,
-        "threshold": 60
+        "threshold": 0.6
       },
       {
         "id": "consistency",
         "name": "Consistency",
         "method": "llm_judge",
         "weight": 0.05,
-        "threshold": 70
+        "threshold": 0.7
       }
     ],
     "safety_gates": [

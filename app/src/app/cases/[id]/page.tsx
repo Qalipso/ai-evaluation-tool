@@ -59,9 +59,9 @@ export default async function CaseDetailPage({
                   : "text-bad"
             }`}
           >
-            {c.overall_score.toFixed(1)}
+            {c.overall_score.toFixed(2)}
           </div>
-          <div className="text-xs text-text-muted">/100</div>
+          <div className="text-xs text-text-muted">/1.0</div>
         </div>
       </header>
 
@@ -126,7 +126,7 @@ export default async function CaseDetailPage({
           <div className="space-y-3">
             {c.scores.map((s) => {
               const dim = rubric?.dimensions.find((d) => d.id === s.dim_id);
-              const tone = scoreTone(s.score, dim?.threshold ?? 70);
+              const tone = scoreTone(s.score, dim?.threshold ?? 0.7);
               return (
                 <div key={s.dim_id} className="space-y-1">
                   <div className="flex items-baseline justify-between text-sm">
@@ -141,7 +141,7 @@ export default async function CaseDetailPage({
                         tone === "ok" ? "text-ok" : tone === "warn" ? "text-warn" : "text-bad"
                       }`}
                     >
-                      {s.score}/{dim?.threshold ?? "—"}
+                      {s.score.toFixed(2)} <span className="text-text-muted">≥{dim?.threshold?.toFixed(2) ?? "—"}</span>
                       {!s.threshold_passed && <span className="text-bad ml-2">below</span>}
                     </span>
                   </div>

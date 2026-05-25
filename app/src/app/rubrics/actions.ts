@@ -27,7 +27,7 @@ function parseDimensions(formData: FormData): Dimension[] {
       name: (formData.get(`dim_name_${i}`) as string).trim(),
       method: (formData.get(`dim_method_${i}`) as string).trim(),
       weight: parseFloat(formData.get(`dim_weight_${i}`) as string) || 0,
-      threshold: parseInt(formData.get(`dim_threshold_${i}`) as string) || 0,
+      threshold: parseFloat(formData.get(`dim_threshold_${i}`) as string) || 0,
     });
     i++;
   }

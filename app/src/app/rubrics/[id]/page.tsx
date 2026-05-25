@@ -139,11 +139,11 @@ export default async function RubricDetailPage({
                           {dim.weight.toFixed(2)}
                         </td>
                         <td className="px-4 py-3 text-right font-mono tabular-nums text-xs text-text-muted">
-                          ≥{dim.threshold}
+                          ≥{dim.threshold.toFixed(2)}
                         </td>
                         {cases.length > 0 && <>
                           <td className={`px-4 py-3 text-right font-mono tabular-nums ${avgScore !== null ? `text-${tone}` : "text-text-muted"}`}>
-                            {avgScore !== null ? avgScore.toFixed(1) : "—"}
+                            {avgScore !== null ? avgScore.toFixed(2) : "—"}
                           </td>
                           <td className="px-4 py-3 text-right font-mono tabular-nums text-xs text-text-secondary">
                             {passRate !== null ? `${(passRate * 100).toFixed(0)}%` : "—"}
@@ -186,7 +186,7 @@ export default async function RubricDetailPage({
                       <div className="text-xs text-text-muted font-mono">{run.variable_changed} · {run.started_at.slice(0, 10)}</div>
                     </div>
                     <div className="flex items-center gap-3 text-sm">
-                      <span className="font-mono tabular-nums">{run.overall_score.toFixed(1)}</span>
+                      <span className="font-mono tabular-nums">{run.overall_score.toFixed(2)}</span>
                       <span className="text-xs text-text-muted">{run.cases_passing}/{run.cases_total} passing</span>
                     </div>
                   </Link>

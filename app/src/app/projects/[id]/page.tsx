@@ -132,15 +132,15 @@ export default async function ProjectDetailPage({
             emptyMsg="No runs yet. Run the first evaluation to establish a baseline."
           >
             <MetricRow label="Total runs" value={quality.totalRuns} />
-            <MetricRow label="Last run score" value={quality.lastScore !== null ? quality.lastScore.toFixed(1) : "—"} mono />
-            <MetricRow label="Previous score" value={quality.prevScore !== null ? quality.prevScore.toFixed(1) : "—"} mono />
+            <MetricRow label="Last run score" value={quality.lastScore !== null ? quality.lastScore.toFixed(2) : "—"} mono />
+            <MetricRow label="Previous score" value={quality.prevScore !== null ? quality.prevScore.toFixed(2) : "—"} mono />
             <MetricRow
               label="Score delta"
               value={
                 quality.delta !== null
                   ? quality.delta >= 0
-                    ? `+${quality.delta.toFixed(1)}`
-                    : quality.delta.toFixed(1)
+                    ? `+${quality.delta.toFixed(2)}`
+                    : quality.delta.toFixed(2)
                   : "—"
               }
               tone={quality.delta !== null ? (quality.delta >= 0 ? "ok" : "bad") : undefined}
@@ -187,7 +187,7 @@ export default async function ProjectDetailPage({
                 <MetricRow label="Dimensions" value={rubricSummary.dimensionCount} />
                 <MetricRow label="Weights normalized" value={rubricSummary.weightsNormalized ? "Yes" : "No"} tone={rubricSummary.weightsNormalized ? "ok" : "bad"} />
                 <MetricRow label="Safety gate" value={rubricSummary.safetyGateEnabled ? "Enabled" : "Disabled"} tone={rubricSummary.safetyGateEnabled ? "ok" : undefined} />
-                <MetricRow label="Min threshold" value={`≥ ${rubricSummary.minThreshold}`} mono />
+                <MetricRow label="Min threshold" value={`≥ ${rubricSummary.minThreshold.toFixed(2)}`} mono />
               </>
             )}
           </IntelCard>
@@ -221,7 +221,7 @@ export default async function ProjectDetailPage({
                         {run.variable_changed}
                       </td>
                       <td className={`px-4 py-2.5 text-right font-mono tabular-nums ${verdictTone[run.verdict]}`}>
-                        {run.overall_score.toFixed(1)}
+                        {run.overall_score.toFixed(2)}
                       </td>
                       <td className="px-4 py-2.5 text-right font-mono tabular-nums text-xs text-text-secondary">
                         {pct(run.cases_passing / run.cases_total)}

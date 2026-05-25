@@ -91,7 +91,7 @@ export function RunsTable({
                 <td
                   className={`px-4 py-2.5 text-right font-mono tabular-nums ${verdictTone[run.verdict]}`}
                 >
-                  {run.overall_score.toFixed(1)}
+                  {run.overall_score.toFixed(2)}
                 </td>
                 <td className="px-4 py-2.5 text-right font-mono tabular-nums text-xs text-text-secondary">
                   {(passRate * 100).toFixed(0)}%

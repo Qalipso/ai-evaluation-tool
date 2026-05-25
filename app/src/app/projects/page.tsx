@@ -42,7 +42,7 @@ export default function ProjectsPage() {
                   <div className="mt-3 pt-3 border-t border-border-subtle text-xs flex items-center justify-between">
                     <div>
                       <span className="text-text-muted">Last run · </span>
-                      <span className="font-mono">{last.overall_score.toFixed(1)}</span>
+                      <span className="font-mono">{last.overall_score.toFixed(2)}</span>
                       <span className="text-text-muted"> · {last.cases_passing}/{last.cases_total} passing</span>
                     </div>
                     <span className={`text-xs ${verdictTone[last.verdict]}`}>

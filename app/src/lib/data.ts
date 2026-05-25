@@ -105,8 +105,8 @@ export function computeDashboard() {
     (r) => r.regression_flag || r.safety_findings > 0,
   ).length;
 
-  // Cases whose overall score is in needs_work territory (< 70)
-  const failedCases = allCases.filter((c) => c.overall_score < 70).length;
+  // Cases whose overall score is in needs_work territory (< 0.7)
+  const failedCases = allCases.filter((c) => c.overall_score < 0.7).length;
 
   // Claim pipeline metrics
   const totalClaims = allCases.reduce((s, c) => s + c.claims.length, 0);
@@ -154,7 +154,7 @@ export function computeDashboard() {
   const quality_breakdown = Object.entries(groups)
     .map(([method, g]) => ({
       evaluator: methodDisplayNames[method] ?? method,
-      score: Math.round(g.sum / g.count),
+      score: Math.round((g.sum / g.count) * 100) / 100,
       cases: g.count,
       pass_rate: g.pass / g.count,
     }))
@@ -186,7 +186,7 @@ export function computeDashboard() {
   ];
 
   return {
-    overall_quality: Math.round(overallQuality * 10) / 10,
+    overall_quality: Math.round(overallQuality * 1000) / 10,
     active_projects: activeProjects,
     recent_runs_30d: allRuns.length,
     failed_cases: failedCases,
@@ -253,8 +253,8 @@ export function calculateProjectCoverage(cases: Case[], runs: Run[]): ProjectCov
   const regressionRunIds = new Set(runs.filter((r) => r.regression_flag).map((r) => r.id));
   return {
     total: cases.length,
-    passing: cases.filter((c) => c.scores.length > 0 && c.overall_score >= 70).length,
-    failing: cases.filter((c) => c.scores.length > 0 && c.overall_score < 70).length,
+    passing: cases.filter((c) => c.scores.length > 0 && c.overall_score >= 0.7).length,
+    failing: cases.filter((c) => c.scores.length > 0 && c.overall_score < 0.7).length,
     unscored: cases.filter((c) => c.scores.length === 0).length,
     regressionCases: cases.filter((c) => regressionRunIds.has(c.run_id)).length,
     safetyCases: cases.filter((c) => c.safety_findings.length > 0).length,

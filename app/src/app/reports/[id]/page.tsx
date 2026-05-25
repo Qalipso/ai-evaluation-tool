@@ -27,7 +27,7 @@ function buildMarkdown(
   const passRate = run.cases_total > 0
     ? Math.round((run.cases_passing / run.cases_total) * 100)
     : 0;
-  const score = Math.round(run.overall_score * 100);
+  const score = run.overall_score.toFixed(2);
 
   const dimAverages = rubric
     ? rubric.dimensions.map((d) => {
@@ -81,7 +81,7 @@ function buildMarkdown(
   // 3. Summary
   lines.push(`## Summary`);
   lines.push(``);
-  lines.push(`Evaluated ${run.cases_total} outputs against rubric \`${rubric?.id ?? run.rubric_id}\`. Overall score ${score}/100 — ${verdictLabel[run.verdict] ?? run.verdict}. ${
+  lines.push(`Evaluated ${run.cases_total} outputs against rubric \`${rubric?.id ?? run.rubric_id}\`. Overall score ${score}/1.0 — ${verdictLabel[run.verdict] ?? run.verdict}. ${
     run.regression_flag
       ? `Regression flagged: score dropped vs previous run.`
       : run.safety_findings > 0
@@ -95,7 +95,7 @@ function buildMarkdown(
   lines.push(``);
   lines.push(`| Metric | Value |`);
   lines.push(`|--------|-------|`);
-  lines.push(`| Overall score | ${score}/100 |`);
+  lines.push(`| Overall score | ${score}/1.0 |`);
   lines.push(`| Pass rate | ${passRate}% (${run.cases_passing}/${run.cases_total}) |`);
   lines.push(`| Cases evaluated | ${run.cases_total} |`);
   if (run.safety_findings > 0) lines.push(`| Safety findings | ${run.safety_findings} |`);
@@ -108,11 +108,11 @@ function buildMarkdown(
     lines.push(`| Dimension | Mean | Threshold | Pass rate | Method |`);
     lines.push(`|-----------|------|-----------|-----------|--------|`);
     dimAverages.forEach((d) => {
-      const mean = d.avg != null ? Math.round(d.avg * 100) : "—";
+      const mean = d.avg != null ? d.avg.toFixed(2) : "—";
       const passRate = d.total > 0 ? `${Math.round((d.passing / d.total) * 100)}%` : "—";
-      const flag = d.avg != null && d.avg * 100 < d.threshold ? " ⚠" : "";
+      const flag = d.avg != null && d.avg < d.threshold ? " ⚠" : "";
       lines.push(
-        `| ${d.name} | ${mean}${flag} | ${d.threshold} | ${passRate} | ${methodLabel[d.method] ?? d.method} |`,
+        `| ${d.name} | ${mean}${flag} | ${d.threshold.toFixed(2)} | ${passRate} | ${methodLabel[d.method] ?? d.method} |`,
       );
     });
     lines.push(``);
@@ -147,7 +147,7 @@ function buildMarkdown(
   if (groundedScore) {
     lines.push(`## Groundedness Summary`);
     lines.push(``);
-    lines.push(`Groundedness dimension tracked. Threshold: ${groundedScore.threshold}/100. See dimension breakdown above.`);
+    lines.push(`Groundedness dimension tracked. Threshold: ${groundedScore.threshold.toFixed(2)}/1.0. See dimension breakdown above.`);
     lines.push(``);
   }
 
@@ -158,7 +158,7 @@ function buildMarkdown(
     failingCases.forEach((c, i) => {
       lines.push(`### Case ${i + 1}: \`${c.id}\``);
       lines.push(``);
-      lines.push(`**Score:** ${Math.round(c.overall_score * 100)}/100`);
+      lines.push(`**Score:** ${c.overall_score.toFixed(2)}/1.0`);
       lines.push(``);
       lines.push(`**Input:** ${c.input}`);
       lines.push(``);
@@ -190,7 +190,7 @@ function buildMarkdown(
     passingCases.forEach((c, i) => {
       lines.push(`### Case ${i + 1}: \`${c.id}\``);
       lines.push(``);
-      lines.push(`**Score:** ${Math.round(c.overall_score * 100)}/100`);
+      lines.push(`**Score:** ${c.overall_score.toFixed(2)}/1.0`);
       lines.push(``);
       lines.push(`**Input:** ${c.input}`);
       lines.push(``);
@@ -214,7 +214,7 @@ function buildMarkdown(
   lines.push(`## Recommendations`);
   lines.push(``);
   const belowThreshold = dimAverages.filter(
-    (d) => d.avg != null && d.avg * 100 < d.threshold,
+    (d) => d.avg != null && d.avg < d.threshold,
   );
   if (belowThreshold.length === 0 && allSafety.length === 0 && !run.regression_flag) {
     lines.push(`Run passes all thresholds. Ready for promotion decision per release policy.`);
@@ -232,7 +232,7 @@ function buildMarkdown(
     belowThreshold.forEach((d, i) => {
       const n = (allSafety.length > 0 ? 1 : 0) + (run.regression_flag ? 1 : 0) + i + 1;
       lines.push(
-        `${n}. **Improve ${d.name}** — mean ${Math.round((d.avg ?? 0) * 100)}, threshold ${d.threshold}. Review failing cases in this dimension.`,
+        `${n}. **Improve ${d.name}** — mean ${(d.avg ?? 0).toFixed(2)}, threshold ${d.threshold.toFixed(2)}. Review failing cases in this dimension.`,
       );
     });
   }
@@ -286,7 +286,7 @@ export default async function ReportDetailPage({
   const rubric = getRubric(run.rubric_id);
   const cases = getCasesByRun(run.id);
 
-  const score = Math.round(run.overall_score * 100);
+  const score = run.overall_score.toFixed(2);
   const passRate = run.cases_total > 0
     ? Math.round((run.cases_passing / run.cases_total) * 100)
     : 0;
@@ -317,7 +317,7 @@ export default async function ReportDetailPage({
     .slice(0, 2);
   const reviewed = cases.filter((c) => c.human_review !== null);
   const belowThreshold = dimAverages.filter(
-    (d) => d.avg != null && d.avg * 100 < d.threshold,
+    (d) => d.avg != null && d.avg < d.threshold,
   );
 
   const markdown = buildMarkdown(run, project, rubric, cases);
@@ -379,8 +379,8 @@ export default async function ReportDetailPage({
         <p className="text-sm text-text-secondary leading-relaxed">
           Evaluated {run.cases_total} outputs against rubric{" "}
           <span className="font-mono text-text-primary">{rubric?.id ?? run.rubric_id}</span>. Overall score{" "}
-          <span className={`font-semibold ${scoreTone(run.overall_score * 100)}`}>
-            {score}/100
+          <span className={`font-semibold text-${scoreTone(run.overall_score)}`}>
+            {score}/1.0
           </span>{" "}
           — {verdictLabel[run.verdict] ?? run.verdict}.{" "}
           {run.regression_flag
@@ -395,12 +395,12 @@ export default async function ReportDetailPage({
       <div className="grid grid-cols-3 gap-3">
         <Card className="px-4 py-3 text-center">
           <div className="text-[10px] uppercase tracking-wider text-text-muted">Overall</div>
-          <div className={`text-3xl font-semibold mt-1 ${scoreTone(score)}`}>{score}</div>
-          <div className="text-xs text-text-muted mt-0.5">/ 100</div>
+          <div className={`text-3xl font-semibold mt-1 text-${scoreTone(run.overall_score)}`}>{score}</div>
+          <div className="text-xs text-text-muted mt-0.5">/ 1.0</div>
         </Card>
         <Card className="px-4 py-3 text-center">
           <div className="text-[10px] uppercase tracking-wider text-text-muted">Pass rate</div>
-          <div className={`text-3xl font-semibold mt-1 ${scoreTone(passRate)}`}>{passRate}%</div>
+          <div className={`text-3xl font-semibold mt-1 text-${scoreTone(passRate / 100)}`}>{passRate}%</div>
           <div className="text-xs text-text-muted mt-0.5">
             {run.cases_passing}/{run.cases_total} cases
           </div>
@@ -424,8 +424,8 @@ export default async function ReportDetailPage({
           </div>
           <div className="space-y-3">
             {dimAverages.map((d) => {
-              const pctVal = d.avg != null ? Math.round(d.avg * 100) : null;
-              const below = pctVal != null && pctVal < d.threshold;
+              const val = d.avg;
+              const below = val != null && val < d.threshold;
               return (
                 <div key={d.id}>
                   <div className="flex items-center justify-between text-xs mb-1">
@@ -440,12 +440,12 @@ export default async function ReportDetailPage({
                           : "no data"}
                       </span>
                       <span className="font-mono">
-                        {pctVal != null ? pctVal : "—"} / {d.threshold}
+                        {val != null ? val.toFixed(2) : "—"} ≥{d.threshold.toFixed(2)}
                       </span>
                     </div>
                   </div>
-                  {pctVal != null && (
-                    <Bar value={pctVal / 100} tone={below ? "warn" : "ok"} />
+                  {val != null && (
+                    <Bar value={val} tone={below ? "warn" : "ok"} />
                   )}
                 </div>
               );
@@ -525,8 +525,8 @@ export default async function ReportDetailPage({
                   >
                     {c.id}
                   </Link>
-                  <span className={`text-xs font-medium ${scoreTone(c.overall_score * 100)}`}>
-                    {Math.round(c.overall_score * 100)}/100
+                  <span className={`text-xs font-medium text-${scoreTone(c.overall_score)}`}>
+                    {c.overall_score.toFixed(2)}/1.0
                   </span>
                 </div>
                 <p className="text-xs text-text-secondary line-clamp-2">{c.input}</p>
@@ -567,7 +567,7 @@ export default async function ReportDetailPage({
                     {c.id}
                   </Link>
                   <span className="text-xs text-ok font-medium">
-                    {Math.round(c.overall_score * 100)}/100
+                    {c.overall_score.toFixed(2)}/1.0
                   </span>
                 </div>
                 <p className="text-xs text-text-secondary line-clamp-2">{c.input}</p>
@@ -621,7 +621,7 @@ export default async function ReportDetailPage({
             {belowThreshold.map((d) => (
               <li key={d.id}>
                 <strong className="text-warn">Improve {d.name}</strong> — mean{" "}
-                {Math.round((d.avg ?? 0) * 100)}, threshold {d.threshold}. Review failing
+                {(d.avg ?? 0).toFixed(2)}, threshold {d.threshold.toFixed(2)}. Review failing
                 cases in this dimension.
               </li>
             ))}

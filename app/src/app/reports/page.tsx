@@ -86,7 +86,7 @@ export default function ReportsPage() {
                 <div className="flex items-center gap-3 shrink-0">
                   <div className="text-right">
                     <div
-                      className={`text-xl font-semibold ${scoreTone(run.overall_score)}`}
+                      className={`text-xl font-semibold text-${scoreTone(run.overall_score)}`}
                     >
                       {pct(run.overall_score)}
                     </div>

@@ -82,7 +82,7 @@ export function Pill({
 
 export function Bar({
   value,
-  max = 100,
+  max = 1,
   tone,
 }: {
   value: number;
@@ -105,8 +105,8 @@ export function Bar({
   );
 }
 
-export function scoreTone(score: number, threshold = 70): "ok" | "warn" | "bad" {
-  if (score >= Math.max(threshold, 80)) return "ok";
+export function scoreTone(score: number, threshold = 0.7): "ok" | "warn" | "bad" {
+  if (score >= Math.max(threshold, 0.8)) return "ok";
   if (score >= threshold) return "warn";
   return "bad";
 }

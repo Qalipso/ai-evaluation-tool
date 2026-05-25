@@ -74,7 +74,7 @@ export default function ComparePage() {
                   <DeltaIcon size={20} className={deltaColor} />
                   <span className={`text-xl font-semibold font-mono ${deltaColor}`}>
                     {delta >= 0 ? "+" : ""}
-                    {delta.toFixed(1)}
+                    {delta.toFixed(2)}
                   </span>
                   <span className="text-[10px] text-text-muted uppercase">delta</span>
                 </div>
@@ -144,9 +144,9 @@ function RunCol({ run, label }: { run: Run; label: string }) {
             tone === "ok" ? "text-ok" : tone === "warn" ? "text-warn" : "text-bad"
           }`}
         >
-          {run.overall_score.toFixed(1)}
+          {run.overall_score.toFixed(2)}
         </span>
-        <span className="text-text-muted text-xs">/100</span>
+        <span className="text-text-muted text-xs">/1.0</span>
       </div>
       <Bar value={run.overall_score} tone={barTone} />
       <div className={`text-xs ${verdictTone[run.verdict]}`}>
