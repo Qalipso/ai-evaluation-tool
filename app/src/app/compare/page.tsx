@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { Card, Pill, Bar, scoreTone } from "@/components/ui";
-import { allRuns, allProjects, verdictLabel, verdictTone, fmtDate } from "@/lib/data";
+import { verdictLabel, verdictTone, fmtDate, type Run } from "@/lib/data";
+import { fetchRuns, fetchProjects } from "@/lib/db";
 import { GitCompare, TrendingDown, TrendingUp, Minus } from "lucide-react";
-
-type Run = (typeof allRuns)[number];
 
 function groupByProject(runs: Run[]): Map<string, Run[]> {
   const map = new Map<string, Run[]>();
@@ -15,7 +14,8 @@ function groupByProject(runs: Run[]): Map<string, Run[]> {
   return map;
 }
 
-export default function ComparePage() {
+export default async function ComparePage() {
+  const [allRuns, allProjects] = await Promise.all([fetchRuns(), fetchProjects()]);
   const byProject = groupByProject(allRuns);
   const pairs: { project_id: string; current: Run; baseline: Run }[] = [];
 

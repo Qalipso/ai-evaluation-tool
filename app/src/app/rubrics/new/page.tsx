@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { allProjects } from "@/lib/data";
+import { fetchProjects } from "@/lib/db";
 import { NewRubricForm } from "./NewRubricForm";
 
-export default function NewRubricPage() {
+export default async function NewRubricPage() {
+  const allProjects = await fetchProjects();
   return (
     <div className="max-w-3xl space-y-5">
       <div>

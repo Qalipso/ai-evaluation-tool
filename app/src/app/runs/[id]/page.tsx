@@ -9,16 +9,13 @@ import {
 } from "@/components/ui";
 import { HeatMap } from "@/components/heat-map";
 import {
-  getRun,
-  getCasesByRun,
-  getProject,
-  getRubric,
   labelTone,
   methodLabel,
   verdictLabel,
   verdictTone,
   fmtDate,
 } from "@/lib/data";
+import { fetchRun, fetchCasesByRun, fetchProject, fetchRubric } from "@/lib/db";
 import { ChevronLeft, ShieldAlert } from "lucide-react";
 
 export default async function RunDetailPage({
@@ -27,12 +24,14 @@ export default async function RunDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const run = getRun(id);
+  const run = await fetchRun(id);
   if (!run) notFound();
 
-  const project = getProject(run.project_id);
-  const rubric = getRubric(run.rubric_id);
-  const cases = getCasesByRun(run.id);
+  const [project, rubric, cases] = await Promise.all([
+    fetchProject(run.project_id),
+    fetchRubric(run.rubric_id),
+    fetchCasesByRun(run.id),
+  ]);
   const sample = cases[0];
 
   const dimAverages = rubric

@@ -2,27 +2,26 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card, Pill, Bar, scoreTone } from "@/components/ui";
 import {
-  getRun,
-  getProject,
-  getRubric,
-  getCasesByRun,
   verdictLabel,
   verdictTone,
   methodLabel,
   labelTone,
   fmtDate,
   pct,
+  type Run,
+  type Project,
+  type Rubric,
+  type Case,
 } from "@/lib/data";
+import { fetchRun, fetchProject, fetchRubric, fetchCasesByRun } from "@/lib/db";
 import { ChevronLeft, ShieldAlert } from "lucide-react";
 import { ReportExport } from "./ReportExport";
 
-type Run = NonNullable<ReturnType<typeof getRun>>;
-
 function buildMarkdown(
   run: Run,
-  project: ReturnType<typeof getProject>,
-  rubric: ReturnType<typeof getRubric>,
-  cases: ReturnType<typeof getCasesByRun>,
+  project: Project | undefined,
+  rubric: Rubric | undefined,
+  cases: Case[],
 ): string {
   const passRate = run.cases_total > 0
     ? Math.round((run.cases_passing / run.cases_total) * 100)
@@ -279,12 +278,14 @@ export default async function ReportDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const run = getRun(id);
+  const run = await fetchRun(id);
   if (!run) notFound();
 
-  const project = getProject(run.project_id);
-  const rubric = getRubric(run.rubric_id);
-  const cases = getCasesByRun(run.id);
+  const [project, rubric, cases] = await Promise.all([
+    fetchProject(run.project_id),
+    fetchRubric(run.rubric_id),
+    fetchCasesByRun(run.id),
+  ]);
 
   const score = run.overall_score.toFixed(2);
   const passRate = run.cases_total > 0

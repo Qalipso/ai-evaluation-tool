@@ -162,3 +162,23 @@ body {
   color: #9090b0;
   font-style: italic;
 }
+
+/* Shared form control */
+.input {
+  width: 100%;
+  border-radius: 0.375rem;
+  border: 1px solid #23233a;
+  background: #0b0b14;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #e7e7f0;
+  resize: vertical;
+}
+.input::placeholder {
+  color: #6b6b85;
+}
+.input:focus {
+  outline: none;
+  border-color: #7c6cff;
+  box-shadow: 0 0 0 1px #7c6cff;
+}

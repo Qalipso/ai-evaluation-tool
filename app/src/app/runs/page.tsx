@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { Card } from "@/components/ui";
-import { allRuns, allProjects } from "@/lib/data";
+import { fetchRuns, fetchProjects } from "@/lib/db";
 import { RunsTable } from "./RunsTable";
 
-export default function RunsPage() {
+export default async function RunsPage() {
+  const [allRuns, allProjects] = await Promise.all([fetchRuns(), fetchProjects()]);
   return (
     <div className="space-y-4 max-w-6xl">
       <header className="flex items-center justify-between">
@@ -12,9 +14,12 @@ export default function RunsPage() {
             Stored evaluation runs. Each row is immutable; re-evaluation creates a new run.
           </p>
         </div>
-        <button className="px-3.5 py-2 bg-brand hover:bg-brand-hover rounded-md text-sm font-medium">
+        <Link
+          href="/runs/new"
+          className="px-3.5 py-2 bg-brand hover:bg-brand-hover rounded-md text-sm font-medium"
+        >
           New run
-        </button>
+        </Link>
       </header>
 
       <Card>

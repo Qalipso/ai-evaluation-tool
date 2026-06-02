@@ -1,17 +1,20 @@
 import Link from "next/link";
 import { Card, Pill, scoreTone } from "@/components/ui";
 import {
-  allRuns,
-  allProjects,
-  allRubrics,
   verdictLabel,
   verdictTone,
   fmtDate,
   pct,
 } from "@/lib/data";
+import { fetchRuns, fetchProjects, fetchRubrics } from "@/lib/db";
 import { FileText, Download, ShieldAlert } from "lucide-react";
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  const [allRuns, allProjects, allRubrics] = await Promise.all([
+    fetchRuns(),
+    fetchProjects(),
+    fetchRubrics(),
+  ]);
   const runsWithData = allRuns.map((run) => ({
     run,
     project: allProjects.find((p) => p.id === run.project_id),

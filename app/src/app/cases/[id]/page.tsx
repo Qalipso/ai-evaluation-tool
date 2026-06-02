@@ -3,19 +3,17 @@ import Link from "next/link";
 import { Card, Pill, Bar, scoreTone } from "@/components/ui";
 import { HeatMap } from "@/components/heat-map";
 import {
-  allCases,
-  getRun,
-  getProject,
-  getRubric,
   labelTone,
   methodLabel,
   verdictTone,
   fmtDate,
 } from "@/lib/data";
+import { fetchCase, fetchCases, fetchRun, fetchProject, fetchRubric } from "@/lib/db";
 import { ChevronLeft, ShieldAlert } from "lucide-react";
 
-export function generateStaticParams() {
-  return allCases.map((c) => ({ id: c.id }));
+export async function generateStaticParams() {
+  const cases = await fetchCases();
+  return cases.map((c) => ({ id: c.id }));
 }
 
 export default async function CaseDetailPage({
@@ -24,12 +22,14 @@ export default async function CaseDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const c = allCases.find((x) => x.id === id);
+  const c = await fetchCase(id);
   if (!c) notFound();
 
-  const run = getRun(c.run_id);
-  const project = run ? getProject(run.project_id) : undefined;
-  const rubric = run ? getRubric(run.rubric_id) : undefined;
+  const run = await fetchRun(c.run_id);
+  const [project, rubric] = await Promise.all([
+    run ? fetchProject(run.project_id) : Promise.resolve(undefined),
+    run ? fetchRubric(run.rubric_id) : Promise.resolve(undefined),
+  ]);
 
   return (
     <div className="space-y-5 max-w-4xl">

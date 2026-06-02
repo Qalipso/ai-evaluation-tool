@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { allModels } from "@/lib/data";
+import { fetchModels } from "@/lib/db";
 import { NewProjectForm } from "./NewProjectForm";
 
-export default function NewProjectPage() {
+export default async function NewProjectPage() {
+  const allModels = await fetchModels();
   return (
     <div className="max-w-xl space-y-5">
       <div>

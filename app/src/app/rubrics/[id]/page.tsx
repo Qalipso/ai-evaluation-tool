@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card, Pill, Bar, scoreTone } from "@/components/ui";
-import {
-  getRubric, allProjects, allRuns, allCases, methodLabel,
-} from "@/lib/data";
+import { methodLabel } from "@/lib/data";
+import { fetchRubric, fetchProjects, fetchRuns, fetchCases } from "@/lib/db";
 import { DeleteRubricButton } from "./DeleteRubricButton";
 import { EditRubricForm } from "./EditRubricForm";
 import { RubricScorer } from "@/components/RubricScorer";
@@ -18,7 +17,12 @@ export default async function RubricDetailPage({
   const { id } = await params;
   const { edit } = await searchParams;
 
-  const rubric = getRubric(id);
+  const [rubric, allProjects, allRuns, allCases] = await Promise.all([
+    fetchRubric(id),
+    fetchProjects(),
+    fetchRuns(),
+    fetchCases(),
+  ]);
   if (!rubric) notFound();
 
   const project = allProjects.find((p) => p.id === rubric.project_id);

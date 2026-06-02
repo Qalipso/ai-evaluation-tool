@@ -11,15 +11,20 @@ import {
 import { Card, StatCard, Pill, Bar, scoreTone } from "@/components/ui";
 import {
   computeDashboard,
-  allRuns,
-  allProjects,
   verdictLabel,
   verdictTone,
   fmtDate,
 } from "@/lib/data";
+import { fetchRuns, fetchCases, fetchRubrics, fetchProjects } from "@/lib/db";
 
-export default function DashboardPage() {
-  const dashboardData = computeDashboard();
+export default async function DashboardPage() {
+  const [allRuns, allCases, allRubrics, allProjects] = await Promise.all([
+    fetchRuns(),
+    fetchCases(),
+    fetchRubrics(),
+    fetchProjects(),
+  ]);
+  const dashboardData = computeDashboard(allRuns, allCases, allRubrics);
   const recent = allRuns.slice(0, 5);
 
   return (

@@ -1,10 +1,6 @@
-import projects from "../../mock-data/projects.json";
-import rubrics from "../../mock-data/rubrics.json";
-import runs from "../../mock-data/runs.json";
-import cases from "../../mock-data/cases.json";
-import models from "../../mock-data/models.json";
+// Domain types, display maps, and PURE compute helpers.
+// Client-safe: no JSON imports, no fs, no Supabase. Data fetching lives in db.ts.
 
-// Explicit interfaces — guards against TypeScript inferring 'never' when JSON files are empty arrays
 export interface Project {
   id: string;
   name: string;
@@ -26,21 +22,6 @@ export interface Score { dim_id: string; score: number; method: string; rational
 export interface SafetyFinding { category: string; severity: string; evidence: string; status: string }
 export interface Case { id: string; run_id: string; input: string; expected_behavior: string; ai_output: string; retrieved_context: string[]; claims: Claim[]; scores: Score[]; overall_score: number; safety_findings: SafetyFinding[]; human_review: string | null }
 export interface AIModel { id: string; provider: string; label: string }
-
-export const allProjects = projects as unknown as Project[];
-export const allRubrics = rubrics as unknown as Rubric[];
-export const allRuns = runs as unknown as Run[];
-export const allCases = cases as unknown as Case[];
-export const allModels = models as unknown as AIModel[];
-
-export const getProject = (id: string) =>
-  allProjects.find((p) => p.id === id);
-export const getRubric = (id: string) =>
-  allRubrics.find((r) => r.id === id);
-export const getRun = (id: string) => allRuns.find((r) => r.id === id);
-export const getCasesByRun = (runId: string) =>
-  allCases.filter((c) => c.run_id === runId);
-export const getCase = (id: string) => allCases.find((c) => c.id === id);
 
 export const verdictLabel: Record<string, string> = {
   ship_ready: "Ship-ready",
@@ -92,50 +73,44 @@ export function pct(n: number) {
   return `${(n * 100).toFixed(1)}%`;
 }
 
-// Computed dashboard metrics — derived from allRuns / allCases / allRubrics
-export function computeDashboard() {
+// ─── Pure finders (operate on supplied arrays) ───────────────────────────────
+export const findProject = (projects: Project[], id: string) => projects.find((p) => p.id === id);
+export const findRubric = (rubrics: Rubric[], id: string) => rubrics.find((r) => r.id === id);
+export const findRun = (runs: Run[], id: string) => runs.find((r) => r.id === id);
+export const casesByRun = (cases: Case[], runId: string) => cases.filter((c) => c.run_id === runId);
+
+// ─── Dashboard metrics — derived from supplied runs / cases / rubrics ────────
+export function computeDashboard(runs: Run[], cases: Case[], rubrics: Rubric[]) {
   const overallQuality =
-    allRuns.length > 0
-      ? allRuns.reduce((s, r) => s + r.overall_score, 0) / allRuns.length
-      : 0;
+    runs.length > 0 ? runs.reduce((s, r) => s + r.overall_score, 0) / runs.length : 0;
 
-  const activeProjects = new Set(allRuns.map((r) => r.project_id)).size;
+  const activeProjects = new Set(runs.map((r) => r.project_id)).size;
 
-  const highRiskRuns = allRuns.filter(
-    (r) => r.regression_flag || r.safety_findings > 0,
-  ).length;
+  const highRiskRuns = runs.filter((r) => r.regression_flag || r.safety_findings > 0).length;
 
-  // Cases whose overall score is in needs_work territory (< 0.7)
-  const failedCases = allCases.filter((c) => c.overall_score < 0.7).length;
+  const failedCases = cases.filter((c) => c.overall_score < 0.7).length;
 
-  // Claim pipeline metrics
-  const totalClaims = allCases.reduce((s, c) => s + c.claims.length, 0);
-  const allClaimsFlat = allCases.flatMap((c) => c.claims);
+  const totalClaims = cases.reduce((s, c) => s + c.claims.length, 0);
+  const allClaimsFlat = cases.flatMap((c) => c.claims);
   const avgConfidence =
     allClaimsFlat.length > 0
       ? allClaimsFlat.reduce((s, cl) => s + cl.confidence, 0) / allClaimsFlat.length
       : 0;
 
-  // Open safety findings across all cases
-  const openFindings = allCases.reduce(
+  const openFindings = cases.reduce(
     (s, c) => s + c.safety_findings.filter((f) => f.status === "open").length,
     0,
   );
 
-  // Cases with at least one open safety finding = human review queue
-  const inQueue = allCases.filter((c) =>
-    c.safety_findings.some((f) => f.status === "open"),
-  ).length;
+  const inQueue = cases.filter((c) => c.safety_findings.some((f) => f.status === "open")).length;
 
-  // Average pass rate across all runs (cases_passing / cases_total)
   const avgPassRate =
-    allRuns.length > 0
-      ? allRuns.reduce((s, r) => s + r.cases_passing / r.cases_total, 0) / allRuns.length
+    runs.length > 0
+      ? runs.reduce((s, r) => s + r.cases_passing / r.cases_total, 0) / runs.length
       : 0;
 
-  // Quality breakdown grouped by evaluator method
   const groups: Record<string, { sum: number; count: number; pass: number }> = {};
-  for (const c of allCases) {
+  for (const c of cases) {
     for (const sc of c.scores) {
       const g = groups[sc.method] ?? { sum: 0, count: 0, pass: 0 };
       g.sum += sc.score;
@@ -162,11 +137,11 @@ export function computeDashboard() {
 
   const pipeline_health = [
     { stage: "Input", score: activeProjects > 0 ? 100 : 0, label: `${activeProjects} projects` },
-    { stage: "Rubric Engine", score: allRubrics.length > 0 ? 100 : 0, label: `${allRubrics.length} active rubrics` },
+    { stage: "Rubric Engine", score: rubrics.length > 0 ? 100 : 0, label: `${rubrics.length} active rubrics` },
     {
       stage: "Scoring",
-      score: allRuns.length > 0 ? Math.round(avgPassRate * 100) : 0,
-      label: `${allRuns.length} runs evaluated`,
+      score: runs.length > 0 ? Math.round(avgPassRate * 100) : 0,
+      label: `${runs.length} runs evaluated`,
     },
     {
       stage: "Claim Pipeline",
@@ -176,10 +151,7 @@ export function computeDashboard() {
     { stage: "Safety Layer", score: 100, label: `${openFindings} findings flagged` },
     {
       stage: "Human Review",
-      score:
-        allCases.length > 0
-          ? Math.round(100 - (inQueue / allCases.length) * 100)
-          : 100,
+      score: cases.length > 0 ? Math.round(100 - (inQueue / cases.length) * 100) : 100,
       label: `${inQueue} in queue`,
     },
     { stage: "Reports", score: 0, label: "0 generated · V1" },
@@ -188,7 +160,7 @@ export function computeDashboard() {
   return {
     overall_quality: Math.round(overallQuality * 1000) / 10,
     active_projects: activeProjects,
-    recent_runs_30d: allRuns.length,
+    recent_runs_30d: runs.length,
     failed_cases: failedCases,
     high_risk_runs: highRiskRuns,
     pipeline_health,
@@ -196,8 +168,7 @@ export function computeDashboard() {
   };
 }
 
-// ─── Project Intelligence Utilities ──────────────────────────────────────────
-
+// ─── Project intelligence utilities ──────────────────────────────────────────
 export interface ProjectCoverage {
   total: number;
   passing: number;
@@ -240,14 +211,13 @@ export interface RubricSummary {
   minThreshold: number;
 }
 
-export function getProjectRuns(projectId: string): Run[] {
-  return allRuns.filter((r) => r.project_id === projectId);
-}
+export const projectRunsOf = (runs: Run[], projectId: string): Run[] =>
+  runs.filter((r) => r.project_id === projectId);
 
-export function getProjectCases(projectId: string): Case[] {
-  const runIds = new Set(getProjectRuns(projectId).map((r) => r.id));
-  return allCases.filter((c) => runIds.has(c.run_id));
-}
+export const projectCasesOf = (runs: Run[], cases: Case[], projectId: string): Case[] => {
+  const runIds = new Set(projectRunsOf(runs, projectId).map((r) => r.id));
+  return cases.filter((c) => runIds.has(c.run_id));
+};
 
 export function calculateProjectCoverage(cases: Case[], runs: Run[]): ProjectCoverage {
   const regressionRunIds = new Set(runs.filter((r) => r.regression_flag).map((r) => r.id));
@@ -299,9 +269,9 @@ export function calculateSafetyState(cases: Case[]): SafetyState {
   };
 }
 
-export function getActiveRubricSummary(project: Project): RubricSummary | null {
+export function getActiveRubricSummary(project: Project, rubrics: Rubric[]): RubricSummary | null {
   if (!project.active_rubric) return null;
-  const rubric = allRubrics.find((r) => r.id === project.active_rubric);
+  const rubric = rubrics.find((r) => r.id === project.active_rubric);
   if (!rubric) return null;
   const weightSum = rubric.dimensions.reduce((s, d) => s + d.weight, 0);
   const thresholds = rubric.dimensions.map((d) => d.threshold);

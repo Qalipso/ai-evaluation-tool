@@ -1,5 +1,6 @@
 import { Card, Pill } from "@/components/ui";
-import { allCases, allRuns, allProjects, labelTone } from "@/lib/data";
+import { labelTone } from "@/lib/data";
+import { fetchCases, fetchRuns, fetchProjects } from "@/lib/db";
 import { Users, ShieldAlert, AlertTriangle, CheckCircle } from "lucide-react";
 import Link from "next/link";
 
@@ -7,7 +8,12 @@ type ReviewItem =
   | { kind: "safety"; caseId: string; runId: string; projectId: string; category: string; severity: string; evidence: string; status: string }
   | { kind: "uncertain"; caseId: string; runId: string; projectId: string; claimText: string; label: string; confidence: number; evidence: string };
 
-export default function ReviewPage() {
+export default async function ReviewPage() {
+  const [allCases, allRuns, allProjects] = await Promise.all([
+    fetchCases(),
+    fetchRuns(),
+    fetchProjects(),
+  ]);
   const items: ReviewItem[] = [];
 
   for (const c of allCases) {

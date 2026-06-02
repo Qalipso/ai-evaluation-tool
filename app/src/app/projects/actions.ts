@@ -3,6 +3,8 @@ import fs from "fs";
 import path from "path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { hasSupabase } from "@/lib/supabase";
+import { dbUpsertProject, dbDeleteProject, dbUpsertModel, dbExistsProject } from "@/lib/db";
 
 const projectsPath = path.join(process.cwd(), "mock-data", "projects.json");
 const modelsPath = path.join(process.cwd(), "mock-data", "models.json");
@@ -32,11 +34,17 @@ export async function createProject(formData: FormData) {
 
   if (!id || !name) throw new Error("id and name are required");
 
-  const projects = readProjects() as Record<string, unknown>[];
-  if (projects.some((p) => p["id"] === id)) throw new Error(`Project id "${id}" already exists`);
+  const row = { id, name, description, owner, model, active_rubric, cases_total };
 
-  projects.push({ id, name, description, owner, model, active_rubric, cases_total });
-  writeProjects(projects);
+  if (hasSupabase()) {
+    if (await dbExistsProject(id)) throw new Error(`Project id "${id}" already exists`);
+    await dbUpsertProject(row);
+  } else {
+    const projects = readProjects() as Record<string, unknown>[];
+    if (projects.some((p) => p["id"] === id)) throw new Error(`Project id "${id}" already exists`);
+    projects.push(row);
+    writeProjects(projects);
+  }
 
   revalidatePath("/projects");
   redirect("/projects");
@@ -53,12 +61,18 @@ export async function updateProject(id: string, formData: FormData) {
   const tags = ((formData.get("tags") as string | null) ?? "").trim();
   const notes = ((formData.get("notes") as string | null) ?? "").trim();
 
-  const projects = readProjects() as Record<string, unknown>[];
-  const idx = projects.findIndex((p) => p["id"] === id);
-  if (idx === -1) throw new Error(`Project "${id}" not found`);
+  const patch = { id, name, description, owner, model, status, active_rubric, judge_model, tags, notes };
 
-  projects[idx] = { ...projects[idx], name, description, owner, model, status, active_rubric, judge_model, tags, notes };
-  writeProjects(projects);
+  if (hasSupabase()) {
+    if (!(await dbExistsProject(id))) throw new Error(`Project "${id}" not found`);
+    await dbUpsertProject(patch);
+  } else {
+    const projects = readProjects() as Record<string, unknown>[];
+    const idx = projects.findIndex((p) => p["id"] === id);
+    if (idx === -1) throw new Error(`Project "${id}" not found`);
+    projects[idx] = { ...projects[idx], ...patch };
+    writeProjects(projects);
+  }
 
   revalidatePath("/projects");
   revalidatePath(`/projects/${id}`);
@@ -66,8 +80,12 @@ export async function updateProject(id: string, formData: FormData) {
 }
 
 export async function deleteProject(id: string) {
-  const projects = readProjects() as Record<string, unknown>[];
-  writeProjects(projects.filter((p) => p["id"] !== id));
+  if (hasSupabase()) {
+    await dbDeleteProject(id);
+  } else {
+    const projects = readProjects() as Record<string, unknown>[];
+    writeProjects(projects.filter((p) => p["id"] !== id));
+  }
 
   revalidatePath("/projects");
   redirect("/projects");
@@ -76,11 +94,15 @@ export async function deleteProject(id: string) {
 export async function addModel(modelId: string, provider: string, label: string) {
   const id = modelId.trim().toLowerCase();
   if (!id) throw new Error("Model id required");
+  const row = { id, provider: provider.trim() || "custom", label: label.trim() || id };
 
-  const models = readModels();
-  if (models.some((m) => m.id === id)) return; // already exists — no-op
-
-  models.push({ id, provider: provider.trim() || "custom", label: label.trim() || id });
-  fs.writeFileSync(modelsPath, JSON.stringify(models, null, 2));
+  if (hasSupabase()) {
+    await dbUpsertModel(row);
+  } else {
+    const models = readModels();
+    if (models.some((m) => m.id === id)) return; // already exists — no-op
+    models.push(row);
+    fs.writeFileSync(modelsPath, JSON.stringify(models, null, 2));
+  }
   revalidatePath("/projects");
 }

@@ -1,8 +1,13 @@
 import { Card, Pill } from "@/components/ui";
-import { allCases, allRuns, allProjects } from "@/lib/data";
+import { fetchCases, fetchRuns, fetchProjects } from "@/lib/db";
 import { ShieldAlert } from "lucide-react";
 
-export default function SafetyLogPage() {
+export default async function SafetyLogPage() {
+  const [allCases, allRuns, allProjects] = await Promise.all([
+    fetchCases(),
+    fetchRuns(),
+    fetchProjects(),
+  ]);
   const findings = allCases.flatMap((c) =>
     c.safety_findings.map((f) => ({ ...f, case: c })),
   );

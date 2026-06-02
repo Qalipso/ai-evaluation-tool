@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { Card, Pill } from "@/components/ui";
-import { allProjects, allRuns, verdictTone, verdictLabel } from "@/lib/data";
+import { verdictTone, verdictLabel } from "@/lib/data";
+import { fetchProjects, fetchRuns } from "@/lib/db";
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const [allProjects, allRuns] = await Promise.all([fetchProjects(), fetchRuns()]);
   return (
     <div className="space-y-5 max-w-6xl">
       <header className="flex items-center justify-between">

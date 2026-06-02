@@ -2,11 +2,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card, Pill } from "@/components/ui";
 import {
-  getProject,
-  allModels,
-  allRubrics,
-  getProjectRuns,
-  getProjectCases,
+  projectRunsOf,
+  projectCasesOf,
   calculateProjectCoverage,
   calculateRecentQuality,
   calculateReviewStatus,
@@ -23,6 +20,7 @@ import {
   type SafetyState,
   type RubricSummary,
 } from "@/lib/data";
+import { fetchProject, fetchModels, fetchRubrics, fetchRuns, fetchCases } from "@/lib/db";
 import { EditProjectForm } from "./EditProjectForm";
 import { DeleteProjectButton } from "./DeleteProjectButton";
 
@@ -36,18 +34,24 @@ export default async function ProjectDetailPage({
   const { id } = await params;
   const { edit } = await searchParams;
 
-  const project = getProject(id);
+  const [project, allModels, allRubrics, allRuns, allCases] = await Promise.all([
+    fetchProject(id),
+    fetchModels(),
+    fetchRubrics(),
+    fetchRuns(),
+    fetchCases(),
+  ]);
   if (!project) notFound();
 
   const isEditing = edit === "1";
 
-  const projectRuns = getProjectRuns(id);
-  const projectCases = getProjectCases(id);
+  const projectRuns = projectRunsOf(allRuns, id);
+  const projectCases = projectCasesOf(allRuns, allCases, id);
   const coverage = calculateProjectCoverage(projectCases, projectRuns);
   const quality = calculateRecentQuality(projectRuns);
   const reviewStatus = calculateReviewStatus(projectCases);
   const safetyState = calculateSafetyState(projectCases);
-  const rubricSummary = getActiveRubricSummary(project);
+  const rubricSummary = getActiveRubricSummary(project, allRubrics);
 
   return (
     <div className="space-y-5 max-w-6xl">

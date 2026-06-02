@@ -1,9 +1,11 @@
 import { Card, Pill } from "@/components/ui";
-import { allRubrics, allProjects, methodLabel } from "@/lib/data";
+import { methodLabel } from "@/lib/data";
+import { fetchRubrics, fetchProjects } from "@/lib/db";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
-export default function RubricsPage() {
+export default async function RubricsPage() {
+  const [allRubrics, allProjects] = await Promise.all([fetchRubrics(), fetchProjects()]);
   return (
     <div className="space-y-5 max-w-6xl">
       <header className="flex items-center justify-between">
