@@ -1,6 +1,8 @@
 # AI Evaluation — Wiki + Tool
 
-> **Demo scope:** 1 rubric (Helpfulness) runs a real LLM call via GPT-4o-mini. All other routes use structured mock data. This is a product-spec-as-prototype — the full eval engine is roadmapped, not yet built.
+> **Demo scope:** The evaluation engine is real. `/runs/new` scores a single AI output against a rubric using a multi-dimension LLM judge (GPT-4o-mini, one structured call) plus deterministic checks (PII, false-confirmation, heuristics), then persists the run, case, scores, and safety findings to Supabase. Seeded projects/runs are pre-scored sample data so the dashboards are populated. Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `OPENAI_API_KEY` to enable live runs; without them the app falls back to bundled mock data (read-only). Batch runs, regression comparison, and the review queue remain roadmapped (see `roadmap.md`).
+>
+> **Setup:** `cd app && cp .env.local.example .env.local` (fill keys) → apply `supabase/migrations/0001_init.sql` in the Supabase SQL editor → `npm run seed` → `npm run dev`.
 
 **An internal AI quality platform for teams shipping LLM-powered products.**
 
