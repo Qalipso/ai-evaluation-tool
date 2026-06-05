@@ -1,5 +1,12 @@
 import "server-only";
+import WebSocket from "ws";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
+// Node < 22 has no global WebSocket; supabase-js's realtime client needs one
+// at construction time. Polyfill with ws on the server.
+if (typeof (globalThis as { WebSocket?: unknown }).WebSocket === "undefined") {
+  (globalThis as { WebSocket?: unknown }).WebSocket = WebSocket;
+}
 
 // Server-only Supabase client using the service role key.
 // MVP has no end-user auth (see roadmap.md), so all DB access is trusted

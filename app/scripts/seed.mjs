@@ -5,7 +5,11 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import WebSocket from "ws";
 import { createClient } from "@supabase/supabase-js";
+
+// Node < 22 has no global WebSocket; supabase-js constructs a realtime client.
+if (!globalThis.WebSocket) globalThis.WebSocket = WebSocket;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const appDir = join(__dirname, "..");
