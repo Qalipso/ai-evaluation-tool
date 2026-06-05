@@ -1,5 +1,6 @@
-// Cinematic dark devtool palette. Electric-blue accent over near-black.
-// Mirrors the real product's dark tokens, shifted brand purple -> electric blue.
+// Cinematic dark devtool palette. Soft-violet accent over near-black,
+// matching the real product's dark brand (#7c6cff). Green success, amber
+// warn, muted red danger — "security cockpit" mood.
 
 export const FPS = 30;
 export const WIDTH = 1920;
@@ -7,25 +8,25 @@ export const HEIGHT = 1080;
 
 export const color = {
   // surfaces
-  bgBase: "#06080f",
-  bgPanel: "#0b0f1a",
-  bgCard: "#11162400",
-  bgCardSolid: "#111624",
-  bgHover: "#161c2e",
+  bgBase: "#07070d",
+  bgPanel: "#0c0c16",
+  bgCard: "#14141f00",
+  bgCardSolid: "#14141f",
+  bgHover: "#191928",
   // borders
-  border: "#1f2740",
-  borderStrong: "#2c3656",
+  border: "#23233a",
+  borderStrong: "#312f52",
   hairline: "rgba(255,255,255,0.06)",
   // text
-  text: "#e8ecf6",
-  textSecondary: "#9aa4bf",
-  textMuted: "#5c6680",
-  // accent (electric blue)
-  accent: "#3b82f6",
-  accentBright: "#22d3ee",
-  accentDeep: "#1d4ed8",
-  accentGlow: "rgba(59,130,246,0.45)",
-  accentSubtle: "rgba(59,130,246,0.12)",
+  text: "#e9e7f4",
+  textSecondary: "#a3a0bd",
+  textMuted: "#6b6788",
+  // accent (soft violet)
+  accent: "#7c6cff",
+  accentBright: "#a78bfa",
+  accentDeep: "#5b46d6",
+  accentGlow: "rgba(124,108,255,0.45)",
+  accentSubtle: "rgba(124,108,255,0.12)",
   // status
   ok: "#3ecf8e",
   okSubtle: "rgba(62,207,142,0.12)",
@@ -47,5 +48,19 @@ export const SCENE = {
   liveRun: 13,
   judge: 15,
 } as const;
+
+// Full 60s film — 8 scenes. "Evaluate AI with evidence, not vibes."
+export const FILM = {
+  hook: 6,
+  problem: 7,
+  reveal: 7,
+  rubrics: 9,
+  claims: 11,
+  safety: 9,
+  verdict: 7,
+  cta: 5,
+} as const;
+
+export const FILM_ORDER = ["hook", "problem", "reveal", "rubrics", "claims", "safety", "verdict", "cta"] as const;
 
 export const sec = (s: number) => Math.round(s * FPS);

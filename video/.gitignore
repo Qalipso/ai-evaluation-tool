@@ -1,4 +1,4 @@
 node_modules/
 out/
 .remotion/
-public/audio/*.mp3
+public/audio/**/*.mp3
