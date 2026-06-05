@@ -6,6 +6,7 @@ import { ClaimHighlighter } from "../../components/ClaimHighlighter";
 import { PipelineFlow } from "../../components/PipelineFlow";
 import { SceneTitle } from "../../components/SceneTitle";
 import { ScannerSweep } from "../../components/ScannerSweep";
+import { Deliberation } from "../../components/Deliberation";
 import { FilmShell } from "./FilmShell";
 import { reveal } from "../../components/anim";
 import { claimAnswer, filmClaims, evidencePanel } from "../../data-film";
@@ -18,7 +19,10 @@ export const S5Claims: React.FC<{ audio?: boolean }> = ({ audio }) => {
     <FilmShell scene="claims" audio={audio} pad="60px 150px 150px">
       <ProductFrame title="cases / areamosa · claim pipeline" badge={{ text: "grounding", tone: "accent" }}>
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 22 }}>
-          <SceneTitle eyebrow="claim pipeline" title="Every claim is checked against evidence." highlight="evidence" at={sec(0.2)} />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <SceneTitle eyebrow="claim pipeline" title="Every claim is checked against evidence." highlight="evidence" at={sec(0.2)} />
+            <Deliberation label="Weighing" start={sec(1.4)} thoughts={["reading claim", "retrieving evidence", "matching sources", "scoring grounding"]} />
+          </div>
           <PipelineFlow steps={["Answer", "Extract claims", "Retrieve evidence", "Score", "Verdict"]} start={sec(0.5)} step={9} />
           <div style={{ display: "flex", gap: 36, width: "100%" }}>
             <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative", overflow: "hidden" }}>

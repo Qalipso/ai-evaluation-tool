@@ -78,18 +78,15 @@ export const verdict = {
     { k: "Safety findings", v: String(D.safetyFindings) },
     { k: "Claims processed", v: String(D.claimsProcessed) },
   ],
-  // top dimensions, 0-1 → 0-100
-  bars: D.rubricDimensions
-    .slice()
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 4)
-    .map((d) => ({ name: d.name, v: Math.round(d.score * 100) })),
+  // five spotlight dimensions, 0-1 → 0-100
+  bars: D.rubricDimensions.slice(0, 5).map((d) => ({ name: d.name, v: Math.round(d.score * 100) })),
 };
 
 // ── Scene 8: CTA ────────────────────────────────────────────────────────
 export const cta = {
   name: D.productName,
   slogan: D.slogan,
+  formula: D.secondaryFormula, // "Score it. Ground it. Gate it. Ship it."
   author: D.finalFooter,
   chips: ["Rubrics", "LLM Judge", "Claim Pipeline", "Safety Gates", "Human Review", "Reports"],
 };

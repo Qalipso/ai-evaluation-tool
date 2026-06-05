@@ -2,6 +2,7 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { color, font, sec } from "../../theme";
 import { FilmShell } from "./FilmShell";
+import { Deliberation } from "../../components/Deliberation";
 import { reveal, rise } from "../../components/anim";
 import { product } from "../../data-film";
 
@@ -38,6 +39,9 @@ export const S3Reveal: React.FC<{ audio?: boolean }> = ({ audio }) => {
           <p style={{ margin: "10px 0 0", fontFamily: font.sans, fontSize: 22, color: color.textSecondary, ...reveal(frame, sec(1.7), 16) }}>
             {product.sub}
           </p>
+          <div style={{ marginTop: 22 }}>
+            <Deliberation label="Initializing" start={sec(2.6)} thoughts={["loading rubric v3", "calibrating judges", "arming safety gates", "ready to evaluate"]} />
+          </div>
         </div>
       </AbsoluteFill>
     </FilmShell>
