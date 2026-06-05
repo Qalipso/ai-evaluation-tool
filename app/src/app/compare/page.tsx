@@ -49,9 +49,11 @@ export default async function ComparePage() {
           const project = allProjects.find((p) => p.id === project_id);
           const delta = current.overall_score - baseline.overall_score;
           const deltaAbs = Math.abs(delta);
+          // Scores are on a 0..1 scale; "3 points" = 0.03.
+          const REGRESSION_THRESHOLD = 0.03;
           const sameRubric = current.rubric_id === baseline.rubric_id;
-          const isRegression = sameRubric && (current.regression_flag || delta < -3);
-          const deltaColor = !sameRubric ? "text-warn" : delta >= 0 ? "text-ok" : deltaAbs > 3 ? "text-bad" : "text-warn";
+          const isRegression = sameRubric && (current.regression_flag || delta < -REGRESSION_THRESHOLD);
+          const deltaColor = !sameRubric ? "text-warn" : delta >= 0 ? "text-ok" : deltaAbs > REGRESSION_THRESHOLD ? "text-bad" : "text-warn";
           const DeltaIcon = delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus;
 
           return (

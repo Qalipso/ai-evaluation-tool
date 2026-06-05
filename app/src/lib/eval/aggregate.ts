@@ -37,8 +37,11 @@ export type Verdict = "ship_ready" | "acceptable_with_caveats" | "needs_work" | 
 export function decideVerdict(
   overall: number,
   scores: Score[],
-  opts: { hasCriticalSafety: boolean; safetyGateEnabled: boolean },
+  opts: { hasCriticalSafety: boolean; safetyGateEnabled: boolean; gateTriggered?: boolean },
 ): Verdict {
+  // A safety gate blocks release regardless of score: either a finding whose
+  // category is listed in the rubric's gates, or any critical finding.
+  if (opts.gateTriggered) return "blocked";
   if (opts.safetyGateEnabled && opts.hasCriticalSafety) return "blocked";
   const anyBelowThreshold = scores.some((s) => !s.threshold_passed);
   if (overall >= 0.85 && !anyBelowThreshold) return "ship_ready";

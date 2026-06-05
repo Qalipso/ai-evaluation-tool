@@ -40,6 +40,11 @@ describe("detectFalseConfirmation", () => {
   it("ignores normal output", () => {
     expect(detectFalseConfirmation(base)).toHaveLength(0);
   });
+
+  it("catches real-world phrasing with filler between noun and verb", () => {
+    expect(detectFalseConfirmation({ ...base, ai_output: "Your appointment for tomorrow at 2 PM is booked and confirmed!" })).toHaveLength(1);
+    expect(detectFalseConfirmation({ ...base, ai_output: "It has been successfully changed and confirmed." })).toHaveLength(1);
+  });
 });
 
 describe("detectFindings", () => {
@@ -67,5 +72,12 @@ describe("scoreDeterministic", () => {
 
   it("proportionate output gets heuristic 0.8", () => {
     expect(scoreDeterministic("completeness", "Completeness", base).score).toBe(0.8);
+  });
+
+  it("language dim does a real language-match check, not length", () => {
+    const enInput = { ...base, input: "What time can I book with Boris tomorrow please?", ai_output: "You can book tomorrow at 9, please confirm the time." };
+    expect(scoreDeterministic("multilingual", "Multilingual", enInput).score).toBe(1);
+    const mismatch = { ...enInput, ai_output: "Hola, puedo ayudarte con la cita para mañana, gracias por favor." };
+    expect(scoreDeterministic("multilingual", "Multilingual", mismatch).score).toBe(0);
   });
 });

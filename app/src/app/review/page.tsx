@@ -7,7 +7,7 @@ import Link from "next/link";
 type ReviewItem =
   | { kind: "safety"; caseId: string; runId: string; projectId: string; category: string; severity: string; evidence: string; status: string }
   | { kind: "uncertain"; caseId: string; runId: string; projectId: string; claimText: string; label: string; confidence: number; evidence: string }
-  | { kind: "human"; caseId: string; runId: string; projectId: string; rubricName: string; dims: string[] };
+  | { kind: "human"; caseId: string; runId: string; projectId: string; rubricName: string; dims: string[]; input: string; output: string; score: number; verdict: string };
 
 export default async function ReviewPage() {
   const [allCases, allRuns, allProjects, allRubrics] = await Promise.all([
@@ -29,7 +29,11 @@ export default async function ReviewPage() {
         .filter((d) => d.method === "human" && !scoredIds.has(d.id))
         .map((d) => d.name);
       if (dims.length > 0) {
-        items.push({ kind: "human", caseId: c.id, runId: c.run_id, projectId, rubricName: rubric?.name ?? "—", dims });
+        items.push({
+          kind: "human", caseId: c.id, runId: c.run_id, projectId, rubricName: rubric?.name ?? "—", dims,
+          input: c.input, output: c.ai_output, score: c.overall_score,
+          verdict: allRuns.find((r) => r.id === c.run_id)?.verdict ?? "",
+        });
       }
     }
 
@@ -54,7 +58,22 @@ export default async function ReviewPage() {
   }
 
   const safety = items.filter((i) => i.kind === "safety");
-  const human = items.filter((i) => i.kind === "human");
+  const human = items.filter((i) => i.kind === "human") as Extract<ReviewItem, { kind: "human" }>[];
+
+  // Group pending-human cases by their run so a reviewer can triage a batch
+  // instead of scrolling identical cards.
+  const humanGroups = Array.from(
+    human.reduce((m, it) => {
+      const arr = m.get(it.runId) ?? [];
+      arr.push(it);
+      m.set(it.runId, arr);
+      return m;
+    }, new Map<string, Extract<ReviewItem, { kind: "human" }>[]>()),
+  ).map(([runId, cases]) => {
+    const first = cases[0];
+    const project = allProjects.find((p) => p.id === first.projectId);
+    return { runId, cases, projectName: project?.name ?? first.projectId, rubricName: first.rubricName };
+  });
   const uncertain = items
     .filter((i) => i.kind === "uncertain")
     .sort((a, b) => (a as { confidence: number }).confidence - (b as { confidence: number }).confidence);
@@ -83,35 +102,52 @@ export default async function ReviewPage() {
       </div>
 
       {human.length > 0 && (
-        <section className="space-y-2">
+        <section className="space-y-3">
           <SectionHeader icon={<UserCheck size={14} className="text-brand" />} label="Pending human scoring" count={human.length} priority="P1" />
           <p className="text-xs text-text-muted -mt-1">
-            Dimensions with method <span className="font-mono">human</span> have no automated scorer. A reviewer must score these cases.
+            Dimensions with method <span className="font-mono">human</span> have no automated scorer. Triage by run, preview the case, then score.
           </p>
-          {human.map((item, i) => {
-            if (item.kind !== "human") return null;
-            const project = allProjects.find((p) => p.id === item.projectId);
-            return (
-              <Card key={`h${i}`} className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                      {item.dims.map((d) => (
-                        <Pill key={d} tone="brand">{d}</Pill>
-                      ))}
-                    </div>
-                    <div className="text-[11px] text-text-muted mt-1.5">
-                      {project?.name} · {item.rubricName} · case{" "}
-                      <span className="font-mono">{item.caseId}</span>
-                    </div>
+
+          {humanGroups.map((g) => (
+            <Card key={g.runId} className="p-0 overflow-hidden">
+              <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-border-subtle bg-bg-hover/40">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium truncate">{g.projectName}</div>
+                  <div className="text-[11px] text-text-muted">
+                    {g.rubricName} · run <span className="font-mono">{g.runId}</span>
                   </div>
-                  <Link href={`/review/${item.caseId}`} className="btn-pill btn-primary px-3.5 py-1.5 text-xs shrink-0">
-                    Review →
-                  </Link>
                 </div>
-              </Card>
-            );
-          })}
+                <span className="shrink-0 text-[11px] text-text-muted">
+                  {g.cases.length} pending
+                </span>
+              </div>
+
+              <ul className="divide-y divide-border-subtle">
+                {g.cases.map((item) => (
+                  <li key={item.caseId} className="flex items-start gap-3 px-4 py-3">
+                    <ScorePill score={item.score} />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm text-text-primary line-clamp-1">
+                        <span className="text-text-muted">Q:</span> {truncate(item.input, 110) || "—"}
+                      </div>
+                      <div className="text-xs text-text-secondary mt-0.5 line-clamp-2">
+                        <span className="text-text-muted">A:</span> {truncate(item.output, 160) || "—"}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                        {item.dims.map((d) => (
+                          <Pill key={d} tone="brand">{d}</Pill>
+                        ))}
+                        <span className="text-[10px] font-mono text-text-muted ml-1">{item.caseId}</span>
+                      </div>
+                    </div>
+                    <Link href={`/review/${item.caseId}`} className="btn-pill btn-primary px-3.5 py-1.5 text-xs shrink-0 self-center">
+                      Review →
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ))}
         </section>
       )}
 
@@ -222,6 +258,21 @@ function ConfBar({ confidence }: { confidence: number }) {
       <div className="w-16 h-1.5 bg-bg-hover rounded-full overflow-hidden">
         <div className={`h-full ${color}`} style={{ width: `${pct}%` }} />
       </div>
+    </div>
+  );
+}
+
+function truncate(s: string, n: number): string {
+  const t = (s ?? "").trim();
+  return t.length > n ? t.slice(0, n).trimEnd() + "…" : t;
+}
+
+function ScorePill({ score }: { score: number }) {
+  const tone = score >= 0.85 ? "text-ok" : score >= 0.7 ? "text-warn" : "text-bad";
+  return (
+    <div className="shrink-0 w-12 text-center">
+      <div className={`font-mono text-sm font-semibold ${tone}`}>{score.toFixed(2)}</div>
+      <div className="text-[9px] uppercase text-text-muted">score</div>
     </div>
   );
 }

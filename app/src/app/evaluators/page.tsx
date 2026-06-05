@@ -1,31 +1,22 @@
-import { fetchModels, getSettings } from "@/lib/db";
 import { hasSupabase } from "@/lib/supabase";
-import { EvaluatorsClient } from "./EvaluatorsClient";
+import { EvaluatorPlayground } from "@/components/evaluators/EvaluatorPlayground";
 
-export default async function EvaluatorsPage() {
-  const [models, settings] = await Promise.all([fetchModels(), getSettings()]);
-  const openaiModels = models.filter((m) => m.provider === "openai");
+export default function EvaluatorsPage() {
+  const llm = Boolean(process.env.OPENAI_API_KEY);
+  const supabase = hasSupabase();
 
   return (
-    <div className="mx-auto w-full max-w-3xl py-6">
-      <header className="mb-7 text-center">
-        <h1 className="text-3xl font-semibold tracking-tight">Evaluators</h1>
-        <p className="text-text-secondary text-sm mt-2 max-w-lg mx-auto leading-relaxed">
-          Configure and test each scoring method. Every method is real — LLM judge, claim
-          pipeline (groundedness), and deterministic checks. Human dimensions go to the review queue.
+    <div className="mx-auto w-full max-w-5xl py-6">
+      <header className="mb-6 text-center">
+        <h1 className="text-3xl font-semibold tracking-tight">Evaluator playground</h1>
+        <p className="text-text-secondary text-sm mt-2 max-w-xl mx-auto leading-relaxed">
+          Run the claim pipeline and deterministic checks on any agent output and watch
+          exactly what the engine flags — extracted claims, evidence verification, and
+          pass/fail rules with severity and rationale.
         </p>
       </header>
 
-      {!hasSupabase() && (
-        <div className="mb-5 rounded-xl bg-warn/10 border border-warn/25 px-4 py-3 text-sm text-warn text-center">
-          Settings persistence needs Supabase. Live tests need an OpenAI key.
-        </div>
-      )}
-
-      <EvaluatorsClient
-        models={openaiModels.length ? openaiModels : [{ id: "gpt-4o-mini", provider: "openai", label: "GPT-4o mini" }]}
-        initial={settings}
-      />
+      <EvaluatorPlayground llm={llm} supabase={supabase} />
     </div>
   );
 }

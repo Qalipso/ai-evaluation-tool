@@ -2,8 +2,26 @@
 import { revalidatePath } from "next/cache";
 import { hasSupabase } from "@/lib/supabase";
 import { saveSettings, type EvalSettings } from "@/lib/db";
+import { runClaimPipeline } from "@/lib/evaluators/claimPipeline";
+import { runDeterministicChecks } from "@/lib/evaluators/deterministicChecks";
+import type {
+  ClaimPipelineInput,
+  ClaimPipelineResult,
+  DeterministicInput,
+  DeterministicResult,
+} from "@/lib/evaluators/types";
 
 export type SaveResult = { ok: true } | { ok: false; error: string };
+
+// Local pattern-based evaluators — no LLM, no network. Run server-side so the
+// playground proves the engine is executing real checks under the hood.
+export async function evaluateClaims(input: ClaimPipelineInput): Promise<ClaimPipelineResult> {
+  return runClaimPipeline(input);
+}
+
+export async function evaluateDeterministic(input: DeterministicInput): Promise<DeterministicResult> {
+  return runDeterministicChecks(input);
+}
 
 export async function saveEvalSettings(s: EvalSettings): Promise<SaveResult> {
   try {

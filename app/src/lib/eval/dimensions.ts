@@ -23,19 +23,33 @@ export function criteriaFor(dimKey: string, dimName: string): string {
   return REFERENCE_CRITERIA[dimKey] ?? `Evaluate the response on: ${dimName}.`;
 }
 
-// LLM judge handles these methods.
+// LLM judge handles only `llm_judge`. `semantic_similarity` is scored with real
+// embeddings (cosine), not the judge — see isSemanticMethod / semantic.ts.
 export function isLlmMethod(method: string): boolean {
-  return method === "llm_judge" || method === "semantic_similarity";
+  return method === "llm_judge";
+}
+
+export function isSemanticMethod(method: string): boolean {
+  return method === "semantic_similarity";
 }
 
 export function isClaimMethod(method: string): boolean {
   return method === "claim_pipeline";
 }
 
-// Whether this dimension has a real automated scorer. Only `human` lacks one
-// and is routed to the review queue.
-export function hasRealScorer(method: string): boolean {
-  return isLlmMethod(method) || method === "deterministic" || isClaimMethod(method);
+// Deterministic scoring is real for safety (PII / false-confirmation) and
+// language-match dimensions. Other deterministic dims have no genuine scorer
+// and are left UNSCORED rather than given a heuristic placeholder.
+export function isRealDeterministic(dimKey: string): boolean {
+  return dimKey === "safety" || /lang|multiling/i.test(dimKey);
+}
+
+// Whether this dimension has a real automated scorer. Dimensions without one
+// (human, generic deterministic) are left unscored.
+export function hasRealScorer(method: string, dimKey: string): boolean {
+  if (isLlmMethod(method) || isSemanticMethod(method) || isClaimMethod(method)) return true;
+  if (method === "deterministic" && isRealDeterministic(dimKey)) return true;
+  return false;
 }
 
 // Dimensions that require a human reviewer (no automated scorer).

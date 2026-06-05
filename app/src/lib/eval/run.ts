@@ -1,8 +1,9 @@
 import "server-only";
 import { getSupabase, hasSupabase } from "../supabase";
 import { fetchRubric, fetchProject, getSettings } from "../db";
-import { isLlmMethod, hasRealScorer, isHumanMethod, isClaimMethod } from "./dimensions";
+import { isLlmMethod, isSemanticMethod, hasRealScorer, isHumanMethod, isClaimMethod } from "./dimensions";
 import { scoreWithJudge, type JudgeDimension } from "./judges";
+import { scoreSemanticSimilarity } from "./semantic";
 import { scoreDeterministic, detectFindings, type EvalInput, type DetectedFinding } from "./deterministic";
 import { runClaimPipeline, type VerifiedClaim } from "./claims";
 import { buildScores, overallScore, decideVerdict, type DimScore } from "./aggregate";
@@ -45,16 +46,17 @@ interface ScoreOpts {
 }
 
 async function scoreOne(rubric: Rubric, input: EvalInput, opts: ScoreOpts = {}): Promise<ScoredCase> {
-  // Every method except `human` has a real automated scorer. Human dims stay
-  // unscored and are routed to the review queue.
-  const scoredDims = rubric.dimensions.filter((d) => hasRealScorer(d.method));
+  // Only dimensions with a real automated scorer are evaluated. `human` and
+  // generic deterministic dims have none and stay unscored (no fabricated score).
+  const scoredDims = rubric.dimensions.filter((d) => hasRealScorer(d.method, d.id));
   const llmDims: JudgeDimension[] = scoredDims
     .filter((d) => isLlmMethod(d.method))
     .map((d) => ({ id: d.id, name: d.name }));
+  const semanticDims = scoredDims.filter((d) => isSemanticMethod(d.method));
   const hasClaimDim = scoredDims.some((d) => isClaimMethod(d.method));
 
   let cost = 0;
-  if (llmDims.length > 0 || hasClaimDim) await assertWithinBudget();
+  if (llmDims.length > 0 || semanticDims.length > 0 || hasClaimDim) await assertWithinBudget();
 
   const judge = await scoreWithJudge(llmDims, input, opts.judgeModel);
   cost += judge.cost_usd;
@@ -72,8 +74,21 @@ async function scoreOne(rubric: Rubric, input: EvalInput, opts: ScoreOpts = {}):
 
   const byDim: Record<string, DimScore> = {};
   for (const s of judge.scores) byDim[s.dim_id] = { score: s.score, rationale: s.rationale };
+
+  // Semantic similarity — real cosine of embeddings vs the expected behavior.
+  for (const d of semanticDims) {
+    const sem = await scoreSemanticSimilarity(input.ai_output, input.expected_behavior);
+    cost += sem.cost_usd;
+    byDim[d.id] = {
+      score: sem.score,
+      rationale: input.expected_behavior.trim()
+        ? `Cosine similarity to expected behavior: ${sem.score.toFixed(2)}.`
+        : "No reference (expected behavior) to compare against.",
+    };
+  }
+
   for (const d of scoredDims) {
-    if (isLlmMethod(d.method)) continue;
+    if (isLlmMethod(d.method) || isSemanticMethod(d.method)) continue;
     if (isClaimMethod(d.method)) {
       const supported = claims.filter((c) => c.label === "supported").length;
       byDim[d.id] = {
@@ -84,6 +99,7 @@ async function scoreOne(rubric: Rubric, input: EvalInput, opts: ScoreOpts = {}):
       };
       continue;
     }
+    // Only safety reaches here (real deterministic).
     byDim[d.id] = scoreDeterministic(d.id, d.name, input);
   }
 
@@ -91,9 +107,11 @@ async function scoreOne(rubric: Rubric, input: EvalInput, opts: ScoreOpts = {}):
   const scores = buildScores(scoredDims, byDim);
   const overall = overallScore(scoredDims, scores);
   const findings = detectFindings(input, { pii: opts.detPii, falseConfirm: opts.detFalseConfirm });
+  const gateTriggered = findings.some((f) => rubric.safety_gates.includes(f.category));
   const verdict = decideVerdict(overall, scores, {
     hasCriticalSafety: findings.some((f) => f.severity === "critical"),
     safetyGateEnabled: rubric.safety_gates.length > 0,
+    gateTriggered,
   });
 
   return { scores, overall, verdict, findings, claims, cost_usd: cost };
@@ -253,17 +271,18 @@ export async function evaluateBatch(args: {
     detPii: settings.det_pii,
     detFalseConfirm: settings.det_false_confirm,
   };
-  const scored: ScoredCase[] = [];
-  for (const c of args.cases) {
-    scored.push(
-      await scoreOne(rubric, {
+  // Score cases concurrently — cuts wall time ~Nx and shrinks the window where
+  // a dev hot-reload could drop the in-flight server action.
+  const scored: ScoredCase[] = await Promise.all(
+    args.cases.map((c) =>
+      scoreOne(rubric, {
         input: c.input,
         expected_behavior: c.expected_behavior,
         ai_output: c.ai_output,
         retrieved_context: c.retrieved_context,
       }, opts),
-    );
-  }
+    ),
+  );
 
   const total = scored.length;
   const passing = scored.filter((s) => s.overall >= 0.7).length;

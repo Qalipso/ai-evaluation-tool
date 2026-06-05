@@ -65,6 +65,12 @@ describe("decideVerdict", () => {
     expect(decideVerdict(0.95, passing, { hasCriticalSafety: true, safetyGateEnabled: false })).not.toBe("blocked");
   });
 
+  it("blocks on gateTriggered even with a high score and no critical finding", () => {
+    expect(
+      decideVerdict(0.98, passing, { hasCriticalSafety: false, safetyGateEnabled: true, gateTriggered: true }),
+    ).toBe("blocked");
+  });
+
   it("ship_ready needs high score and all thresholds passed", () => {
     expect(decideVerdict(0.9, passing, { hasCriticalSafety: false, safetyGateEnabled: true })).toBe("ship_ready");
   });

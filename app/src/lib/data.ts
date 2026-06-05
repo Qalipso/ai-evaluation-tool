@@ -148,13 +148,22 @@ export function computeDashboard(runs: Run[], cases: Case[], rubrics: Rubric[]) 
       score: Math.round(avgConfidence * 100),
       label: `${totalClaims} claims processed`,
     },
-    { stage: "Safety Layer", score: 100, label: `${openFindings} findings flagged` },
+    {
+      stage: "Safety Layer",
+      // Share of cases with no open safety finding.
+      score: cases.length > 0 ? Math.round((1 - inQueue / cases.length) * 100) : 100,
+      label: `${openFindings} findings flagged`,
+    },
     {
       stage: "Human Review",
       score: cases.length > 0 ? Math.round(100 - (inQueue / cases.length) * 100) : 100,
       label: `${inQueue} in queue`,
     },
-    { stage: "Reports", score: 0, label: "0 generated · V1" },
+    {
+      stage: "Reports",
+      score: runs.length > 0 ? 100 : 0,
+      label: `${runs.length} runs exportable`,
+    },
   ];
 
   return {
