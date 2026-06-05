@@ -1,0 +1,24 @@
+{
+  "name": "ai-eval-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cinematic product video for AI Evaluation Tool (Remotion)",
+  "scripts": {
+    "dev": "remotion studio",
+    "render": "remotion render EvalReel out/ai-eval-reel.mp4",
+    "render:slice": "remotion render EvalReel out/ai-eval-slice.mp4",
+    "still": "remotion still EvalReel out/frame.png --frame=120",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@remotion/google-fonts": "4.0.473",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "remotion": "4.0.473"
+  },
+  "devDependencies": {
+    "@remotion/cli": "4.0.473",
+    "@types/react": "19.0.0",
+    "typescript": "5.7.3"
+  }
+}
