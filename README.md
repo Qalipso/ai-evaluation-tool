@@ -4,9 +4,11 @@
 >
 > **Live features:**
 > - **Assisted batch runner** (`/runs/new`) — set a master prompt, let the rubric generate test questions, generate candidate answers with the chosen model, then evaluate all as one run (N cases). Per-run model selection (project default or override).
-> - **Real scoring methods** — LLM-as-judge (one structured call, all LLM dims), **claim pipeline** (atomic claim extraction + verification against context → groundedness, persisted claims drive the heat map), and deterministic checks (PII, false-confirmation, length). Only `human` dimensions are left unscored and routed to review. No fabricated scores.
-> - **Evaluators hub** (`/evaluators`) — configure the judge model, claim-pipeline model, claim threshold, and deterministic toggles; live-test each method.
-> - **Human review** (`/review/[case]`) — reviewers score `human` dimensions from the case text; submit persists scores and recomputes the case overall.
+> - **Real scoring methods, no fabrication** — LLM-as-judge (one structured call), **claim pipeline** (atomic claim extraction + verification against context → groundedness; persisted claims drive the heat map), **real semantic cosine** (embeddings vs the expected behavior), and deterministic checks that are genuinely real: PII, false-confirmation, language-match, and cost-efficiency (conciseness). Dimensions with no real scorer (`human`, generic deterministic) are left **unscored**, never given a placeholder number.
+> - **Evaluators hub** (`/evaluators`) — live, local pattern-based playground for the claim pipeline and deterministic checks: tool-trace editor, evidence sources, results tables, detail drawers, demo examples.
+> - **Safety gates** — a finding whose category is listed in the rubric's safety gates **blocks the verdict** even at a high score. Text-detectable gates: `pii_leakage`, `false_confirmation`, `admin_data_leak_to_client`, `operator_command_from_client`, `prompt_injection_followed`, `unsupported_price_claim`. Calendar/booking gates need a tool trace (see the data-skeleton plan).
+> - **Human review** (`/review/[case]`) and **inline scoring** — reviewers score `human` dimensions from the case text; the run page's **expandable dimension breakdown** shows per-case scores, judge rationales, and the claim/evidence chain, and lets you score human dimensions inline.
+> - **Input validation** — garbage outputs (keyboard mashing, repeats, mostly non-letters) are rejected before any LLM call.
 > - **Reports** — structured `.txt` export per run; **theme toggle** (cream / dark) and a macOS-style bottom dock.
 > - Persistence in Supabase; graceful fallback to bundled mock data (read-only) when env is absent.
 >

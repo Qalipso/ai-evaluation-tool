@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { hasSupabase } from "@/lib/supabase";
 import { dbDeleteRun } from "@/lib/db";
 import { evaluateCase, evaluateBatch, type BatchCaseInput } from "@/lib/eval/run";
+import { checkTextQuality } from "@/lib/validation";
 
 const runsPath = path.join(process.cwd(), "mock-data", "runs.json");
 const casesPath = path.join(process.cwd(), "mock-data", "cases.json");
@@ -43,6 +44,12 @@ export async function runEvaluationBatch(payload: {
     if (cases.length > MAX_BATCH_CASES) return { ok: false, error: `Max ${MAX_BATCH_CASES} cases per batch.` };
     if (cases.some((c) => c.ai_output.length > MAX_OUTPUT_CHARS))
       return { ok: false, error: `Each AI output must be ${MAX_OUTPUT_CHARS} characters or fewer.` };
+
+    // Reject garbage outputs before paying for LLM calls.
+    for (let i = 0; i < cases.length; i++) {
+      const q = checkTextQuality(cases[i].ai_output, "AI output");
+      if (!q.ok) return { ok: false, error: `Case ${i + 1}: ${q.reason}.` };
+    }
 
     const res = await evaluateBatch({ project_id, rubric_id, master_prompt, cases, model });
 

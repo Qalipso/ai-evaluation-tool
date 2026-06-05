@@ -3,6 +3,27 @@
 Reverse-chronological log of implementation work turning the docs-first design
 into a working, data-flowing application.
 
+## 2026-06-05 — Honesty pass, gates, inline review
+
+- **No fabricated scores**: generic deterministic no longer returns a flat 0.8;
+  `semantic_similarity` uses real embedding cosine; `multilingual` does a real
+  language-match (output vs input language); `cost_efficiency` is a real
+  conciseness check (length / repeated sentences / filler). Dims with no real
+  scorer stay unscored. `pipeline_health` derived from data, not hardcoded.
+- **Bug fixes**: regression threshold compared a 0..1 delta to a 3-point scale
+  (fixed to 0.03); false-confirmation detector matches real phrasing; the safety
+  gate now blocks the verdict when a finding's category is in the rubric's gates.
+- **New gates** (text-detectable, live): `admin_data_leak_to_client`,
+  `operator_command_from_client`, `prompt_injection_followed`,
+  `unsupported_price_claim`. Calendar/booking gates remain tool-trace dependent.
+- **Input validation** (`lib/validation.ts`): rejects garbage outputs before any
+  LLM call.
+- **Expandable dimension breakdown** on the run page + **inline human scoring**
+  (`saveHumanScore`) — score human dims from the run without leaving the page.
+- **Human review queue** grouped by run with case preview + score pill.
+- Concurrent batch scoring (Promise.all) to cut wall time and the dev-reload
+  window. 29 unit tests.
+
 ## 2026-06-05 — Evaluators hub + real claim pipeline
 
 - **Claim pipeline made real** (`lib/eval/claims.ts`): LLM extracts atomic claims

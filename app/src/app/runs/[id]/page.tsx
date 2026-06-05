@@ -3,14 +3,12 @@ import Link from "next/link";
 import {
   Card,
   Pill,
-  Bar,
   StatCard,
   scoreTone,
 } from "@/components/ui";
 import { HeatMap } from "@/components/heat-map";
 import {
   labelTone,
-  methodLabel,
   verdictLabel,
   verdictTone,
   fmtDate,
@@ -18,6 +16,7 @@ import {
 import { fetchRun, fetchCasesByRun, fetchProject, fetchRubric } from "@/lib/db";
 import { buildRunTextReport } from "@/lib/reportText";
 import { DownloadButton } from "@/components/DownloadButton";
+import { DimensionBreakdown } from "@/components/run/DimensionBreakdown";
 import { ChevronLeft, ShieldAlert } from "lucide-react";
 
 export default async function RunDetailPage({
@@ -35,19 +34,6 @@ export default async function RunDetailPage({
     fetchCasesByRun(run.id),
   ]);
   const sample = cases[0];
-
-  const dimAverages = rubric
-    ? rubric.dimensions.map((d) => {
-        const ds = cases
-          .flatMap((c) => c.scores)
-          .filter((s) => s.dim_id === d.id);
-        const avg = ds.length
-          ? ds.reduce((s, x) => s + x.score, 0) / ds.length
-          : null;
-        return { ...d, avg };
-      })
-    : [];
-
   const allClaims = cases.flatMap((c) => c.claims);
   const labelCounts = allClaims.reduce(
     (acc, c) => {
@@ -116,56 +102,16 @@ export default async function RunDetailPage({
       </div>
 
       <Card className="p-5">
-        <h2 className="text-base font-semibold mb-3">Dimension breakdown</h2>
+        <h2 className="text-base font-semibold mb-1">Dimension breakdown</h2>
         <p className="text-xs text-text-muted mb-4">
-          per-dimension averages across {cases.length} sample case(s) · safety is gated, not weighted
+          Per-dimension averages across {cases.length} case(s). Expand a row for per-case
+          detail; human dimensions can be scored inline. Safety is gated, not weighted.
         </p>
-        <div className="space-y-3">
-          {dimAverages.map((d) => {
-            const v = d.avg ?? 0;
-            const tone = scoreTone(v, d.threshold);
-            const passed = v >= d.threshold;
-            return (
-              <div key={d.id} className="space-y-1">
-                <div className="flex items-baseline justify-between text-sm">
-                  <span>
-                    {d.name}
-                    <span className="text-text-muted text-[11px] ml-2">
-                      · {methodLabel[d.method] ?? d.method} · weight{" "}
-                      {d.weight.toFixed(2)}
-                    </span>
-                  </span>
-                  <span className="font-mono tabular-nums text-xs">
-                    {d.avg !== null ? (
-                      <>
-                        <span
-                          className={
-                            tone === "ok"
-                              ? "text-ok"
-                              : tone === "warn"
-                                ? "text-warn"
-                                : "text-bad"
-                          }
-                        >
-                          {d.avg.toFixed(2)}
-                        </span>
-                        <span className="text-text-muted">
-                          {" "}≥{d.threshold.toFixed(2)}
-                        </span>
-                        {!passed && (
-                          <span className="text-bad ml-2">below</span>
-                        )}
-                      </>
-                    ) : (
-                      <span className="text-text-muted">n/a</span>
-                    )}
-                  </span>
-                </div>
-                <Bar value={v} tone={tone} />
-              </div>
-            );
-          })}
-        </div>
+        {rubric ? (
+          <DimensionBreakdown dims={rubric.dimensions} cases={cases} />
+        ) : (
+          <p className="text-sm text-text-muted">No rubric.</p>
+        )}
       </Card>
 
       <Card className="p-5">

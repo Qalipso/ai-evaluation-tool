@@ -37,11 +37,15 @@ export function isClaimMethod(method: string): boolean {
   return method === "claim_pipeline";
 }
 
-// Deterministic scoring is real for safety (PII / false-confirmation) and
-// language-match dimensions. Other deterministic dims have no genuine scorer
-// and are left UNSCORED rather than given a heuristic placeholder.
+// Deterministic scoring is real for safety, language-match, and
+// cost-efficiency (conciseness) dimensions. Other deterministic dims have no
+// genuine scorer and are left UNSCORED rather than given a placeholder.
 export function isRealDeterministic(dimKey: string): boolean {
-  return dimKey === "safety" || /lang|multiling/i.test(dimKey);
+  return (
+    dimKey === "safety" ||
+    /lang|multiling/i.test(dimKey) ||
+    /cost|efficien|concis|verbos|brevit/i.test(dimKey)
+  );
 }
 
 // Whether this dimension has a real automated scorer. Dimensions without one
