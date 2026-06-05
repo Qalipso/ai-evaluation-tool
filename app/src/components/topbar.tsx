@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { Search, Bell, Settings, Command } from "lucide-react";
+import { Search, Bell, Command } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { SettingsMenu } from "./SettingsMenu";
+import { AccountMenu } from "./AccountMenu";
 
 export function Topbar() {
   return (
@@ -35,14 +37,9 @@ export function Topbar() {
         <div className="flex items-center gap-1.5 shrink-0">
           <ThemeToggle />
           <IconButton label="Notifications"><Bell size={16} /></IconButton>
-          <IconButton label="Settings"><Settings size={16} /></IconButton>
+          <SettingsMenu />
           <span className="mx-1 hidden h-6 w-px bg-border-subtle sm:block" />
-          <button
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-hover text-[11px] font-semibold text-white ring-2 ring-bg-base transition-transform hover:scale-105"
-            title="Account"
-          >
-            EM
-          </button>
+          <AccountMenu />
         </div>
       </div>
     </header>

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Dock } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
 import { DemoBanner } from "@/components/DemoBanner";
+import { OnboardingTour } from "@/components/OnboardingTour";
 
 export const metadata: Metadata = {
   title: "AI Evaluation Tool",
@@ -30,6 +31,7 @@ export default function RootLayout({
           <div key="page" className="mx-auto w-full max-w-5xl page-enter">{children}</div>
         </main>
         <Dock />
+        <OnboardingTour />
       </body>
     </html>
   );
