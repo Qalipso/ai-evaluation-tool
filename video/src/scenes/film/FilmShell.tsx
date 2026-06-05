@@ -8,7 +8,7 @@ import { filmNarration, type FilmScene } from "../../narration-film";
 
 // Toggle to bring generated backgrounds into the film once assets exist in
 // public/video/generated/. Off by default so the film renders without them.
-export const USE_GENERATED_ASSETS = false;
+export const USE_GENERATED_ASSETS = true;
 
 // Common scene chrome: backdrop glow, optional generated background (gated),
 // narration audio (gated), lower-third caption, and the scene body.

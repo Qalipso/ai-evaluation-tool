@@ -18,7 +18,7 @@ export const AssetBg: React.FC<{
   return (
     <AbsoluteFill>
       {video ? (
-        <OffthreadVideo src={file} muted style={{ width: "100%", height: "100%", objectFit: "cover", opacity }} />
+        <OffthreadVideo src={file} muted playbackRate={0.7} style={{ width: "100%", height: "100%", objectFit: "cover", opacity }} />
       ) : (
         <Img src={file} style={{ width: "100%", height: "100%", objectFit: "cover", opacity }} />
       )}

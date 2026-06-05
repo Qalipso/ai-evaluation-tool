@@ -14,7 +14,7 @@ export const S6Safety: React.FC<{ audio?: boolean }> = ({ audio }) => {
   const resolveAt = sec(3.4);
   const glow = frame >= resolveAt && blocked ? "bad" : "accent";
   return (
-    <FilmShell scene="safety" audio={audio} glow={glow} pad="80px 200px 150px">
+    <FilmShell scene="safety" audio={audio} glow={glow} pad="80px 200px 150px" bg="video/generated/safety-gates.mp4" bgVideo>
       <ProductFrame title="safety / areamosa · gate run" badge={frame >= resolveAt ? { text: "1 blocked", tone: "bad" } : { text: "scanning…", tone: "accent" }}>
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 24, justifyContent: "center" }}>
           <span style={{ fontFamily: font.sans, fontSize: 26, fontWeight: 600, color: color.text, ...reveal(frame, sec(0.2), 12) }}>

@@ -11,7 +11,7 @@ export const S3Reveal: React.FC<{ audio?: boolean }> = ({ audio }) => {
   const frame = useCurrentFrame();
   const mark = rise(frame, sec(0.2));
   return (
-    <FilmShell scene="reveal" audio={audio}>
+    <FilmShell scene="reveal" audio={audio} bg="video/generated/reveal-chamber.mp4" bgVideo>
       <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
         <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 18 }}>
           <div
