@@ -330,11 +330,11 @@ export default async function ReportDetailPage({
   const markdown = buildMarkdown(run, project, rubric, cases);
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="mx-auto w-full max-w-3xl space-y-5 surface-enter">
       <div className="flex items-center justify-between gap-4">
         <Link
           href="/reports"
-          className="text-xs text-text-muted hover:text-text-primary inline-flex items-center gap-1"
+          className="text-xs text-text-muted hover:text-brand transition-colors inline-flex items-center gap-1"
         >
           <ChevronLeft size={12} /> All reports
         </Link>
@@ -345,14 +345,14 @@ export default async function ReportDetailPage({
       </div>
 
       {/* 1. Header */}
-      <header>
-        <h1 className="text-2xl font-semibold">
+      <header className="text-center">
+        <h1 className="text-3xl font-semibold tracking-tight">
           {project?.name ?? run.project_id}
         </h1>
-        <p className="text-text-secondary text-sm mt-1">
+        <p className="text-text-secondary text-sm mt-2">
           Run <span className="font-mono">{run.id}</span> · {fmtDate(run.started_at)}
         </p>
-        <div className="flex gap-2 mt-2 flex-wrap">
+        <div className="flex gap-2 mt-3 flex-wrap justify-center">
           <Pill tone="brand">rubric {rubric?.id ?? run.rubric_id}</Pill>
           <Pill>model {run.model}</Pill>
           <Pill>dataset {run.dataset_id}</Pill>

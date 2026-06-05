@@ -26,7 +26,9 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-bg-base text-text-primary">
         <DemoBanner />
         <Topbar />
-        <main className="flex-1 min-w-0 overflow-y-auto px-6 pt-6 pb-28">{children}</main>
+        <main className="flex-1 min-w-0 overflow-y-auto px-6 pt-6 pb-28">
+          <div key="page" className="mx-auto w-full max-w-5xl page-enter">{children}</div>
+        </main>
         <Dock />
       </body>
     </html>

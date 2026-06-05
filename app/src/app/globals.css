@@ -310,3 +310,54 @@ body {
 .btn-ghost:not(:disabled):hover {
   background: var(--ghost-hover);
 }
+
+/* ── Motion ────────────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Whole-page entrance on navigation. */
+.page-enter {
+  animation: fadeUp 0.45s cubic-bezier(0.21, 0.7, 0.35, 1) both;
+}
+
+/* Floating cards rise in, slightly staggered for a calm cascade. */
+.elev-card {
+  animation: fadeUp 0.5s cubic-bezier(0.21, 0.7, 0.35, 1) both;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.elev-card:nth-of-type(2) { animation-delay: 0.05s; }
+.elev-card:nth-of-type(3) { animation-delay: 0.1s; }
+.elev-card:nth-of-type(4) { animation-delay: 0.15s; }
+.elev-card:nth-of-type(n + 5) { animation-delay: 0.2s; }
+
+/* Soft, staggered entrance for stacked content sections. */
+.surface-enter > * {
+  animation: fadeUp 0.45s cubic-bezier(0.21, 0.7, 0.35, 1) both;
+}
+.surface-enter > *:nth-child(1) { animation-delay: 0s; }
+.surface-enter > *:nth-child(2) { animation-delay: 0.05s; }
+.surface-enter > *:nth-child(3) { animation-delay: 0.1s; }
+.surface-enter > *:nth-child(4) { animation-delay: 0.15s; }
+.surface-enter > *:nth-child(5) { animation-delay: 0.2s; }
+.surface-enter > *:nth-child(6) { animation-delay: 0.25s; }
+.surface-enter > *:nth-child(n + 7) { animation-delay: 0.3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .elev-card,
+  .surface-enter > * {
+    animation: none;
+  }
+  html,
+  body {
+    transition: none;
+  }
+}
