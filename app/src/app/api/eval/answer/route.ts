@@ -16,7 +16,8 @@ export async function POST(req: NextRequest) {
     const { answer, cost_usd } = await generateAnswer({ masterPrompt, question, context, model });
     return NextResponse.json({ answer, cost_usd });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "Internal error";
+    console.error("api/eval/answer", e);
+    const msg = e instanceof Error && /budget|OPENAI_API_KEY/i.test(e.message) ? e.message : "Could not generate answer.";
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

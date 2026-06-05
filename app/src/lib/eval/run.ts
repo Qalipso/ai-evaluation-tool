@@ -1,6 +1,6 @@
 import "server-only";
 import { getSupabase, hasSupabase } from "../supabase";
-import { fetchRubric, fetchProject, getSettings } from "../db";
+import { fetchRubric, fetchProject, getSettings, fetchRun, fetchCasesByRun } from "../db";
 import { isLlmMethod, isSemanticMethod, hasRealScorer, isHumanMethod, isClaimMethod } from "./dimensions";
 import { scoreWithJudge, type JudgeDimension } from "./judges";
 import { scoreSemanticSimilarity } from "./semantic";
@@ -347,4 +347,116 @@ export async function evaluateBatch(args: {
     verdict: runVerdict,
     cost_usd: totalCost,
   };
+}
+
+// ── Per-case orchestration (client-driven progress, prod-timeout-safe) ────────
+// Each case is a short request instead of one long batch action.
+
+export async function createRun(args: {
+  project_id: string;
+  rubric_id: string;
+  model?: string;
+}): Promise<{ run_id: string }> {
+  if (!hasSupabase()) throw new Error("Evaluation runner requires Supabase.");
+  const project = await fetchProject(args.project_id);
+  const db = getSupabase();
+  const runId = `run-batch-${Date.now()}`;
+  const { error } = await db.from("runs").insert({
+    id: runId,
+    project_id: args.project_id,
+    rubric_id: args.rubric_id,
+    model: args.model || project?.model || "manual",
+    dataset_id: "generated",
+    started_at: new Date().toISOString(),
+    cases_total: 0,
+    cases_passing: 0,
+    overall_score: 0,
+    verdict: "needs_work",
+    regression_flag: false,
+    safety_findings: 0,
+    variable_changed: "rubric-generated batch",
+  });
+  if (error) throw new Error(`createRun: ${error.message}`);
+  return { run_id: runId };
+}
+
+export async function evaluateCaseIntoRun(args: {
+  run_id: string;
+  rubric_id: string;
+  index: number;
+  input: string;
+  expected_behavior: string;
+  ai_output: string;
+  retrieved_context: string[];
+  model?: string;
+}): Promise<{ case_id: string; overall: number; verdict: string; cost_usd: number }> {
+  if (!hasSupabase()) throw new Error("Evaluation runner requires Supabase.");
+  const rubric = await fetchRubric(args.rubric_id);
+  if (!rubric) throw new Error(`Rubric "${args.rubric_id}" not found`);
+
+  const settings = await getSettings();
+  const needsHuman = rubric.dimensions.some((d) => isHumanMethod(d.method));
+  const r = await scoreOne(
+    rubric,
+    {
+      input: args.input,
+      expected_behavior: args.expected_behavior,
+      ai_output: args.ai_output,
+      retrieved_context: args.retrieved_context,
+    },
+    {
+      judgeModel: args.model || settings.judge_model,
+      claimModel: settings.claim_model,
+      detPii: settings.det_pii,
+      detFalseConfirm: settings.det_false_confirm,
+    },
+  );
+
+  const db = getSupabase();
+  const caseId = `case-${args.run_id.replace(/^run-/, "")}-${args.index}`;
+  const { error: caseErr } = await db.from("cases").insert({
+    id: caseId,
+    run_id: args.run_id,
+    input: args.input,
+    expected_behavior: args.expected_behavior,
+    ai_output: args.ai_output,
+    retrieved_context: args.retrieved_context,
+    overall_score: r.overall,
+    human_review: needsHuman ? "pending" : null,
+  });
+  if (caseErr) throw new Error(`insert case: ${caseErr.message}`);
+  await insertCaseChildren(caseId, r.scores, r.findings, r.claims);
+
+  return { case_id: caseId, overall: r.overall, verdict: r.verdict, cost_usd: r.cost_usd };
+}
+
+export async function finalizeRun(runId: string): Promise<BatchResult> {
+  if (!hasSupabase()) throw new Error("Evaluation runner requires Supabase.");
+  const cases = await fetchCasesByRun(runId);
+  const run = await fetchRun(runId);
+  const rubric = run ? await fetchRubric(run.rubric_id) : undefined;
+
+  const total = cases.length;
+  const passing = cases.filter((c) => c.overall_score >= 0.7).length;
+  const avg = total ? Math.round((cases.reduce((s, c) => s + c.overall_score, 0) / total) * 100) / 100 : 0;
+  const totalFindings = cases.reduce((s, c) => s + c.safety_findings.length, 0);
+  const gates = rubric?.safety_gates ?? [];
+  const anyBlocked =
+    gates.length > 0 && cases.some((c) => c.safety_findings.some((f) => gates.includes(f.category)));
+  const verdict = anyBlocked
+    ? "blocked"
+    : avg >= 0.85 && passing === total
+      ? "ship_ready"
+      : avg >= 0.7
+        ? "acceptable_with_caveats"
+        : "needs_work";
+
+  const db = getSupabase();
+  const { error } = await db
+    .from("runs")
+    .update({ cases_total: total, cases_passing: passing, overall_score: avg, verdict, safety_findings: totalFindings })
+    .eq("id", runId);
+  if (error) throw new Error(`finalizeRun: ${error.message}`);
+
+  return { run_id: runId, cases_total: total, cases_passing: passing, overall_score: avg, verdict, cost_usd: 0 };
 }

@@ -4,6 +4,7 @@ import { Dock } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
 import { DemoBanner } from "@/components/DemoBanner";
 import { OnboardingTour } from "@/components/OnboardingTour";
+import { CommandPalette } from "@/components/CommandPalette";
 
 export const metadata: Metadata = {
   title: "AI Evaluation Tool",
@@ -32,6 +33,7 @@ export default function RootLayout({
         </main>
         <Dock />
         <OnboardingTour />
+        <CommandPalette />
       </body>
     </html>
   );

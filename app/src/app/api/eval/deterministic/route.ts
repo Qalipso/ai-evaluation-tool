@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ findings, safety, length });
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : "Internal error" }, { status: 500 });
+    console.error("api/eval/deterministic", e);
+    return NextResponse.json({ error: "Could not run checks." }, { status: 500 });
   }
 }

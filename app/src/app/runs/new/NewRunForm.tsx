@@ -4,7 +4,6 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, Sparkles, Wand2, Upload, X } from "lucide-react";
 import type { Project, Rubric, AIModel } from "@/lib/data";
-import { runEvaluationBatch } from "../actions";
 
 const MAX_OUTPUT = 8000;
 const GEN_COUNT = 6;
@@ -57,6 +56,7 @@ export function NewRunForm({
   const [genQ, setGenQ] = useState(false);
   const [genAll, setGenAll] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -169,37 +169,51 @@ export function NewRunForm({
 
   async function runBatch() {
     setError(null);
+    const cases = rows
+      .filter((r) => r.ai_output.trim())
+      .map((r) => ({
+        input: r.question,
+        expected_behavior: r.expected_behavior,
+        ai_output: r.ai_output,
+        retrieved_context: contextChunks,
+      }));
+    if (cases.length === 0) {
+      setError("Generate or paste at least one answer before running.");
+      return;
+    }
+
     setSubmitting(true);
+    setProgress({ done: 0, total: cases.length });
     try {
-      const cases = rows
-        .filter((r) => r.ai_output.trim())
-        .map((r) => ({
-          input: r.question,
-          expected_behavior: r.expected_behavior,
-          ai_output: r.ai_output,
-          retrieved_context: contextChunks,
-        }));
-      if (cases.length === 0) {
-        setError("Generate or paste at least one answer before running.");
-        setSubmitting(false);
-        return;
-      }
-      const res = await runEvaluationBatch({
-        project_id: projectId,
-        rubric_id: rubricId,
-        master_prompt: masterPrompt,
-        cases,
-        model,
+      // Per-case orchestration: short requests, live progress, prod-timeout-safe.
+      const startRes = await fetch("/api/eval/run/start", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ project_id: projectId, rubric_id: rubricId, model }),
       });
-      if (res.ok) {
-        router.push(`/runs/${res.run_id}`);
-      } else {
-        setError(res.error);
-        setSubmitting(false);
+      const startData = await startRes.json();
+      if (!startRes.ok) throw new Error(startData.error ?? "start failed");
+      const runId = startData.run_id as string;
+
+      for (let i = 0; i < cases.length; i++) {
+        const c = cases[i];
+        const r = await fetch("/api/eval/run/case", {
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ run_id: runId, rubric_id: rubricId, model, index: i, ...c }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error ?? `case ${i + 1} failed`);
+        setProgress({ done: i + 1, total: cases.length });
       }
-    } catch {
-      setError("Network error — check console.");
+
+      await fetch("/api/eval/run/finalize", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ run_id: runId }),
+      });
+      router.push(`/runs/${runId}`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Network error — check console.");
       setSubmitting(false);
+      setProgress(null);
     }
   }
 
@@ -376,9 +390,21 @@ export function NewRunForm({
           disabled={submitting || readyCases === 0}
           className="btn-pill btn-primary px-8 py-3 text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {submitting ? "Evaluating…" : `Run evaluation · ${readyCases} case${readyCases === 1 ? "" : "s"}`}
+          {progress
+            ? `Evaluating ${progress.done}/${progress.total}…`
+            : submitting
+              ? "Starting…"
+              : `Run evaluation · ${readyCases} case${readyCases === 1 ? "" : "s"}`}
         </button>
-        <span className="text-[11px] text-text-muted">Real LLM-judge calls · subject to the daily budget cap</span>
+        {progress && (
+          <div className="w-full max-w-xs h-1.5 rounded-full bg-bg-hover overflow-hidden">
+            <div
+              className="h-full bg-brand transition-all duration-300"
+              style={{ width: `${Math.round((progress.done / Math.max(progress.total, 1)) * 100)}%` }}
+            />
+          </div>
+        )}
+        <span className="text-[11px] text-text-muted">Each case scored separately · subject to the daily budget cap</span>
       </div>
     </div>
   );

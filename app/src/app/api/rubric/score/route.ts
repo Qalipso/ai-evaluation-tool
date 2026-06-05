@@ -56,7 +56,8 @@ export async function POST(req: NextRequest) {
       daily_spend_usd: dailySpend,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Internal error";
+    console.error("api/rubric/score", err);
+    const message = err instanceof Error && /budget|OPENAI_API_KEY/i.test(err.message) ? err.message : "Could not score output.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

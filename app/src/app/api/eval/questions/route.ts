@@ -28,7 +28,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ questions, cost_usd });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "Internal error";
+    console.error("api/eval/questions", e);
+    const msg = e instanceof Error && /budget|OPENAI_API_KEY/i.test(e.message) ? e.message : "Could not generate questions.";
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
