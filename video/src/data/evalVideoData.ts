@@ -14,12 +14,14 @@ export interface FailureAlert {
 export interface RubricDimension {
   name: string;
   score: number; // 0.0 – 1.0
+  threshold: number; // 0.0 – 1.0 pass line
 }
 
 export interface VideoClaim {
   text: string;
   verdict: ClaimVerdict;
   confidence: number; // 0.0 – 1.0
+  evidence: string; // the retrieved evidence the claim was checked against
 }
 
 export interface SafetyGateSpec {
@@ -37,6 +39,8 @@ export interface VideoExample {
 export interface EvalVideoData {
   productName: string;
   slogan: string;
+  positioning: string;
+  secondaryFormula: string;
   projectName: string;
   useCase: string;
   language: string;
@@ -61,6 +65,8 @@ export interface EvalVideoData {
 export const evalVideoData: EvalVideoData = {
   productName: "AI Evaluation Tool",
   slogan: "Evaluate AI with evidence, not vibes.",
+  positioning: "Evidence-backed quality control for LLM outputs.",
+  secondaryFormula: "Score it. Ground it. Gate it. Ship it.",
   projectName: "AreaMosa Assistant",
   useCase: "WhatsApp booking assistant",
   language: "Spanish",
@@ -79,20 +85,20 @@ export const evalVideoData: EvalVideoData = {
   ],
 
   rubricDimensions: [
-    { name: "Accuracy", score: 1.0 },
-    { name: "Conversation quality", score: 0.88 },
-    { name: "Hallucination risk", score: 1.0 },
-    { name: "Tone fit", score: 0.92 },
-    { name: "Multilingual", score: 0.8 },
-    { name: "State management", score: 1.0 },
-    { name: "Handoff intelligence", score: 0.86 },
+    { name: "Accuracy", score: 1.0, threshold: 0.75 },
+    { name: "Conversation quality", score: 0.88, threshold: 0.7 },
+    { name: "Hallucination risk", score: 1.0, threshold: 0.8 },
+    { name: "Tone fit", score: 0.92, threshold: 0.7 },
+    { name: "Multilingual", score: 0.8, threshold: 0.7 },
+    { name: "State management", score: 1.0, threshold: 0.7 },
+    { name: "Handoff intelligence", score: 0.86, threshold: 0.7 },
   ],
 
   claims: [
-    { text: "The appointment is confirmed for 18:00.", verdict: "CONTRADICTED", confidence: 0.91 },
-    { text: "The user asked to reschedule.", verdict: "SUPPORTED", confidence: 0.86 },
-    { text: "The assistant used the calendar result before confirming.", verdict: "SUPPORTED", confidence: 0.83 },
-    { text: "No unsupported pricing was mentioned.", verdict: "SUPPORTED", confidence: 0.8 },
+    { text: "The appointment is confirmed for 18:00.", verdict: "CONTRADICTED", confidence: 0.91, evidence: "No available calendar slot found at 18:00." },
+    { text: "The user asked to reschedule.", verdict: "SUPPORTED", confidence: 0.86, evidence: "User requested a new appointment time." },
+    { text: "The assistant used the calendar result before confirming.", verdict: "SUPPORTED", confidence: 0.83, evidence: "Calendar availability was retrieved before final response." },
+    { text: "No unsupported pricing was mentioned.", verdict: "SUPPORTED", confidence: 0.8, evidence: "Response contains no service price claim." },
   ],
 
   safetyGates: [

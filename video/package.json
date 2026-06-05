@@ -10,6 +10,8 @@
     "video:render": "remotion render EvalFilm out/ai-eval-film.mp4",
     "video:still": "remotion still EvalFilm out/frame.png --frame=750",
     "video:capture-screens": "node scripts/capture-screens.mjs",
+    "video:generate-images": "node scripts/generate-images.mjs",
+    "video:generate-clips": "node scripts/generate-clips.mjs",
     "render:film": "remotion render EvalFilm out/ai-eval-film.mp4",
     "render:slice": "remotion render EvalReel out/ai-eval-slice.mp4",
     "still": "remotion still EvalFilm out/frame.png --frame=750",

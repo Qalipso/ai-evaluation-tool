@@ -2,6 +2,7 @@ import React from "react";
 import { AbsoluteFill, Audio, staticFile, useVideoConfig } from "remotion";
 import { Backdrop } from "../../components/Backdrop";
 import { AssetBg } from "../../components/AssetBg";
+import { Grain } from "../../components/Grain";
 import { Caption } from "../../components/Caption";
 import { filmNarration, type FilmScene } from "../../narration-film";
 
@@ -28,6 +29,7 @@ export const FilmShell: React.FC<{
       <AssetBg src={bg} video={bgVideo} enabled={USE_GENERATED_ASSETS && !!bg} />
       {audio && <Audio src={staticFile(n.audio)} />}
       <AbsoluteFill style={{ padding: pad }}>{children}</AbsoluteFill>
+      <Grain opacity={0.045} />
       <Caption text={n.text} durationInFrames={durationInFrames} />
     </AbsoluteFill>
   );

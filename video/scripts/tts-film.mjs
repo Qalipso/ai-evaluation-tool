@@ -18,13 +18,13 @@ const outDir = `${here}/../public/audio/film`;
 const VOICE = "Brian";
 
 const lines = [
-  { file: "hook.mp3", text: "AI outputs can sound confident — even when they are wrong." },
-  { file: "problem.mp3", text: "For real products, looking good is not enough." },
-  { file: "reveal.mp3", text: "AI Evaluation Tool turns subjective reviews into measurable quality control." },
-  { file: "rubrics.mp3", text: "You define rubrics, thresholds, judges, and safety checks for every AI use case." },
-  { file: "claims.mp3", text: "The claim pipeline breaks an answer into factual claims and checks them against retrieved evidence." },
-  { file: "safety.mp3", text: "Safety gates catch the failures that should never reach production." },
-  { file: "verdict.mp3", text: "Each run produces a verdict, score breakdown, rationale, and exportable report." },
+  { file: "hook.mp3", text: "AI can lie beautifully." },
+  { file: "problem.mp3", text: "A fluent answer can hide a false claim, a broken policy, or a risky action." },
+  { file: "reveal.mp3", text: "AI Evaluation Tool gives every output a quality trial." },
+  { file: "rubrics.mp3", text: "Rubrics define the rules." },
+  { file: "claims.mp3", text: "Evidence checks the claims." },
+  { file: "safety.mp3", text: "Safety gates block the risks." },
+  { file: "verdict.mp3", text: "And every run ends with a verdict your team can trust." },
   { file: "cta.mp3", text: "Evaluate AI with evidence — not vibes." },
 ];
 

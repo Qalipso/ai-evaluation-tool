@@ -17,6 +17,8 @@ export const hookAnswer = {
   flag: "confirmed for 18:00",
 };
 export const hookFlag = D.evidenceContradiction;
+export const hookEvidence = D.beforeExample.evidence;
+export const hookFailure = D.beforeExample.failure; // "False confirmation"
 
 // ── Scene 2: Problem — failure alerts ───────────────────────────────────
 export const problemAlerts = D.failureAlerts;
