@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateAnswer } from "@/lib/eval/generate";
+import { isAllowedModel } from "@/lib/modelWhitelist";
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,6 +9,7 @@ export async function POST(req: NextRequest) {
     const masterPrompt = (body?.master_prompt as string) ?? "";
     const context: string[] = Array.isArray(body?.context) ? body.context : [];
     const model = typeof body?.model === "string" ? body.model : undefined;
+    if (!isAllowedModel(model)) return NextResponse.json({ error: "Model not allowed" }, { status: 400 });
 
     if (!question) {
       return NextResponse.json({ error: "question is required" }, { status: 400 });

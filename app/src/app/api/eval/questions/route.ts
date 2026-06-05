@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchRubric } from "@/lib/db";
 import { generateQuestions } from "@/lib/eval/generate";
+import { isAllowedModel } from "@/lib/modelWhitelist";
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,6 +11,7 @@ export async function POST(req: NextRequest) {
     const context: string[] = Array.isArray(body?.context) ? body.context : [];
     const count = Math.min(Math.max(Number(body?.count) || 6, 1), 12);
     const model = typeof body?.model === "string" ? body.model : undefined;
+    if (!isAllowedModel(model)) return NextResponse.json({ error: "Model not allowed" }, { status: 400 });
 
     if (!rubric_id) {
       return NextResponse.json({ error: "rubric_id is required" }, { status: 400 });

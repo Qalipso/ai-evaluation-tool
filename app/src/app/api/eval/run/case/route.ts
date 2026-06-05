@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { evaluateCaseIntoRun } from "@/lib/eval/run";
+import { isAllowedModel } from "@/lib/modelWhitelist";
+import { checkTextQuality } from "@/lib/validation";
 
 const MAX_OUTPUT = 8000;
 
@@ -12,6 +14,11 @@ export async function POST(req: NextRequest) {
     if (!run_id || !rubric_id) {
       return NextResponse.json({ error: "run_id and rubric_id are required" }, { status: 400 });
     }
+    if (!isAllowedModel(typeof b?.model === "string" ? b.model : undefined)) {
+      return NextResponse.json({ error: "Model not allowed" }, { status: 400 });
+    }
+    const q = checkTextQuality(ai_output, "AI output");
+    if (!q.ok) return NextResponse.json({ error: q.reason }, { status: 400 });
     if (!ai_output.trim()) return NextResponse.json({ error: "ai_output is required" }, { status: 400 });
     if (ai_output.length > MAX_OUTPUT) {
       return NextResponse.json({ error: `ai_output must be ${MAX_OUTPUT} chars or fewer` }, { status: 400 });

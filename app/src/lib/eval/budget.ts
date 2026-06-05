@@ -4,7 +4,7 @@ import { getSupabase, hasSupabase } from "../supabase";
 // Daily LLM cost cap. Supabase-backed when configured (survives cold starts);
 // in-memory fallback for local dev without creds.
 
-export const DAILY_CAP_USD = Number(process.env.MAX_DAILY_LLM_USD ?? 5);
+export const DAILY_CAP_USD = Number(process.env.MAX_DAILY_LLM_USD ?? 2);
 
 let memSpend = 0;
 let memDay = new Date().toDateString();

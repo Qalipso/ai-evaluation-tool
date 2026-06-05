@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runClaimPipeline } from "@/lib/eval/claims";
+import { isAllowedModel } from "@/lib/modelWhitelist";
 
 export async function POST(req: NextRequest) {
   try {
@@ -7,6 +8,7 @@ export async function POST(req: NextRequest) {
     const ai_output = (body?.ai_output as string)?.trim();
     const context: string[] = Array.isArray(body?.context) ? body.context : [];
     const model = typeof body?.model === "string" ? body.model : undefined;
+    if (!isAllowedModel(model)) return NextResponse.json({ error: "Model not allowed" }, { status: 400 });
     if (!ai_output) return NextResponse.json({ error: "ai_output is required" }, { status: 400 });
     if (ai_output.length > 4000) return NextResponse.json({ error: "ai_output too long (max 4000)" }, { status: 400 });
 
