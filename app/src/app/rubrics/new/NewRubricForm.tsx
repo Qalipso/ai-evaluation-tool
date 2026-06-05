@@ -157,8 +157,8 @@ export function NewRubricForm({ projects }: { projects: Project[] }) {
             <div className="grid grid-cols-12 gap-2 text-[10px] uppercase text-text-muted px-1">
               <div className="col-span-3" title="Human-readable label shown in reports and the UI.">Name</div>
               <div className="col-span-2" title="Snake_case identifier used in scoring APIs and data exports.">ID</div>
-              <div className="col-span-3" title="Scoring method applied to this dimension. Hover each select for details.">Method</div>
-              <div className="col-span-1 text-right" title="Fraction of total score (0–1). All weights must sum to 1.00.">Weight</div>
+              <div className="col-span-2" title="Scoring method applied to this dimension. Hover each select for details.">Method</div>
+              <div className="col-span-2 text-right" title="Fraction of total score (0–1). All weights must sum to 1.00.">Weight</div>
               <div className="col-span-2 text-right" title="Minimum score (0–100) for this dimension to count as passing.">Threshold</div>
               <div className="col-span-1" />
             </div>
@@ -179,7 +179,7 @@ export function NewRubricForm({ projects }: { projects: Project[] }) {
                   onChange={(e) => updateDim(i, "id", e.target.value)}
                 />
                 <select
-                  className="col-span-3 px-2 py-1.5 text-xs bg-bg-panel border border-border-subtle rounded focus:outline-none focus:border-brand"
+                  className="col-span-2 px-2 py-1.5 text-xs bg-bg-panel border border-border-subtle rounded focus:outline-none focus:border-brand min-w-0"
                   title={METHOD_DESCRIPTIONS[d.method]}
                   value={d.method}
                   onChange={(e) => updateDim(i, "method", e.target.value)}
@@ -191,14 +191,14 @@ export function NewRubricForm({ projects }: { projects: Project[] }) {
                 <input
                   type="number" step="0.01" min="0" max="1"
                   title="Fraction of total score (0–1). All weights must sum to 1.00."
-                  className="col-span-1 px-2 py-1.5 text-xs font-mono text-right bg-bg-panel border border-border-subtle rounded focus:outline-none focus:border-brand"
+                  className="col-span-2 px-2 py-1.5 text-xs font-mono text-right bg-bg-panel border border-border-subtle rounded focus:outline-none focus:border-brand min-w-0"
                   value={d.weight}
                   onChange={(e) => updateDim(i, "weight", parseFloat(e.target.value) || 0)}
                 />
                 <input
                   type="number" min="0" max="1" step="0.05"
                   title="Minimum score (0–1) for this dimension to count as passing. Cases below this threshold are flagged."
-                  className="col-span-2 px-2 py-1.5 text-xs font-mono text-right bg-bg-panel border border-border-subtle rounded focus:outline-none focus:border-brand"
+                  className="col-span-2 px-2 py-1.5 text-xs font-mono text-right bg-bg-panel border border-border-subtle rounded focus:outline-none focus:border-brand min-w-0"
                   value={d.threshold}
                   onChange={(e) => updateDim(i, "threshold", parseFloat(e.target.value) || 0)}
                 />

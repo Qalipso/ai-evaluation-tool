@@ -2,19 +2,104 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Theme tokens ──────────────────────────────────────────────────────────── */
 :root {
+  color-scheme: light;
+  --bg-base: #f4efe6;
+  --bg-panel: #fbf7ef;
+  --bg-card: #fffdf8;
+  --bg-hover: #ece4d6;
+  --border-subtle: #e6ddcc;
+  --border-strong: #d6ccb6;
+  --text-primary: #2c2620;
+  --text-secondary: #6d6354;
+  --text-muted: #9b9080;
+  --brand: #a67c45;
+  --brand-hover: #8c6432;
+  --brand-subtle: #ecdfc6;
+  --ok: #3a9d6e;
+  --warn: #c1841b;
+  --bad: #c0392b;
+
+  --input-bg: rgba(255, 255, 255, 0.55);
+  --input-border: rgba(44, 38, 32, 0.12);
+  --input-border-hover: rgba(44, 38, 32, 0.2);
+  --input-focus-bg: #fffdf8;
+  --elev-bg: linear-gradient(180deg, #fffdf8, #fbf7ef);
+  --elev-border: rgba(44, 38, 32, 0.07);
+  --elev-shadow: 0 30px 60px -30px rgba(82, 62, 30, 0.28), 0 2px 6px -2px rgba(82, 62, 30, 0.1),
+    0 1px 0 0 rgba(255, 255, 255, 0.7) inset;
+  --hairline: rgba(44, 38, 32, 0.08);
+  --btn-from: #b58a4f;
+  --btn-to: #a67c45;
+  --btn-shadow: rgba(166, 124, 69, 0.6);
+  --ghost-border: rgba(44, 38, 32, 0.14);
+  --ghost-bg: rgba(255, 255, 255, 0.5);
+  --ghost-text: #5a5044;
+  --ghost-hover: #fffdf8;
+  --scroll-track: #efe8db;
+  --scroll-thumb: #d6ccb6;
+  --scroll-thumb-hover: #c4b89e;
+  --code-bg: rgba(166, 124, 69, 0.12);
+  --code-border: rgba(166, 124, 69, 0.25);
+  --code-text: #8c6432;
+  --pre-bg: #fbf7ef;
+  --brand-rgb: 166, 124, 69;
+}
+
+.dark {
   color-scheme: dark;
+  --bg-base: #0b0b14;
+  --bg-panel: #11111c;
+  --bg-card: #161624;
+  --bg-hover: #1c1c2e;
+  --border-subtle: #23233a;
+  --border-strong: #2e2e4a;
+  --text-primary: #e7e7f0;
+  --text-secondary: #a3a3b8;
+  --text-muted: #6b6b85;
+  --brand: #7c6cff;
+  --brand-hover: #9183ff;
+  --brand-subtle: #3a2f8a;
+  --ok: #3ecf8e;
+  --warn: #f5a524;
+  --bad: #ef4444;
+
+  --input-bg: rgba(255, 255, 255, 0.03);
+  --input-border: rgba(255, 255, 255, 0.08);
+  --input-border-hover: rgba(255, 255, 255, 0.14);
+  --input-focus-bg: rgba(124, 108, 255, 0.06);
+  --elev-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+  --elev-border: rgba(255, 255, 255, 0.07);
+  --elev-shadow: 0 30px 70px -28px rgba(0, 0, 0, 0.75), 0 1px 0 0 rgba(255, 255, 255, 0.04) inset;
+  --hairline: rgba(255, 255, 255, 0.07);
+  --btn-from: #8a7bff;
+  --btn-to: #6f5cff;
+  --btn-shadow: rgba(124, 108, 255, 0.7);
+  --ghost-border: rgba(255, 255, 255, 0.12);
+  --ghost-bg: rgba(255, 255, 255, 0.03);
+  --ghost-text: #c8c8da;
+  --ghost-hover: rgba(255, 255, 255, 0.06);
+  --scroll-track: #0b0b14;
+  --scroll-thumb: #2e2e4a;
+  --scroll-thumb-hover: #3a3a5a;
+  --code-bg: rgba(124, 108, 255, 0.12);
+  --code-border: rgba(124, 108, 255, 0.25);
+  --code-text: #b8acff;
+  --pre-bg: #12121e;
+  --brand-rgb: 124, 108, 255;
 }
 
 html,
 body {
-  background: #0b0b14;
-  color: #e7e7f0;
+  background: var(--bg-base);
+  color: var(--text-primary);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
 * {
-  border-color: #23233a;
+  border-color: var(--border-subtle);
 }
 
 ::-webkit-scrollbar {
@@ -22,14 +107,14 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #0b0b14;
+  background: var(--scroll-track);
 }
 ::-webkit-scrollbar-thumb {
-  background: #2e2e4a;
+  background: var(--scroll-thumb);
   border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a3a5a;
+  background: var(--scroll-thumb-hover);
 }
 
 .heat-supported {
@@ -53,30 +138,30 @@ body {
 
 /* Wiki markdown rendering */
 .prose-wiki {
-  color: #c8c8d8;
+  color: var(--text-secondary);
   line-height: 1.75;
   font-size: 0.9rem;
 }
 .prose-wiki h1 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #e7e7f0;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
   margin-top: 1.5rem;
-  border-bottom: 1px solid #23233a;
+  border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 0.5rem;
 }
 .prose-wiki h2 {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #e7e7f0;
+  color: var(--text-primary);
   margin-top: 1.75rem;
   margin-bottom: 0.5rem;
 }
 .prose-wiki h3 {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #d0d0e0;
+  color: var(--text-primary);
   margin-top: 1.25rem;
   margin-bottom: 0.35rem;
 }
@@ -84,21 +169,21 @@ body {
   margin-bottom: 0.75rem;
 }
 .prose-wiki strong {
-  color: #e7e7f0;
+  color: var(--text-primary);
   font-weight: 600;
 }
 .prose-wiki code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.8em;
-  background: rgba(124, 108, 255, 0.1);
-  border: 1px solid rgba(124, 108, 255, 0.2);
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
   border-radius: 3px;
   padding: 0.1em 0.4em;
-  color: #b8acff;
+  color: var(--code-text);
 }
 .prose-wiki pre {
-  background: #12121e;
-  border: 1px solid #23233a;
+  background: var(--pre-bg);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 1rem;
   overflow-x: auto;
@@ -108,14 +193,13 @@ body {
   background: none;
   border: none;
   padding: 0;
-  color: #c8c8d8;
+  color: var(--text-secondary);
   font-size: 0.85rem;
 }
 .prose-wiki ul {
   list-style-type: disc;
   padding-left: 1.5rem;
   margin-bottom: 0.75rem;
-  space-y: 0.25rem;
 }
 .prose-wiki ol {
   list-style-type: decimal;
@@ -126,7 +210,7 @@ body {
   margin-bottom: 0.2rem;
 }
 .prose-wiki hr {
-  border-color: #23233a;
+  border-color: var(--border-subtle);
   margin: 1.5rem 0;
 }
 .prose-wiki table {
@@ -136,49 +220,93 @@ body {
   margin: 1rem 0;
 }
 .prose-wiki th {
-  background: #16162a;
-  color: #9090b0;
+  background: var(--bg-hover);
+  color: var(--text-secondary);
   font-weight: 600;
   text-align: left;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #23233a;
+  border: 1px solid var(--border-subtle);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 .prose-wiki td {
   padding: 0.45rem 0.75rem;
-  border: 1px solid #23233a;
-  color: #c0c0d4;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
   vertical-align: top;
 }
 .prose-wiki tr:nth-child(even) td {
-  background: rgba(255,255,255,0.02);
+  background: rgba(0, 0, 0, 0.02);
 }
 .prose-wiki blockquote {
-  border-left: 3px solid #7c6cff;
+  border-left: 3px solid var(--brand);
   padding-left: 1rem;
   margin: 1rem 0;
-  color: #9090b0;
+  color: var(--text-secondary);
   font-style: italic;
 }
 
 /* Shared form control */
 .input {
   width: 100%;
-  border-radius: 0.375rem;
-  border: 1px solid #23233a;
-  background: #0b0b14;
-  padding: 0.5rem 0.75rem;
+  border-radius: 0.7rem;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  padding: 0.65rem 0.9rem;
   font-size: 0.875rem;
-  color: #e7e7f0;
+  line-height: 1.5;
+  color: var(--text-primary);
   resize: vertical;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 .input::placeholder {
-  color: #6b6b85;
+  color: var(--text-muted);
+}
+.input:hover {
+  border-color: var(--input-border-hover);
 }
 .input:focus {
   outline: none;
-  border-color: #7c6cff;
-  box-shadow: 0 0 0 1px #7c6cff;
+  border-color: rgba(var(--brand-rgb), 0.7);
+  background: var(--input-focus-bg);
+  box-shadow: 0 0 0 3px rgba(var(--brand-rgb), 0.16);
+}
+
+/* Floating, suspended card */
+.elev-card {
+  border-radius: 1.25rem;
+  border: 1px solid var(--elev-border);
+  background: var(--elev-bg);
+  box-shadow: var(--elev-shadow);
+}
+
+/* Hairline section divider */
+.hairline {
+  border-top: 1px solid var(--hairline);
+}
+
+/* Pill button */
+.btn-pill {
+  border-radius: 9999px;
+  transition: transform 0.12s ease, box-shadow 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+}
+.btn-pill:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+.btn-primary {
+  background: linear-gradient(180deg, var(--btn-from), var(--btn-to));
+  color: #fff;
+  box-shadow: 0 10px 22px -10px var(--btn-shadow);
+}
+.btn-primary:not(:disabled):hover {
+  box-shadow: 0 14px 28px -10px var(--btn-shadow);
+}
+.btn-ghost {
+  border: 1px solid var(--ghost-border);
+  background: var(--ghost-bg);
+  color: var(--ghost-text);
+}
+.btn-ghost:not(:disabled):hover {
+  background: var(--ghost-hover);
 }

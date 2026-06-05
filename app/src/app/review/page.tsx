@@ -1,24 +1,37 @@
 import { Card, Pill } from "@/components/ui";
 import { labelTone } from "@/lib/data";
-import { fetchCases, fetchRuns, fetchProjects } from "@/lib/db";
-import { Users, ShieldAlert, AlertTriangle, CheckCircle } from "lucide-react";
+import { fetchCases, fetchRuns, fetchProjects, fetchRubrics } from "@/lib/db";
+import { Users, ShieldAlert, AlertTriangle, CheckCircle, UserCheck } from "lucide-react";
 import Link from "next/link";
 
 type ReviewItem =
   | { kind: "safety"; caseId: string; runId: string; projectId: string; category: string; severity: string; evidence: string; status: string }
-  | { kind: "uncertain"; caseId: string; runId: string; projectId: string; claimText: string; label: string; confidence: number; evidence: string };
+  | { kind: "uncertain"; caseId: string; runId: string; projectId: string; claimText: string; label: string; confidence: number; evidence: string }
+  | { kind: "human"; caseId: string; runId: string; projectId: string; rubricName: string; dims: string[] };
 
 export default async function ReviewPage() {
-  const [allCases, allRuns, allProjects] = await Promise.all([
+  const [allCases, allRuns, allProjects, allRubrics] = await Promise.all([
     fetchCases(),
     fetchRuns(),
     fetchProjects(),
+    fetchRubrics(),
   ]);
   const items: ReviewItem[] = [];
 
   for (const c of allCases) {
     const run = allRuns.find((r) => r.id === c.run_id);
     const projectId = run?.project_id ?? "";
+
+    if (c.human_review === "pending") {
+      const rubric = allRubrics.find((r) => r.id === run?.rubric_id);
+      const scoredIds = new Set(c.scores.map((s) => s.dim_id));
+      const dims = (rubric?.dimensions ?? [])
+        .filter((d) => d.method === "human" && !scoredIds.has(d.id))
+        .map((d) => d.name);
+      if (dims.length > 0) {
+        items.push({ kind: "human", caseId: c.id, runId: c.run_id, projectId, rubricName: rubric?.name ?? "—", dims });
+      }
+    }
 
     for (const f of c.safety_findings) {
       items.push({ kind: "safety", caseId: c.id, runId: c.run_id, projectId, ...f });
@@ -41,6 +54,7 @@ export default async function ReviewPage() {
   }
 
   const safety = items.filter((i) => i.kind === "safety");
+  const human = items.filter((i) => i.kind === "human");
   const uncertain = items
     .filter((i) => i.kind === "uncertain")
     .sort((a, b) => (a as { confidence: number }).confidence - (b as { confidence: number }).confidence);
@@ -61,11 +75,45 @@ export default async function ReviewPage() {
         </p>
       </header>
 
-      <div className="grid grid-cols-3 gap-3 text-sm">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
         <Stat label="Total items" value={total} />
         <Stat label="Open safety" value={openSafety} tone={openSafety > 0 ? "bad" : "ok"} />
+        <Stat label="Pending human" value={human.length} tone={human.length > 0 ? "warn" : "ok"} />
         <Stat label="Uncertain claims" value={uncertain.length} tone={uncertain.length > 0 ? "warn" : "ok"} />
       </div>
+
+      {human.length > 0 && (
+        <section className="space-y-2">
+          <SectionHeader icon={<UserCheck size={14} className="text-brand" />} label="Pending human scoring" count={human.length} priority="P1" />
+          <p className="text-xs text-text-muted -mt-1">
+            Dimensions with method <span className="font-mono">human</span> have no automated scorer. A reviewer must score these cases.
+          </p>
+          {human.map((item, i) => {
+            if (item.kind !== "human") return null;
+            const project = allProjects.find((p) => p.id === item.projectId);
+            return (
+              <Card key={`h${i}`} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                      {item.dims.map((d) => (
+                        <Pill key={d} tone="brand">{d}</Pill>
+                      ))}
+                    </div>
+                    <div className="text-[11px] text-text-muted mt-1.5">
+                      {project?.name} · {item.rubricName} · case{" "}
+                      <span className="font-mono">{item.caseId}</span>
+                    </div>
+                  </div>
+                  <Link href={`/review/${item.caseId}`} className="btn-pill btn-primary px-3.5 py-1.5 text-xs shrink-0">
+                    Review →
+                  </Link>
+                </div>
+              </Card>
+            );
+          })}
+        </section>
+      )}
 
       {safety.length > 0 && (
         <section className="space-y-2">

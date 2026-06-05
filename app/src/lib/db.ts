@@ -212,3 +212,44 @@ export async function dbExistsRubric(id: string): Promise<boolean> {
   const { data } = await getSupabase().from("rubrics").select("id").eq("id", id).maybeSingle();
   return Boolean(data);
 }
+
+// ─── Evaluator settings (singleton) ──────────────────────────────────────────
+export interface EvalSettings {
+  judge_model: string;
+  claim_model: string;
+  claim_threshold: number;
+  det_pii: boolean;
+  det_false_confirm: boolean;
+}
+
+export const DEFAULT_SETTINGS: EvalSettings = {
+  judge_model: process.env.OPENAI_JUDGE_MODEL ?? "gpt-4o-mini",
+  claim_model: process.env.OPENAI_CLAIM_MODEL ?? "gpt-4o-mini",
+  claim_threshold: 0.8,
+  det_pii: true,
+  det_false_confirm: true,
+};
+
+export async function getSettings(): Promise<EvalSettings> {
+  if (!hasSupabase()) return DEFAULT_SETTINGS;
+  try {
+    const { data, error } = await getSupabase().from("eval_settings").select("*").eq("id", 1).maybeSingle();
+    if (error || !data) return DEFAULT_SETTINGS;
+    return {
+      judge_model: (data.judge_model as string) || DEFAULT_SETTINGS.judge_model,
+      claim_model: (data.claim_model as string) || DEFAULT_SETTINGS.claim_model,
+      claim_threshold: Number(data.claim_threshold ?? DEFAULT_SETTINGS.claim_threshold),
+      det_pii: data.det_pii ?? true,
+      det_false_confirm: data.det_false_confirm ?? true,
+    };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
+export async function saveSettings(s: EvalSettings): Promise<void> {
+  const { error } = await getSupabase()
+    .from("eval_settings")
+    .upsert({ id: 1, ...s, updated_at: new Date().toISOString() }, { onConflict: "id" });
+  if (error) throw new Error(`saveSettings: ${error.message}`);
+}

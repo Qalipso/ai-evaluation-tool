@@ -64,15 +64,17 @@ function buildUserContent(input: EvalInput): string {
 export async function scoreWithJudge(
   dims: JudgeDimension[],
   input: EvalInput,
+  model?: string,
 ): Promise<JudgeResult> {
-  if (dims.length === 0) return { scores: [], model: JUDGE_MODEL, cost_usd: 0 };
+  const useModel = model || JUDGE_MODEL;
+  if (dims.length === 0) return { scores: [], model: useModel, cost_usd: 0 };
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY not set");
 
   const client = new OpenAI({ apiKey });
   const completion = await client.chat.completions.create({
-    model: JUDGE_MODEL,
+    model: useModel,
     temperature: 0,
     response_format: { type: "json_object" },
     messages: [
@@ -95,5 +97,5 @@ export async function scoreWithJudge(
     .filter((s) => wanted.has(s.dim_id))
     .map((s) => ({ dim_id: s.dim_id, score: (s.score - 1) / 4, rationale: s.rationale }));
 
-  return { scores, model: JUDGE_MODEL, cost_usd };
+  return { scores, model: useModel, cost_usd };
 }

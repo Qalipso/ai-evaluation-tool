@@ -1,4 +1,5 @@
 import { Search, Bell, Settings } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Topbar() {
   return (
@@ -15,13 +16,14 @@ export function Topbar() {
           />
         </div>
       </div>
+      <ThemeToggle />
       <button className="p-1.5 rounded-md hover:bg-bg-hover text-text-secondary">
         <Bell size={15} />
       </button>
       <button className="p-1.5 rounded-md hover:bg-bg-hover text-text-secondary">
         <Settings size={15} />
       </button>
-      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand to-brand-subtle flex items-center justify-center text-[11px] font-semibold">
+      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-brand to-brand-subtle flex items-center justify-center text-[11px] font-semibold text-white">
         EM
       </div>
     </header>

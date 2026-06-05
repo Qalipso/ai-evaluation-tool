@@ -1,11 +1,13 @@
 import "server-only";
 import { getSupabase, hasSupabase } from "../supabase";
-import { fetchRubric, fetchProject } from "../db";
-import { isLlmMethod } from "./dimensions";
+import { fetchRubric, fetchProject, getSettings } from "../db";
+import { isLlmMethod, hasRealScorer, isHumanMethod, isClaimMethod } from "./dimensions";
 import { scoreWithJudge, type JudgeDimension } from "./judges";
-import { scoreDeterministic, detectFindings, type EvalInput } from "./deterministic";
+import { scoreDeterministic, detectFindings, type EvalInput, type DetectedFinding } from "./deterministic";
+import { runClaimPipeline, type VerifiedClaim } from "./claims";
 import { buildScores, overallScore, decideVerdict, type DimScore } from "./aggregate";
 import { assertWithinBudget, addDailySpend } from "./budget";
+import type { Rubric, Score, Claim } from "../data";
 
 export interface EvaluateArgs {
   project_id: string;
@@ -14,6 +16,7 @@ export interface EvaluateArgs {
   expected_behavior: string;
   ai_output: string;
   retrieved_context: string[];
+  model?: string;
 }
 
 export interface EvaluateResult {
@@ -24,88 +27,85 @@ export interface EvaluateResult {
   cost_usd: number;
 }
 
-export async function evaluateCase(args: EvaluateArgs): Promise<EvaluateResult> {
-  if (!hasSupabase()) {
-    throw new Error("Evaluation runner requires Supabase (set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY).");
-  }
+// Score one case against a rubric. LLM + deterministic + claim pipeline.
+interface ScoredCase {
+  scores: Score[];
+  overall: number;
+  verdict: string;
+  findings: DetectedFinding[];
+  claims: VerifiedClaim[];
+  cost_usd: number;
+}
 
-  const rubric = await fetchRubric(args.rubric_id);
-  if (!rubric) throw new Error(`Rubric "${args.rubric_id}" not found`);
-  if (rubric.dimensions.length === 0) throw new Error("Rubric has no dimensions");
+interface ScoreOpts {
+  judgeModel?: string;
+  claimModel?: string;
+  detPii?: boolean;
+  detFalseConfirm?: boolean;
+}
 
-  const input: EvalInput = {
-    input: args.input,
-    expected_behavior: args.expected_behavior,
-    ai_output: args.ai_output,
-    retrieved_context: args.retrieved_context,
-  };
-
-  const llmDims: JudgeDimension[] = rubric.dimensions
+async function scoreOne(rubric: Rubric, input: EvalInput, opts: ScoreOpts = {}): Promise<ScoredCase> {
+  // Every method except `human` has a real automated scorer. Human dims stay
+  // unscored and are routed to the review queue.
+  const scoredDims = rubric.dimensions.filter((d) => hasRealScorer(d.method));
+  const llmDims: JudgeDimension[] = scoredDims
     .filter((d) => isLlmMethod(d.method))
     .map((d) => ({ id: d.id, name: d.name }));
+  const hasClaimDim = scoredDims.some((d) => isClaimMethod(d.method));
 
-  // Budget guard before any paid call.
   let cost = 0;
-  if (llmDims.length > 0) await assertWithinBudget();
-  const judge = await scoreWithJudge(llmDims, input);
-  cost = judge.cost_usd;
-  if (cost > 0) await addDailySpend(cost);
+  if (llmDims.length > 0 || hasClaimDim) await assertWithinBudget();
 
-  // Assemble per-dimension scores.
+  const judge = await scoreWithJudge(llmDims, input, opts.judgeModel);
+  cost += judge.cost_usd;
+  if (judge.cost_usd > 0) await addDailySpend(judge.cost_usd);
+
+  // Claim pipeline (groundedness) — runs once, scores all claim_pipeline dims.
+  let claims: VerifiedClaim[] = [];
+  let claimScore = 0;
+  if (hasClaimDim) {
+    const cp = await runClaimPipeline(input, opts.claimModel);
+    claims = cp.claims;
+    claimScore = cp.score;
+    cost += cp.cost_usd;
+  }
+
   const byDim: Record<string, DimScore> = {};
   for (const s of judge.scores) byDim[s.dim_id] = { score: s.score, rationale: s.rationale };
-  for (const d of rubric.dimensions) {
+  for (const d of scoredDims) {
     if (isLlmMethod(d.method)) continue;
+    if (isClaimMethod(d.method)) {
+      const supported = claims.filter((c) => c.label === "supported").length;
+      byDim[d.id] = {
+        score: claimScore,
+        rationale: claims.length
+          ? `Groundedness from ${claims.length} claims (${supported} supported).`
+          : "No factual claims detected; nothing ungrounded.",
+      };
+      continue;
+    }
     byDim[d.id] = scoreDeterministic(d.id, d.name, input);
   }
 
-  const scores = buildScores(rubric.dimensions, byDim);
-  const overall = overallScore(rubric.dimensions, scores);
-
-  const findings = detectFindings(input);
-  const hasCriticalSafety = findings.some((f) => f.severity === "critical");
+  // Weighted overall is renormalized over scored dimensions only.
+  const scores = buildScores(scoredDims, byDim);
+  const overall = overallScore(scoredDims, scores);
+  const findings = detectFindings(input, { pii: opts.detPii, falseConfirm: opts.detFalseConfirm });
   const verdict = decideVerdict(overall, scores, {
-    hasCriticalSafety,
+    hasCriticalSafety: findings.some((f) => f.severity === "critical"),
     safetyGateEnabled: rubric.safety_gates.length > 0,
   });
 
-  // Persist run + case + children.
-  const project = await fetchProject(args.project_id);
+  return { scores, overall, verdict, findings, claims, cost_usd: cost };
+}
+
+async function insertCaseChildren(
+  caseId: string,
+  scores: Score[],
+  findings: DetectedFinding[],
+  claims: Claim[] = [],
+): Promise<void> {
   const db = getSupabase();
-  const stamp = Date.now();
-  const runId = `run-adhoc-${stamp}`;
-  const caseId = `case-adhoc-${stamp}`;
-  const passing = overall >= 0.7 ? 1 : 0;
-
-  const { error: runErr } = await db.from("runs").insert({
-    id: runId,
-    project_id: args.project_id,
-    rubric_id: args.rubric_id,
-    model: project?.model ?? "manual",
-    dataset_id: "adhoc",
-    started_at: new Date().toISOString(),
-    cases_total: 1,
-    cases_passing: passing,
-    overall_score: overall,
-    verdict,
-    regression_flag: false,
-    safety_findings: findings.length,
-    variable_changed: "manual single-case run",
-  });
-  if (runErr) throw new Error(`insert run: ${runErr.message}`);
-
-  const { error: caseErr } = await db.from("cases").insert({
-    id: caseId,
-    run_id: runId,
-    input: args.input,
-    expected_behavior: args.expected_behavior,
-    ai_output: args.ai_output,
-    retrieved_context: args.retrieved_context,
-    overall_score: overall,
-    human_review: null,
-  });
-  if (caseErr) throw new Error(`insert case: ${caseErr.message}`);
-
   if (scores.length) {
     const { error } = await db.from("scores").insert(
       scores.map((s, i) => ({
@@ -120,7 +120,20 @@ export async function evaluateCase(args: EvaluateArgs): Promise<EvaluateResult> 
     );
     if (error) throw new Error(`insert scores: ${error.message}`);
   }
-
+  if (claims.length) {
+    const { error } = await db.from("claims").insert(
+      claims.map((c, i) => ({
+        case_id: caseId,
+        text: c.text,
+        label: c.label,
+        confidence: c.confidence,
+        source_idx: c.source_idx,
+        evidence: c.evidence,
+        ord: i,
+      })),
+    );
+    if (error) throw new Error(`insert claims: ${error.message}`);
+  }
   if (findings.length) {
     const { error } = await db.from("safety_findings").insert(
       findings.map((f, i) => ({
@@ -134,6 +147,185 @@ export async function evaluateCase(args: EvaluateArgs): Promise<EvaluateResult> 
     );
     if (error) throw new Error(`insert safety_findings: ${error.message}`);
   }
+}
 
-  return { run_id: runId, case_id: caseId, overall_score: overall, verdict, cost_usd: cost };
+export async function evaluateCase(args: EvaluateArgs): Promise<EvaluateResult> {
+  if (!hasSupabase()) {
+    throw new Error("Evaluation runner requires Supabase (set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY).");
+  }
+  const rubric = await fetchRubric(args.rubric_id);
+  if (!rubric) throw new Error(`Rubric "${args.rubric_id}" not found`);
+  if (rubric.dimensions.length === 0) throw new Error("Rubric has no dimensions");
+
+  const input: EvalInput = {
+    input: args.input,
+    expected_behavior: args.expected_behavior,
+    ai_output: args.ai_output,
+    retrieved_context: args.retrieved_context,
+  };
+  const settings = await getSettings();
+  const r = await scoreOne(rubric, input, {
+    judgeModel: args.model || settings.judge_model,
+    claimModel: settings.claim_model,
+    detPii: settings.det_pii,
+    detFalseConfirm: settings.det_false_confirm,
+  });
+  const needsHuman = rubric.dimensions.some((d) => isHumanMethod(d.method));
+
+  const project = await fetchProject(args.project_id);
+  const db = getSupabase();
+  const stamp = Date.now();
+  const runId = `run-adhoc-${stamp}`;
+  const caseId = `case-adhoc-${stamp}`;
+
+  const { error: runErr } = await db.from("runs").insert({
+    id: runId,
+    project_id: args.project_id,
+    rubric_id: args.rubric_id,
+    model: args.model || project?.model || "manual",
+    dataset_id: "adhoc",
+    started_at: new Date().toISOString(),
+    cases_total: 1,
+    cases_passing: r.overall >= 0.7 ? 1 : 0,
+    overall_score: r.overall,
+    verdict: r.verdict,
+    regression_flag: false,
+    safety_findings: r.findings.length,
+    variable_changed: "manual single-case run",
+  });
+  if (runErr) throw new Error(`insert run: ${runErr.message}`);
+
+  const { error: caseErr } = await db.from("cases").insert({
+    id: caseId,
+    run_id: runId,
+    input: args.input,
+    expected_behavior: args.expected_behavior,
+    ai_output: args.ai_output,
+    retrieved_context: args.retrieved_context,
+    overall_score: r.overall,
+    human_review: needsHuman ? "pending" : null,
+  });
+  if (caseErr) throw new Error(`insert case: ${caseErr.message}`);
+
+  await insertCaseChildren(caseId, r.scores, r.findings, r.claims);
+
+  return { run_id: runId, case_id: caseId, overall_score: r.overall, verdict: r.verdict, cost_usd: r.cost_usd };
+}
+
+// ── Batch: one run, N cases (rubric-generated dataset) ───────────────────────
+export interface BatchCaseInput {
+  input: string;
+  expected_behavior: string;
+  ai_output: string;
+  retrieved_context: string[];
+}
+
+export interface BatchResult {
+  run_id: string;
+  cases_total: number;
+  cases_passing: number;
+  overall_score: number;
+  verdict: string;
+  cost_usd: number;
+}
+
+export async function evaluateBatch(args: {
+  project_id: string;
+  rubric_id: string;
+  master_prompt: string;
+  cases: BatchCaseInput[];
+  model?: string;
+}): Promise<BatchResult> {
+  if (!hasSupabase()) {
+    throw new Error("Evaluation runner requires Supabase (set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY).");
+  }
+  if (args.cases.length === 0) throw new Error("No cases to evaluate");
+
+  const rubric = await fetchRubric(args.rubric_id);
+  if (!rubric) throw new Error(`Rubric "${args.rubric_id}" not found`);
+  if (rubric.dimensions.length === 0) throw new Error("Rubric has no dimensions");
+
+  const needsHuman = rubric.dimensions.some((d) => isHumanMethod(d.method));
+  const settings = await getSettings();
+  const opts = {
+    judgeModel: args.model || settings.judge_model,
+    claimModel: settings.claim_model,
+    detPii: settings.det_pii,
+    detFalseConfirm: settings.det_false_confirm,
+  };
+  const scored: ScoredCase[] = [];
+  for (const c of args.cases) {
+    scored.push(
+      await scoreOne(rubric, {
+        input: c.input,
+        expected_behavior: c.expected_behavior,
+        ai_output: c.ai_output,
+        retrieved_context: c.retrieved_context,
+      }, opts),
+    );
+  }
+
+  const total = scored.length;
+  const passing = scored.filter((s) => s.overall >= 0.7).length;
+  const avg = Math.round((scored.reduce((s, x) => s + x.overall, 0) / total) * 100) / 100;
+  const totalFindings = scored.reduce((s, x) => s + x.findings.length, 0);
+  const totalCost = scored.reduce((s, x) => s + x.cost_usd, 0);
+  const anyBlocked =
+    rubric.safety_gates.length > 0 && scored.some((s) => s.verdict === "blocked");
+  const runVerdict = anyBlocked
+    ? "blocked"
+    : avg >= 0.85 && passing === total
+      ? "ship_ready"
+      : avg >= 0.7
+        ? "acceptable_with_caveats"
+        : "needs_work";
+
+  const project = await fetchProject(args.project_id);
+  const db = getSupabase();
+  const stamp = Date.now();
+  const runId = `run-batch-${stamp}`;
+
+  const { error: runErr } = await db.from("runs").insert({
+    id: runId,
+    project_id: args.project_id,
+    rubric_id: args.rubric_id,
+    model: args.model || project?.model || "manual",
+    dataset_id: "generated",
+    started_at: new Date().toISOString(),
+    cases_total: total,
+    cases_passing: passing,
+    overall_score: avg,
+    verdict: runVerdict,
+    regression_flag: false,
+    safety_findings: totalFindings,
+    variable_changed: "rubric-generated batch",
+  });
+  if (runErr) throw new Error(`insert run: ${runErr.message}`);
+
+  for (let i = 0; i < total; i++) {
+    const c = args.cases[i];
+    const r = scored[i];
+    const caseId = `case-batch-${stamp}-${i}`;
+    const { error: caseErr } = await db.from("cases").insert({
+      id: caseId,
+      run_id: runId,
+      input: c.input,
+      expected_behavior: c.expected_behavior,
+      ai_output: c.ai_output,
+      retrieved_context: c.retrieved_context,
+      overall_score: r.overall,
+      human_review: needsHuman ? "pending" : null,
+    });
+    if (caseErr) throw new Error(`insert case ${i}: ${caseErr.message}`);
+    await insertCaseChildren(caseId, r.scores, r.findings, r.claims);
+  }
+
+  return {
+    run_id: runId,
+    cases_total: total,
+    cases_passing: passing,
+    overall_score: avg,
+    verdict: runVerdict,
+    cost_usd: totalCost,
+  };
 }

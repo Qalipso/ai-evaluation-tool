@@ -23,7 +23,22 @@ export function criteriaFor(dimKey: string, dimName: string): string {
   return REFERENCE_CRITERIA[dimKey] ?? `Evaluate the response on: ${dimName}.`;
 }
 
-// LLM judge handles these methods; everything else is deterministic.
+// LLM judge handles these methods.
 export function isLlmMethod(method: string): boolean {
   return method === "llm_judge" || method === "semantic_similarity";
+}
+
+export function isClaimMethod(method: string): boolean {
+  return method === "claim_pipeline";
+}
+
+// Whether this dimension has a real automated scorer. Only `human` lacks one
+// and is routed to the review queue.
+export function hasRealScorer(method: string): boolean {
+  return isLlmMethod(method) || method === "deterministic" || isClaimMethod(method);
+}
+
+// Dimensions that require a human reviewer (no automated scorer).
+export function isHumanMethod(method: string): boolean {
+  return method === "human";
 }

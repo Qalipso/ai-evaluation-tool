@@ -16,6 +16,8 @@ import {
   fmtDate,
 } from "@/lib/data";
 import { fetchRun, fetchCasesByRun, fetchProject, fetchRubric } from "@/lib/db";
+import { buildRunTextReport } from "@/lib/reportText";
+import { DownloadButton } from "@/components/DownloadButton";
 import { ChevronLeft, ShieldAlert } from "lucide-react";
 
 export default async function RunDetailPage({
@@ -78,14 +80,20 @@ export default async function RunDetailPage({
             {run.regression_flag && <Pill tone="bad">regression flagged</Pill>}
           </div>
         </div>
-        <div className="text-right shrink-0">
-          <div className="text-[10px] uppercase text-text-muted">Verdict</div>
-          <div className={`text-2xl font-semibold ${verdictTone[run.verdict]}`}>
-            {verdictLabel[run.verdict]}
+        <div className="text-right shrink-0 space-y-2">
+          <div>
+            <div className="text-[10px] uppercase text-text-muted">Verdict</div>
+            <div className={`text-2xl font-semibold ${verdictTone[run.verdict]}`}>
+              {verdictLabel[run.verdict]}
+            </div>
+            <div className={`text-sm font-mono ${verdictTone[run.verdict]}`}>
+              {run.overall_score.toFixed(2)}/1.0
+            </div>
           </div>
-          <div className={`text-sm font-mono ${verdictTone[run.verdict]}`}>
-            {run.overall_score.toFixed(2)}/1.0
-          </div>
+          <DownloadButton
+            text={buildRunTextReport(run, project, rubric, cases)}
+            filename={`${run.id}.txt`}
+          />
         </div>
       </header>
 

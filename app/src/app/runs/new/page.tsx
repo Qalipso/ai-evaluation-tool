@@ -1,38 +1,40 @@
 import Link from "next/link";
-import { Card } from "@/components/ui";
-import { fetchProjects, fetchRubrics } from "@/lib/db";
+import { fetchProjects, fetchRubrics, fetchModels } from "@/lib/db";
 import { hasSupabase } from "@/lib/supabase";
 import { NewRunForm } from "./NewRunForm";
 
 export default async function NewRunPage() {
-  const [projects, rubrics] = await Promise.all([fetchProjects(), fetchRubrics()]);
+  const [projects, rubrics, models] = await Promise.all([
+    fetchProjects(),
+    fetchRubrics(),
+    fetchModels(),
+  ]);
   const enabled = hasSupabase();
 
   return (
-    <div className="max-w-2xl space-y-5">
-      <div>
-        <div className="flex items-center gap-2 text-sm text-text-muted mb-1">
-          <Link href="/runs" className="hover:text-brand">Runs</Link>
-          <span>/</span>
-          <span>New run</span>
+    <div className="mx-auto w-full max-w-2xl px-1 py-6">
+      <div className="mb-7 text-center">
+        <div className="flex items-center justify-center gap-2 text-xs text-text-muted mb-3 tracking-wide">
+          <Link href="/runs" className="hover:text-brand transition-colors">Runs</Link>
+          <span className="opacity-40">/</span>
+          <span className="text-text-secondary">New run</span>
         </div>
-        <h1 className="text-2xl font-semibold">New evaluation run</h1>
-        <p className="text-text-secondary text-sm mt-1">
-          Score a single AI output against a rubric. LLM-judge dimensions call a real model;
-          deterministic dimensions run in code. Results persist as a new run.
+        <h1 className="text-3xl font-semibold tracking-tight">New evaluation run</h1>
+        <p className="text-text-secondary text-sm mt-2 max-w-md mx-auto leading-relaxed">
+          Set a master prompt, let the rubric generate questions, score candidate answers —
+          all persisted as one run.
         </p>
       </div>
 
       {!enabled && (
-        <div className="rounded-md bg-warn/10 border border-warn/30 px-4 py-3 text-sm text-warn">
-          Live evaluation needs Supabase + an OpenAI key. Set <code>SUPABASE_URL</code>,{" "}
-          <code>SUPABASE_SERVICE_ROLE_KEY</code> and <code>OPENAI_API_KEY</code> to enable it.
+        <div className="mb-5 rounded-xl bg-warn/10 border border-warn/25 px-4 py-3 text-sm text-warn text-center">
+          Live evaluation needs Supabase + an OpenAI key.
         </div>
       )}
 
-      <Card className="p-5">
-        <NewRunForm projects={projects} rubrics={rubrics} />
-      </Card>
+      <div className="elev-card p-7 sm:p-9">
+        <NewRunForm projects={projects} rubrics={rubrics} models={models} />
+      </div>
     </div>
   );
 }

@@ -5,29 +5,30 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Theme tokens resolve to CSS variables (light default, .dark override)
         bg: {
-          base: "#0b0b14",
-          panel: "#11111c",
-          card: "#161624",
-          hover: "#1c1c2e",
+          base: "var(--bg-base)",
+          panel: "var(--bg-panel)",
+          card: "var(--bg-card)",
+          hover: "var(--bg-hover)",
         },
         border: {
-          subtle: "#23233a",
-          strong: "#2e2e4a",
+          subtle: "var(--border-subtle)",
+          strong: "var(--border-strong)",
         },
         text: {
-          primary: "#e7e7f0",
-          secondary: "#a3a3b8",
-          muted: "#6b6b85",
+          primary: "var(--text-primary)",
+          secondary: "var(--text-secondary)",
+          muted: "var(--text-muted)",
         },
         brand: {
-          DEFAULT: "#7c6cff",
-          hover: "#9183ff",
-          subtle: "#3a2f8a",
+          DEFAULT: "var(--brand)",
+          hover: "var(--brand-hover)",
+          subtle: "var(--brand-subtle)",
         },
-        ok: "#3ecf8e",
-        warn: "#f5a524",
-        bad: "#ef4444",
+        ok: "var(--ok)",
+        warn: "var(--warn)",
+        bad: "var(--bad)",
       },
       fontFamily: {
         sans: ["ui-sans-serif", "system-ui", "-apple-system", "Inter", "sans-serif"],

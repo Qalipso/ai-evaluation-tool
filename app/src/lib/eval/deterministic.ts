@@ -47,8 +47,18 @@ export function detectFalseConfirmation(input: EvalInput): DetectedFinding[] {
   ];
 }
 
-export function detectFindings(input: EvalInput): DetectedFinding[] {
-  return [...detectPII(input.ai_output), ...detectFalseConfirmation(input)];
+export interface DetectOptions {
+  pii?: boolean;
+  falseConfirm?: boolean;
+}
+
+export function detectFindings(input: EvalInput, opts: DetectOptions = {}): DetectedFinding[] {
+  const pii = opts.pii ?? true;
+  const falseConfirm = opts.falseConfirm ?? true;
+  return [
+    ...(pii ? detectPII(input.ai_output) : []),
+    ...(falseConfirm ? detectFalseConfirmation(input) : []),
+  ];
 }
 
 export interface DeterministicScore {
