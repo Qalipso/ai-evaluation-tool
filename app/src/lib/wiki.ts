@@ -193,6 +193,22 @@ export const WIKI_ARTICLES: WikiArticle[] = [
     ],
     order: 9,
   },
+  {
+    slug: "evaluators",
+    title: "Evaluators: Methods That Actually Run",
+    category: "workflows",
+    summary:
+      "How the four scoring methods work in this tool — LLM judge, claim pipeline (groundedness), deterministic checks, and human review — and how to configure and test them.",
+    bestFor: ["AI Engineers", "QA / AI Reviewers"],
+    readTime: 8,
+    relatedRoutes: [
+      { label: "Evaluators", href: "/evaluators" },
+      { label: "New run", href: "/runs/new" },
+    ],
+    relatedArticles: ["llm-as-judge", "groundedness", "human-review"],
+    sourceIds: [],
+    order: 10,
+  },
 ];
 
 export const WIKI_CATEGORIES: {

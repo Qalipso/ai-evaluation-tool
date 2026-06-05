@@ -1,8 +1,16 @@
 # AI Evaluation — Wiki + Tool
 
-> **Demo scope:** The evaluation engine is real. `/runs/new` scores a single AI output against a rubric using a multi-dimension LLM judge (GPT-4o-mini, one structured call) plus deterministic checks (PII, false-confirmation, heuristics), then persists the run, case, scores, and safety findings to Supabase. Seeded projects/runs are pre-scored sample data so the dashboards are populated. Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `OPENAI_API_KEY` to enable live runs; without them the app falls back to bundled mock data (read-only). Batch runs, regression comparison, and the review queue remain roadmapped (see `roadmap.md`).
+> **Status: the evaluation engine is real and data flows end-to-end** (Next.js 15 + Supabase + OpenAI).
 >
-> **Setup:** `cd app && cp .env.local.example .env.local` (fill keys) → apply `supabase/migrations/0001_init.sql` in the Supabase SQL editor → `npm run seed` → `npm run dev`.
+> **Live features:**
+> - **Assisted batch runner** (`/runs/new`) — set a master prompt, let the rubric generate test questions, generate candidate answers with the chosen model, then evaluate all as one run (N cases). Per-run model selection (project default or override).
+> - **Real scoring methods** — LLM-as-judge (one structured call, all LLM dims), **claim pipeline** (atomic claim extraction + verification against context → groundedness, persisted claims drive the heat map), and deterministic checks (PII, false-confirmation, length). Only `human` dimensions are left unscored and routed to review. No fabricated scores.
+> - **Evaluators hub** (`/evaluators`) — configure the judge model, claim-pipeline model, claim threshold, and deterministic toggles; live-test each method.
+> - **Human review** (`/review/[case]`) — reviewers score `human` dimensions from the case text; submit persists scores and recomputes the case overall.
+> - **Reports** — structured `.txt` export per run; **theme toggle** (cream / dark) and a macOS-style bottom dock.
+> - Persistence in Supabase; graceful fallback to bundled mock data (read-only) when env is absent.
+>
+> **Setup:** `cd app && cp .env.local.example .env.local` (fill `OPENAI_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) → apply `supabase/migrations/0001_init.sql` **and** `0002_eval_settings.sql` in the Supabase SQL editor → `npm run seed` → `npm run dev`.
 
 **An internal AI quality platform for teams shipping LLM-powered products.**
 
