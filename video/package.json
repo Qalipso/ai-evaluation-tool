@@ -5,10 +5,14 @@
   "description": "Cinematic product video for AI Evaluation Tool (Remotion)",
   "scripts": {
     "dev": "remotion studio",
+    "video:dev": "remotion studio",
     "render": "remotion render EvalFilm out/ai-eval-film.mp4",
+    "video:render": "remotion render EvalFilm out/ai-eval-film.mp4",
+    "video:still": "remotion still EvalFilm out/frame.png --frame=750",
+    "video:capture-screens": "node scripts/capture-screens.mjs",
     "render:film": "remotion render EvalFilm out/ai-eval-film.mp4",
     "render:slice": "remotion render EvalReel out/ai-eval-slice.mp4",
-    "still": "remotion still EvalFilm out/frame.png --frame=120",
+    "still": "remotion still EvalFilm out/frame.png --frame=750",
     "upgrade": "remotion upgrade"
   },
   "dependencies": {

@@ -50,15 +50,16 @@ export const SCENE = {
 } as const;
 
 // Full 60s film — 8 scenes. "Evaluate AI with evidence, not vibes."
+// Exact storyboard timing @30fps: 5+5+6+8+12+9+9+6 = 60s.
 export const FILM = {
-  hook: 6,
-  problem: 7,
-  reveal: 7,
-  rubrics: 9,
-  claims: 11,
+  hook: 5,
+  problem: 5,
+  reveal: 6,
+  rubrics: 8,
+  claims: 12,
   safety: 9,
-  verdict: 7,
-  cta: 5,
+  verdict: 9,
+  cta: 6,
 } as const;
 
 export const FILM_ORDER = ["hook", "problem", "reveal", "rubrics", "claims", "safety", "verdict", "cta"] as const;

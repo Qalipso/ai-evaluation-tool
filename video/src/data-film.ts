@@ -1,98 +1,93 @@
-// Mock data for the 60s film. Demo case: AreaMosa — a Spanish WhatsApp
-// booking assistant. Shapes mirror the real product (claims, scores, safety).
+// Scene-facing adapter. All values derive from the typed video data contract
+// (data/evalVideoData.ts) so the film is data-driven, not hardcoded.
 
+import { evalVideoData as D, type ClaimVerdict } from "./data/evalVideoData";
+
+// ── Case meta ───────────────────────────────────────────────────────────
 export const demoCase = {
-  project: "AreaMosa Assistant",
-  useCase: "WhatsApp booking assistant",
-  language: "Spanish",
+  project: D.projectName,
+  useCase: D.useCase,
+  language: D.language,
   risk: "client booking · policy · calendar state",
 };
 
 // ── Scene 1: Hook — confident answer, one unsupported claim ─────────────
 export const hookAnswer = {
-  text: "Your appointment is confirmed for 18:00 today. See you then!",
-  // char range to flag as unsupported
+  text: D.beforeExample.answer,
   flag: "confirmed for 18:00",
 };
-export const hookFlag = "Unsupported claim · no calendar slot at 18:00";
+export const hookFlag = D.evidenceContradiction;
 
-// ── Scene 2: Problem — three failure alerts ─────────────────────────────
-export const problemAlerts = [
-  { kind: "Hallucinated fact", detail: "Cited a slot that does not exist", severity: "high" },
-  { kind: "Wrong policy", detail: "Skipped the cancellation terms", severity: "med" },
-  { kind: "Unsafe confirmation", detail: "Booked before checking the calendar", severity: "high" },
-];
+// ── Scene 2: Problem — failure alerts ───────────────────────────────────
+export const problemAlerts = D.failureAlerts;
 
 // ── Scene 3: Product reveal ─────────────────────────────────────────────
 export const product = {
-  name: "AI Evaluation Tool",
+  name: D.productName,
   tagline: "Quality control for AI outputs",
   sub: "Score, ground, and ship AI answers with evidence.",
 };
 
-// ── Scene 4: Rubric dimensions ──────────────────────────────────────────
-export const rubricDims = [
-  "Accuracy",
-  "Conversation quality",
-  "Hallucination risk",
-  "Tone fit",
-  "Multilingual",
-  "State management",
-  "Handoff intelligence",
-];
+// ── Scene 4: Rubric dimensions (name + 0-1 score) ───────────────────────
+export type RubricDim = { name: string; score: number };
+export const rubricDims: RubricDim[] = D.rubricDimensions;
 
 // ── Scene 5: Claim pipeline ─────────────────────────────────────────────
 export type ClaimLabel = "supported" | "partial" | "unsupported" | "contradicted";
 export type FilmClaim = { text: string; label: ClaimLabel; confidence: number };
 
-export const claimAnswer =
-  "I checked the calendar and your appointment is confirmed for 18:00. Our cancellation policy gives a full refund up to 24 hours before.";
+const verdictToLabel: Record<ClaimVerdict, ClaimLabel> = {
+  SUPPORTED: "supported",
+  PARTIAL: "partial",
+  UNSUPPORTED: "unsupported",
+  CONTRADICTED: "contradicted",
+};
 
-export const filmClaims: FilmClaim[] = [
-  { text: "I checked the calendar", label: "contradicted", confidence: 0.91 },
-  { text: "your appointment is confirmed for 18:00", label: "unsupported", confidence: 0.88 },
-  { text: "full refund up to 24 hours before", label: "supported", confidence: 0.79 },
-];
+export const filmClaims: FilmClaim[] = D.claims.map((c) => ({
+  text: c.text,
+  label: verdictToLabel[c.verdict],
+  confidence: c.confidence,
+}));
 
+// The answer paragraph the claims were extracted from (the failing reply).
+export const claimAnswer = D.beforeExample.answer;
+
+const ungrounded = D.claims.filter((c) => c.verdict === "CONTRADICTED" || c.verdict === "UNSUPPORTED").length;
 export const evidencePanel = [
   { k: "Retrieved context", v: "calendar.slots(2026-06-06) → []" },
-  { k: "Source match", v: "policy.md §3 refund window" },
-  { k: "Claim confidence", v: "0.88" },
-  { k: "Verdict", v: "2 of 3 ungrounded" },
+  { k: "Evidence", v: D.beforeExample.evidence },
+  { k: "Claim confidence", v: D.claims[0].confidence.toFixed(2) },
+  { k: "Verdict", v: `${ungrounded} of ${D.claims.length} ungrounded` },
 ];
 
-// ── Scene 6: Safety gates ───────────────────────────────────────────────
+// ── Scene 6: Safety gates (the failing "before" run) ────────────────────
 export type Gate = { name: string; status: "pass" | "blocked" };
-export const safetyGates: Gate[] = [
-  { name: "PII detection", status: "pass" },
-  { name: "False confirmation", status: "blocked" },
-  { name: "Prompt injection", status: "pass" },
-  { name: "Unsupported pricing", status: "pass" },
-  { name: "Language mismatch", status: "pass" },
-  { name: "Policy violation", status: "pass" },
-];
+export const safetyGates: Gate[] = D.safetyGates.map((g) => ({
+  name: g.name,
+  status: g.before === "BLOCKED" ? "blocked" : "pass",
+}));
 
 // ── Scene 7: Run verdict (the re-run, after evaluation) ─────────────────
 export const verdict = {
-  label: "Ship-ready",
-  score: 0.94,
+  label: D.verdict,
+  score: D.score,
   metrics: [
-    { k: "Pass rate", v: "100%" },
-    { k: "Safety findings", v: "0" },
-    { k: "Claims processed", v: "9" },
+    { k: "Pass rate", v: D.passRate },
+    { k: "Safety findings", v: String(D.safetyFindings) },
+    { k: "Claims processed", v: String(D.claimsProcessed) },
   ],
-  bars: [
-    { name: "Accuracy", v: 96 },
-    { name: "Hallucination risk", v: 92 },
-    { name: "Tone fit", v: 90 },
-    { name: "State management", v: 95 },
-  ],
+  // top dimensions, 0-1 → 0-100
+  bars: D.rubricDimensions
+    .slice()
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4)
+    .map((d) => ({ name: d.name, v: Math.round(d.score * 100) })),
 };
 
 // ── Scene 8: CTA ────────────────────────────────────────────────────────
 export const cta = {
-  name: "AI Evaluation Tool",
-  slogan: "Evaluate AI with evidence, not vibes.",
-  author: "Built by Eduard Shatalov",
+  name: D.productName,
+  slogan: D.slogan,
+  author: D.finalFooter,
   chips: ["Rubrics", "LLM Judge", "Claim Pipeline", "Safety Gates", "Human Review", "Reports"],
 };

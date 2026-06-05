@@ -23,7 +23,7 @@ export const S4Rubrics: React.FC<{ audio?: boolean }> = ({ audio }) => {
               const p = rise(frame, at);
               return (
                 <div
-                  key={d}
+                  key={d.name}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -36,11 +36,12 @@ export const S4Rubrics: React.FC<{ audio?: boolean }> = ({ audio }) => {
                   }}
                 >
                   <span style={{ fontFamily: font.mono, fontSize: 14, color: color.accent, width: 26 }}>{String(i + 1).padStart(2, "0")}</span>
-                  <span style={{ flex: 1, fontFamily: font.sans, fontSize: 22, color: color.text }}>{d}</span>
-                  {/* calibrating meter */}
+                  <span style={{ flex: 1, fontFamily: font.sans, fontSize: 22, color: color.text }}>{d.name}</span>
+                  {/* calibrating meter to the dimension's score */}
                   <div style={{ width: 90, height: 6, borderRadius: 99, background: color.bgCardSolid, overflow: "hidden" }}>
-                    <div style={{ width: `${p * 100}%`, height: "100%", background: `linear-gradient(90deg, ${color.accentDeep}, ${color.accentBright})`, boxShadow: `0 0 8px ${color.accentGlow}` }} />
+                    <div style={{ width: `${p * d.score * 100}%`, height: "100%", background: `linear-gradient(90deg, ${color.accentDeep}, ${color.accentBright})`, boxShadow: `0 0 8px ${color.accentGlow}` }} />
                   </div>
+                  <span style={{ width: 48, textAlign: "right", fontFamily: font.mono, fontSize: 17, color: color.textSecondary }}>{(p * d.score).toFixed(2)}</span>
                 </div>
               );
             })}

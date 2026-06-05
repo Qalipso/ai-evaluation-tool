@@ -3,25 +3,27 @@ import { useCurrentFrame } from "remotion";
 import { color, font, sec } from "../../theme";
 import { ProductFrame } from "../../components/ProductFrame";
 import { ClaimHighlighter } from "../../components/ClaimHighlighter";
+import { PipelineFlow } from "../../components/PipelineFlow";
+import { SceneTitle } from "../../components/SceneTitle";
 import { FilmShell } from "./FilmShell";
 import { reveal } from "../../components/anim";
 import { claimAnswer, filmClaims, evidencePanel } from "../../data-film";
 
-// HERO: answer split into claims, checked against an evidence panel. ~11s.
+// HERO: answer split into claims, checked against an evidence panel. ~12s.
 export const S5Claims: React.FC<{ audio?: boolean }> = ({ audio }) => {
   const frame = useCurrentFrame();
-  const eviAt = sec(1.0);
+  const eviAt = sec(2.2);
   return (
-    <FilmShell scene="claims" audio={audio} pad="70px 150px 150px">
+    <FilmShell scene="claims" audio={audio} pad="60px 150px 150px">
       <ProductFrame title="cases / areamosa · claim pipeline" badge={{ text: "grounding", tone: "accent" }}>
-        <div style={{ display: "flex", gap: 36, width: "100%" }}>
-          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-            <span style={{ fontFamily: font.sans, fontSize: 24, fontWeight: 600, color: color.text, marginBottom: 22, ...reveal(frame, sec(0.2), 12) }}>
-              Every claim is checked against <span style={{ color: color.accentBright }}>evidence</span>.
-            </span>
-            <ClaimHighlighter answer={claimAnswer} claims={filmClaims} start={sec(0.8)} step={sec(0.95)} />
-          </div>
-          <div style={{ width: 1, background: color.border }} />
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 22 }}>
+          <SceneTitle eyebrow="claim pipeline" title="Every claim is checked against evidence." highlight="evidence" at={sec(0.2)} />
+          <PipelineFlow steps={["Answer", "Extract claims", "Retrieve evidence", "Score", "Verdict"]} start={sec(0.5)} step={9} />
+          <div style={{ display: "flex", gap: 36, width: "100%" }}>
+            <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <ClaimHighlighter answer={claimAnswer} claims={filmClaims} start={sec(1.8)} step={sec(0.95)} />
+            </div>
+            <div style={{ width: 1, background: color.border }} />
           {/* evidence panel */}
           <div style={{ width: 380, flexShrink: 0, display: "flex", flexDirection: "column", gap: 16, ...reveal(frame, eviAt, 18) }}>
             <span style={{ fontFamily: font.mono, fontSize: 14, color: color.textMuted, letterSpacing: 1, textTransform: "uppercase" }}>Evidence</span>
@@ -35,6 +37,7 @@ export const S5Claims: React.FC<{ audio?: boolean }> = ({ audio }) => {
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
       </ProductFrame>
