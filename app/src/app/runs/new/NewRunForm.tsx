@@ -2,8 +2,9 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Sparkles, Wand2, Upload, X } from "lucide-react";
+import { Plus, Trash2, Sparkles, Wand2, Upload, X, Database } from "lucide-react";
 import type { Project, Rubric, AIModel } from "@/lib/data";
+import { saveDataset } from "@/app/datasets/actions";
 
 const MAX_OUTPUT = 8000;
 const GEN_COUNT = 6;
@@ -57,6 +58,7 @@ export function NewRunForm({
   const [genAll, setGenAll] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [savingDs, setSavingDs] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -165,6 +167,25 @@ export function NewRunForm({
   }
   function removeRow(i: number) {
     setRows((rs) => rs.filter((_, idx) => idx !== i));
+  }
+
+  async function saveAsDataset() {
+    setError(null);
+    setNotice(null);
+    const cases = rows
+      .filter((r) => r.question.trim())
+      .map((r) => ({ input: r.question, expected_behavior: r.expected_behavior }));
+    if (cases.length === 0) {
+      setError("Generate questions first.");
+      return;
+    }
+    const name = window.prompt("Dataset name", `${activeRubric?.name ?? "Set"} · ${cases.length} cases`);
+    if (!name) return;
+    setSavingDs(true);
+    const res = await saveDataset({ project_id: projectId, name, cases });
+    setSavingDs(false);
+    if (res.ok) setNotice(`Saved dataset "${name}".`);
+    else setError(res.error);
   }
 
   async function runBatch() {
@@ -318,14 +339,24 @@ export function NewRunForm({
           <Plus size={13} /> Add manually
         </button>
         {rows.length > 0 && (
-          <button
-            type="button"
-            onClick={generateAllAnswers}
-            disabled={genAll}
-            className="btn-pill btn-ghost inline-flex items-center gap-1.5 text-xs px-3.5 py-2 disabled:opacity-40 ml-auto"
-          >
-            <Wand2 size={13} /> {genAll ? "Answering…" : "Generate all answers"}
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={saveAsDataset}
+              disabled={savingDs}
+              className="btn-pill btn-ghost inline-flex items-center gap-1.5 text-xs px-3.5 py-2 disabled:opacity-40 ml-auto"
+            >
+              <Database size={13} /> {savingDs ? "Saving…" : "Save as dataset"}
+            </button>
+            <button
+              type="button"
+              onClick={generateAllAnswers}
+              disabled={genAll}
+              className="btn-pill btn-ghost inline-flex items-center gap-1.5 text-xs px-3.5 py-2 disabled:opacity-40"
+            >
+              <Wand2 size={13} /> {genAll ? "Answering…" : "Generate all answers"}
+            </button>
+          </>
         )}
       </div>
 

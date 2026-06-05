@@ -253,3 +253,138 @@ export async function saveSettings(s: EvalSettings): Promise<void> {
     .upsert({ id: 1, ...s, updated_at: new Date().toISOString() }, { onConflict: "id" });
   if (error) throw new Error(`saveSettings: ${error.message}`);
 }
+
+// ─── Datasets ─────────────────────────────────────────────────────────────────
+export interface DatasetCase {
+  id: string;
+  input: string;
+  expected_behavior: string;
+  expected_language?: string | null;
+  difficulty: string;
+  category: string[];
+  is_critical: boolean;
+  tags: string[];
+  ord: number;
+}
+
+export interface EvalDataset {
+  id: string;
+  project_id: string | null;
+  name: string;
+  version: string;
+  description: string;
+  source: string;
+  created_at: string;
+  cases: DatasetCase[];
+  case_count?: number;
+}
+
+export async function fetchDatasets(): Promise<EvalDataset[]> {
+  if (!hasSupabase()) return [];
+  // Graceful when the 0003 migration is not applied yet.
+  let data: unknown[] | null = null;
+  try {
+    const res = await getSupabase()
+      .from("eval_datasets")
+      .select("*, dataset_cases(id)")
+      .order("created_at", { ascending: false });
+    if (res.error) return [];
+    data = res.data;
+  } catch {
+    return [];
+  }
+  return (data ?? []).map((d) => {
+    const r = d as Record<string, unknown>;
+    return {
+      id: r.id as string,
+      project_id: (r.project_id as string) ?? null,
+      name: r.name as string,
+      version: r.version as string,
+      description: (r.description as string) ?? "",
+      source: (r.source as string) ?? "llm",
+      created_at: r.created_at as string,
+      cases: [],
+      case_count: ((r.dataset_cases as unknown[]) ?? []).length,
+    };
+  });
+}
+
+export async function fetchDataset(id: string): Promise<EvalDataset | undefined> {
+  if (!hasSupabase()) return undefined;
+  let data: unknown = null;
+  try {
+    const res = await getSupabase().from("eval_datasets").select("*, dataset_cases(*)").eq("id", id).maybeSingle();
+    data = res.data;
+  } catch {
+    return undefined;
+  }
+  if (!data) return undefined;
+  const r = data as Record<string, unknown>;
+  const cases = ((r.dataset_cases as Record<string, unknown>[]) ?? [])
+    .map((c) => ({
+      id: c.id as string,
+      input: (c.input as string) ?? "",
+      expected_behavior: (c.expected_behavior as string) ?? "",
+      expected_language: (c.expected_language as string) ?? null,
+      difficulty: (c.difficulty as string) ?? "medium",
+      category: (c.category as string[]) ?? [],
+      is_critical: Boolean(c.is_critical),
+      tags: (c.tags as string[]) ?? [],
+      ord: Number(c.ord ?? 0),
+    }))
+    .sort((a, b) => a.ord - b.ord);
+  return {
+    id: r.id as string,
+    project_id: (r.project_id as string) ?? null,
+    name: r.name as string,
+    version: r.version as string,
+    description: (r.description as string) ?? "",
+    source: (r.source as string) ?? "llm",
+    created_at: r.created_at as string,
+    cases,
+  };
+}
+
+export async function dbCreateDataset(args: {
+  project_id: string;
+  name: string;
+  version?: string;
+  description?: string;
+  source?: string;
+  cases: Omit<DatasetCase, "id" | "ord">[];
+}): Promise<{ id: string }> {
+  const db = getSupabase();
+  const id = `ds-${Date.now()}`;
+  const { error: dErr } = await db.from("eval_datasets").insert({
+    id,
+    project_id: args.project_id || null,
+    name: args.name,
+    version: args.version || "v1",
+    description: args.description ?? "",
+    source: args.source ?? "llm",
+  });
+  if (dErr) throw new Error(`dbCreateDataset: ${dErr.message}`);
+  if (args.cases.length) {
+    const { error: cErr } = await db.from("dataset_cases").insert(
+      args.cases.map((c, i) => ({
+        id: `${id}-c${i}`,
+        dataset_id: id,
+        input: c.input,
+        expected_behavior: c.expected_behavior,
+        expected_language: c.expected_language ?? null,
+        difficulty: c.difficulty ?? "medium",
+        category: c.category ?? [],
+        is_critical: c.is_critical ?? false,
+        tags: c.tags ?? [],
+        ord: i,
+      })),
+    );
+    if (cErr) throw new Error(`dbCreateDataset cases: ${cErr.message}`);
+  }
+  return { id };
+}
+
+export async function dbDeleteDataset(id: string): Promise<void> {
+  const { error } = await getSupabase().from("eval_datasets").delete().eq("id", id);
+  if (error) throw new Error(`dbDeleteDataset: ${error.message}`);
+}

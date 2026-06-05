@@ -15,6 +15,7 @@ import {
   ShieldAlert,
   Gamepad2,
   Scale,
+  Database,
   type LucideIcon,
 } from "lucide-react";
 
@@ -25,6 +26,7 @@ const items: DockItem[] = [
   { href: "/projects", label: "Projects", Icon: FolderKanban },
   { href: "/rubrics", label: "Rubrics", Icon: ClipboardList },
   { href: "/runs", label: "Eval Runs", Icon: Activity },
+  { href: "/datasets", label: "Datasets", Icon: Database },
   { href: "/evaluators", label: "Evaluators", Icon: Scale },
   { href: "/compare", label: "Regression", Icon: GitCompare },
   { href: "/review", label: "Human Review", Icon: Users },
