@@ -8,11 +8,17 @@
 > - **Evaluators hub** (`/evaluators`) — live, local pattern-based playground for the claim pipeline and deterministic checks: tool-trace editor, evidence sources, results tables, detail drawers, demo examples.
 > - **Safety gates** — a finding whose category is listed in the rubric's safety gates **blocks the verdict** even at a high score. Text-detectable gates: `pii_leakage`, `false_confirmation`, `admin_data_leak_to_client`, `operator_command_from_client`, `prompt_injection_followed`, `unsupported_price_claim`. Calendar/booking gates need a tool trace (see the data-skeleton plan).
 > - **Human review** (`/review/[case]`) and **inline scoring** — reviewers score `human` dimensions from the case text; the run page's **expandable dimension breakdown** shows per-case scores, judge rationales, and the claim/evidence chain, and lets you score human dimensions inline.
+> - **Datasets** (`/datasets`) — versioned test sets. Save the questions a rubric generates as a dataset, then re-run it across model/prompt versions for apples-to-apples regression.
+> - **Per-case run with progress** — the runner scores each case as a short request with a live progress bar (prod-timeout-safe), not one long action.
+> - **Command palette** (`Cmd/Ctrl+K`) — search and jump across nav, projects, rubrics, runs, and cases. **Cost meter** in the top bar (today's LLM spend vs the daily cap) and a **recent-activity** bell.
+> - **Demo auth gate** (opt-in) — public read by link, but evaluations/edits require a code at `/enter`; per-IP rate limit + server-side model whitelist + daily budget cap protect the cost surface.
 > - **Input validation** — garbage outputs (keyboard mashing, repeats, mostly non-letters) are rejected before any LLM call.
-> - **Reports** — structured `.txt` export per run; **theme toggle** (cream / dark) and a macOS-style bottom dock.
+> - **Reports** — structured `.txt` export per run; **theme toggle** (cream / dark), a macOS-style bottom dock, and a first-visit guided tour.
 > - Persistence in Supabase; graceful fallback to bundled mock data (read-only) when env is absent.
 >
-> **Setup:** `cd app && cp .env.local.example .env.local` (fill `OPENAI_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) → apply `supabase/migrations/0001_init.sql` **and** `0002_eval_settings.sql` in the Supabase SQL editor → `npm run seed` → `npm run dev`.
+> **Setup:** `cd app && cp .env.local.example .env.local` (fill `OPENAI_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) → apply `supabase/migrations/0001_init.sql`, `0002_eval_settings.sql`, `0003_datasets.sql` in the Supabase SQL editor → `npm run seed` → `npm run dev`.
+>
+> **Public deploy:** set `DEMO_ACCESS_CODE` + `DEMO_SESSION_SECRET` (gate on), `MAX_DAILY_LLM_USD=2`, and rotate keys before going live.
 
 **An internal AI quality platform for teams shipping LLM-powered products.**
 

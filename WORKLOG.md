@@ -3,6 +3,24 @@
 Reverse-chronological log of implementation work turning the docs-first design
 into a working, data-flowing application.
 
+## 2026-06-06 — Platform polish, auth gate, datasets
+
+- **Per-case run + progress**: `/api/eval/run/{start,case,finalize}`. Each case
+  is a short request with a live progress bar — prod-timeout-safe, survives dev
+  hot-reload. Replaced the single long batch action.
+- **Command palette** (Cmd/Ctrl+K) over nav/projects/rubrics/runs/cases via
+  `/api/index`; **cost meter** + **recent-activity bell** in the top bar.
+- **Demo auth gate** (opt-in, `DEMO_ACCESS_CODE`): edge-safe HMAC session
+  (`lib/auth`), `middleware` protects `/api/eval/*` + Server Actions, public
+  read otherwise. `/enter` + `/api/enter`. Per-IP rate limit (`lib/ratelimit`),
+  server-side model whitelist, daily cap lowered to $2.
+- **Datasets P0** (migration 0003): versioned `eval_datasets` + `dataset_cases`,
+  `/datasets` list/detail, "Save as dataset" on the runner, dock entry.
+- **UX**: centered layouts + entrance animations, refined top bar, settings /
+  account menus, onboarding tour, loading skeletons, expandable dimension
+  breakdown with inline human scoring, dismissible themed demo banner,
+  stronger overlay blur, working dashboard action buttons.
+
 ## 2026-06-05 — Honesty pass, gates, inline review
 
 - **No fabricated scores**: generic deterministic no longer returns a flat 0.8;

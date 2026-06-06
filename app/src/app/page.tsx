@@ -31,7 +31,7 @@ export default async function DashboardPage() {
     <div className="space-y-6 max-w-6xl">
       <div className="flex items-center gap-2 text-xs text-text-muted">
         <span className="inline-block w-1.5 h-1.5 rounded-full bg-ok" />
-        system online · mock provider · {dashboardData.recent_runs_30d} recent runs
+        system online · {dashboardData.recent_runs_30d} recent runs
       </div>
 
       <header>
@@ -42,12 +42,15 @@ export default async function DashboardPage() {
       </header>
 
       <div className="flex gap-2 flex-wrap">
-        <button className="inline-flex items-center gap-2 px-3.5 py-2 bg-brand hover:bg-brand-hover rounded-md text-sm font-medium">
+        <Link
+          href="/runs/new"
+          className="inline-flex items-center gap-2 px-3.5 py-2 bg-brand hover:bg-brand-hover rounded-md text-sm font-medium text-white"
+        >
           <PlayCircle size={16} />
           Run evaluation
-        </button>
+        </Link>
         <Link
-          href="/review"
+          href="/runs"
           className="inline-flex items-center gap-2 px-3.5 py-2 bg-bg-card hover:bg-bg-hover border border-border-subtle rounded-md text-sm"
         >
           <AlertCircle size={16} />
