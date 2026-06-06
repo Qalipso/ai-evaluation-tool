@@ -8,13 +8,13 @@ This tool scores AI outputs against rubrics, checks claims against evidence, cat
 > Evaluate AI with evidence, not vibes.
 
 <p align="center">
-  <a href="https://edu.dev/projects/ai-evaluation-tool">
+  <a href="https://ai-eval-tool.vercel.app/">
     <img src="./docs/media/teaser15.gif" alt="AI Evaluation Tool preview" width="100%" />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://edu.dev/projects/ai-evaluation-tool">Watch product preview</a>
+  <a href="https://ai-eval-tool.vercel.app/">Live demo</a>
   ·
   <a href="https://github.com/Qalipso/ai-evaluation-tool">GitHub</a>
 </p>
