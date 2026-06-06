@@ -23,7 +23,7 @@ export const S1Hook: React.FC<{ audio?: boolean }> = ({ audio }) => {
   const stampRot = interpolate(stampP, [0, 1], [-14, -7]);
 
   return (
-    <FilmShell scene="hook" audio={audio} glow={flagged ? "bad" : "accent"} pad="100px 220px">
+    <FilmShell scene="hook" audio={audio} glow={flagged ? "bad" : "accent"} pad="100px 220px" bg="video/generated/hook-robots.mp4" bgVideo>
       <ProductFrame
         title={`${demoCase.project} · WhatsApp`}
         badge={flagged ? { text: "Unsupported claim", tone: "bad" } : { text: "agent reply", tone: "accent" }}
