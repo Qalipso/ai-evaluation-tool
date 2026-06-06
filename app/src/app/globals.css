@@ -69,9 +69,9 @@
   --input-border: rgba(255, 255, 255, 0.08);
   --input-border-hover: rgba(255, 255, 255, 0.14);
   --input-focus-bg: rgba(124, 108, 255, 0.06);
-  --elev-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
-  --elev-border: rgba(255, 255, 255, 0.07);
-  --elev-shadow: 0 30px 70px -28px rgba(0, 0, 0, 0.75), 0 1px 0 0 rgba(255, 255, 255, 0.04) inset;
+  --elev-bg: linear-gradient(180deg, #1a1a2b, #14141f);
+  --elev-border: rgba(255, 255, 255, 0.08);
+  --elev-shadow: 0 30px 70px -28px rgba(0, 0, 0, 0.8), 0 1px 0 0 rgba(255, 255, 255, 0.05) inset;
   --hairline: rgba(255, 255, 255, 0.07);
   --btn-from: #8a7bff;
   --btn-to: #6f5cff;
