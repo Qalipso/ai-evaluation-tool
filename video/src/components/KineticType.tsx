@@ -26,7 +26,7 @@ export const KineticType: React.FC<{
 }> = ({ words, start = 0, step = 7, align = "center", gap = 18 }) => {
   const frame = useCurrentFrame();
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap, justifyContent: align, alignItems: "baseline", width: "100%" }}>
+    <div style={{ display: "flex", flexWrap: "wrap", gap, justifyContent: align, alignItems: "baseline", width: "100%", perspective: 1400 }}>
       {words.map((w, i) => {
         const at = start + i * step;
         if (frame < at) return null;
@@ -34,6 +34,8 @@ export const KineticType: React.FC<{
         const wipe = interpolate(p, [0, 1], [100, 0]);
         const y = interpolate(p, [0, 1], [40, 0], { easing: Easing.out(Easing.cubic) });
         const scale = interpolate(p, [0, 0.6, 1], [1.25, 1.02, 1]);
+        // 3D flip-up entrance — word rotates from below into the plane
+        const rx = interpolate(p, [0, 1], [70, 0], { easing: Easing.out(Easing.cubic) });
         return (
           <span
             key={i}
@@ -46,7 +48,7 @@ export const KineticType: React.FC<{
               letterSpacing: w.track ?? -3,
               lineHeight: 0.95,
               color: w.color ?? color.text,
-              transform: `translateY(${y}px) scale(${scale})`,
+              transform: `translateY(${y}px) scale(${scale}) rotateX(${rx}deg)`,
               transformOrigin: "50% 100%",
               clipPath: `inset(0 0 ${wipe}% 0)`,
               willChange: "transform, clip-path",
