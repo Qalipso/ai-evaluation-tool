@@ -43,6 +43,22 @@ The rest of this README stays focused on proof, architecture, and setup.
 
 ---
 
+## Screenshots
+
+| Dashboard | Run detail |
+|---|---|
+| [![Dashboard](./docs/assets/screenshots/dashboard.png)](./docs/assets/screenshots/dashboard.png) | [![Run detail](./docs/assets/screenshots/run-detail.png)](./docs/assets/screenshots/run-detail.png) |
+| Quality health, pipeline status, evaluator breakdown | Ship-ready verdict + per-dimension scores with methods/thresholds |
+
+| Regression | Reports |
+|---|---|
+| [![Regression](./docs/assets/screenshots/regression.png)](./docs/assets/screenshots/regression.png) | [![Reports](./docs/assets/screenshots/reports.png)](./docs/assets/screenshots/reports.png) |
+| Baseline vs current deltas + verdicts | Exportable evaluation reports per run |
+
+Live, seeded demo: [ai-eval-tool.vercel.app](https://ai-eval-tool.vercel.app/) · 90-second path: [docs/DEMO.md](./docs/DEMO.md)
+
+---
+
 ## Why this exists
 
 LLM outputs are fluent by default.

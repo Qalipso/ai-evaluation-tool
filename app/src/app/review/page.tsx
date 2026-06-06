@@ -199,7 +199,7 @@ export default async function ReviewPage() {
                       <span className={`text-[10px] uppercase font-mono ${tone}`}>{item.label.replaceAll("_", " ")}</span>
                       <span className="text-[10px] text-text-muted">conf {item.confidence.toFixed(2)}</span>
                     </div>
-                    <p className="text-sm text-text-primary">"{item.claimText}"</p>
+                    <p className="text-sm text-text-primary">&ldquo;{item.claimText}&rdquo;</p>
                     <p className="text-xs text-text-muted mt-1">{item.evidence}</p>
                     <div className="text-[11px] text-text-muted mt-1.5">
                       {project?.name} · <Link href={`/runs/${item.runId}`} className="font-mono hover:text-brand">{item.caseId}</Link>
