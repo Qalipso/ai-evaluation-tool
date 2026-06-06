@@ -2,6 +2,7 @@ import React from "react";
 import { useCurrentFrame, interpolate } from "remotion";
 import { color, font, sec } from "../../theme";
 import { ProductFrame } from "../../components/ProductFrame";
+import { GlassCard } from "../../components/GlassCard";
 import { FilmShell } from "./FilmShell";
 import { reveal, rise } from "../../components/anim";
 import { rubricDims } from "../../data-film";
@@ -36,27 +37,17 @@ export const S4Rubrics: React.FC<{ audio?: boolean }> = ({ audio }) => {
               if (frame < at) return null;
               const p = rise(frame, at);
               return (
-                <div
-                  key={d.name}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 14,
-                    padding: "16px 20px",
-                    borderRadius: 12,
-                    background: "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))",
-                    border: `1px solid ${color.border}`,
-                    ...reveal(frame, at, 16),
-                  }}
-                >
-                  <span style={{ fontFamily: font.mono, fontSize: 14, color: color.accent, width: 26 }}>{String(i + 1).padStart(2, "0")}</span>
-                  <span style={{ flex: 1, fontFamily: font.sans, fontSize: 22, color: color.text }}>{d.name}</span>
-                  {/* calibrating meter to the dimension's score */}
-                  <div style={{ width: 90, height: 6, borderRadius: 99, background: color.bgCardSolid, overflow: "hidden" }}>
-                    <div style={{ width: `${p * d.score * 100}%`, height: "100%", background: `linear-gradient(90deg, ${color.accentDeep}, ${color.accentBright})`, boxShadow: `0 0 8px ${color.accentGlow}` }} />
+                <GlassCard key={d.name} delay={at} radius={12} padding="16px 20px" speed={4}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <span style={{ fontFamily: font.mono, fontSize: 14, color: color.accent, width: 26 }}>{String(i + 1).padStart(2, "0")}</span>
+                    <span style={{ flex: 1, fontFamily: font.sans, fontSize: 22, color: color.text }}>{d.name}</span>
+                    {/* calibrating meter to the dimension's score */}
+                    <div style={{ width: 90, height: 6, borderRadius: 99, background: color.bgCardSolid, overflow: "hidden" }}>
+                      <div style={{ width: `${p * d.score * 100}%`, height: "100%", background: `linear-gradient(90deg, ${color.accentDeep}, ${color.accentBright})`, boxShadow: `0 0 8px ${color.accentGlow}` }} />
+                    </div>
+                    <span style={{ width: 48, textAlign: "right", fontFamily: font.mono, fontSize: 17, color: color.textSecondary }}>{(p * d.score).toFixed(2)}</span>
                   </div>
-                  <span style={{ width: 48, textAlign: "right", fontFamily: font.mono, fontSize: 17, color: color.textSecondary }}>{(p * d.score).toFixed(2)}</span>
-                </div>
+                </GlassCard>
               );
             })}
           </div>

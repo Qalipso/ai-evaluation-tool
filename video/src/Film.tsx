@@ -7,6 +7,7 @@ import { fade } from "@remotion/transitions/fade";
 import { flip } from "@remotion/transitions/flip";
 import { sec, color, FILM } from "./theme";
 import { CameraPush } from "./components/CameraPush";
+import { S0ColdOpen } from "./scenes/film/S0ColdOpen";
 import { S1Hook } from "./scenes/film/S1Hook";
 import { S2Problem } from "./scenes/film/S2Problem";
 import { S3Reveal } from "./scenes/film/S3Reveal";
@@ -30,6 +31,7 @@ const Cut: React.FC<{ children: React.ReactNode; from: number; to: number; drift
 };
 
 const cam: Record<keyof typeof FILM, { from: number; to: number; driftY: number }> = {
+  coldOpen: { from: 1.12, to: 1.0, driftY: 0 }, // punch zoom-out grab
   hook: { from: 1.0, to: 1.06, driftY: -6 },
   problem: { from: 1.04, to: 1.1, driftY: 0 },
   reveal: { from: 1.08, to: 1.0, driftY: 0 },
@@ -41,6 +43,7 @@ const cam: Record<keyof typeof FILM, { from: number; to: number; driftY: number 
 };
 
 const Scenes: { key: keyof typeof FILM; Comp: React.FC<{ audio?: boolean }> }[] = [
+  { key: "coldOpen", Comp: S0ColdOpen },
   { key: "hook", Comp: S1Hook },
   { key: "problem", Comp: S2Problem },
   { key: "reveal", Comp: S3Reveal },
@@ -55,6 +58,7 @@ const Scenes: { key: keyof typeof FILM; Comp: React.FC<{ audio?: boolean }> }[] 
 // (durations shrink toward the climax = rising tension / нагнетение).
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const transitions: { dur: number; p: () => TransitionPresentation<any>; t: ReturnType<typeof linearTiming> }[] = [
+  { dur: 8, p: () => fade(), t: linearTiming({ durationInFrames: 8 }) }, // coldOpen -> hook: fast hard cut
   { dur: 16, p: () => slide({ direction: "from-bottom" }), t: springTiming({ config: { damping: 200 } }) },
   { dur: 15, p: () => wipe({ direction: "from-left" }), t: linearTiming({ durationInFrames: 15 }) },
   { dur: 14, p: () => slide({ direction: "from-right" }), t: springTiming({ config: { damping: 200 } }) },
