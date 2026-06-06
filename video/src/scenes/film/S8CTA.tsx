@@ -1,6 +1,7 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { color, font, sec } from "../../theme";
+import { KineticType } from "../../components/KineticType";
 import { FilmShell } from "./FilmShell";
 import { reveal, rise } from "../../components/anim";
 import { cta } from "../../data-film";
@@ -42,11 +43,20 @@ export const S8CTA: React.FC<{ audio?: boolean }> = ({ audio }) => {
               );
             })}
           </div>
-          <h1 style={{ margin: "10px 0 0", fontFamily: font.sans, fontSize: 60, fontWeight: 700, letterSpacing: -1.6, lineHeight: 1.1, color: color.text, ...reveal(frame, sec(1.6), 22) }}>
-            Evaluate AI with evidence,
-            <br />
-            <span style={{ color: color.accentBright }}>not vibes.</span>
-          </h1>
+          <div style={{ margin: "14px 0 0", maxWidth: 1200 }}>
+            <KineticType
+              start={sec(1.6)}
+              step={5}
+              words={[
+                { text: "Evaluate", size: 84, weight: 700, color: color.text },
+                { text: "AI", size: 84, weight: 800, color: color.text },
+                { text: "with", size: 56, weight: 400, italic: true, color: color.textSecondary },
+                { text: "EVIDENCE,", size: 96, weight: 900, color: color.accentBright, track: -3 },
+                { text: "not", size: 60, weight: 400, italic: true, color: color.textSecondary },
+                { text: "vibes.", size: 96, weight: 900, color: color.text },
+              ]}
+            />
+          </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", maxWidth: 760, marginTop: 18, ...reveal(frame, sec(2.6), 16) }}>
             {cta.chips.map((c) => (
               <span key={c} style={{ fontFamily: font.mono, fontSize: 16, color: color.textSecondary, border: `1px solid ${color.border}`, background: "rgba(255,255,255,0.02)", padding: "7px 14px", borderRadius: 99 }}>

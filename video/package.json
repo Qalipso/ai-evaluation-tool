@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@remotion/google-fonts": "4.0.473",
+    "@remotion/transitions": "^4.0.473",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "remotion": "4.0.473"
