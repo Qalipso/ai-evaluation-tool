@@ -119,11 +119,11 @@ Thresholds (see `app/src/lib/eval/aggregate.ts`):
 ## 90-second demo path
 
 1. Open **Dashboard** — see quality health across projects.
-2. Open a **Customer Support** failed run — inspect an unsupported claim + safety finding.
-3. Open a **Shadow** run — inspect the claim heat map and partial grounding.
-4. Open **Regression** (`/compare`) — compare prompt/model changes.
+2. Open the **RAG — Internal Docs QA** run (`/runs/run-rag-qa-004`) — inspect the claim heat map, grounded vs unsupported claims, and the Ship-ready verdict.
+3. Open **Safety Log** (`/safety`) — inspect the open finding that blocks a run.
+4. Open **Regression** (`/compare`) — compare prompt/model changes with score deltas.
 5. Open **Reports** — export a stakeholder-ready markdown summary.
-6. Open **Wiki → Outputs, Please** — practice claim labeling.
+6. Open **Play** (`/play`, "Outputs, Please") — practice claim labeling.
 
 ---
 
