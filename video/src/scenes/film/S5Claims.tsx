@@ -14,20 +14,20 @@ import { claimAnswer, filmClaims, evidencePanel } from "../../data-film";
 // HERO: answer split into claims, checked against an evidence panel. ~12s.
 export const S5Claims: React.FC<{ audio?: boolean }> = ({ audio }) => {
   const frame = useCurrentFrame();
-  const eviAt = sec(2.2);
+  const eviAt = sec(1.4);
   return (
     <FilmShell scene="claims" audio={audio} pad="60px 150px 150px">
       <ProductFrame title="cases / areamosa · claim pipeline" badge={{ text: "grounding", tone: "accent" }}>
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 22 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <SceneTitle eyebrow="claim pipeline" title="Every claim is checked against evidence." highlight="evidence" at={sec(0.2)} />
-            <Deliberation label="Weighing" start={sec(1.4)} thoughts={["reading claim", "retrieving evidence", "matching sources", "scoring grounding"]} />
+            <SceneTitle eyebrow="claim pipeline" title="Every claim is checked against evidence." highlight="evidence" at={sec(0.15)} />
+            <Deliberation label="Weighing" start={sec(0.9)} thoughts={["reading claim", "retrieving evidence", "matching sources", "scoring grounding"]} />
           </div>
-          <PipelineFlow steps={["Answer", "Extract claims", "Retrieve evidence", "Score", "Verdict"]} start={sec(0.5)} step={9} />
+          <PipelineFlow steps={["Answer", "Extract claims", "Retrieve evidence", "Score", "Verdict"]} start={sec(0.35)} step={6} />
           <div style={{ display: "flex", gap: 36, width: "100%" }}>
             <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative", overflow: "hidden" }}>
-            <ClaimHighlighter answer={claimAnswer} claims={filmClaims} start={sec(1.8)} step={sec(0.95)} />
-            <ScannerSweep start={sec(1.3)} dur={sec(1.2)} />
+            <ClaimHighlighter answer={claimAnswer} claims={filmClaims} start={sec(1.2)} step={sec(0.5)} />
+            <ScannerSweep start={sec(0.8)} dur={sec(0.9)} />
             </div>
             <div style={{ width: 1, background: color.border }} />
           {/* evidence panel */}

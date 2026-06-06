@@ -1,9 +1,10 @@
 import { interpolate, spring, Easing } from "remotion";
 import { FPS } from "../theme";
 
-// Reveal a value 0->1 with a soft spring, starting at `delay` frames.
+// Reveal a value 0->1 with a snappy spring (quick pop, tiny overshoot),
+// starting at `delay` frames. Punchy, not floaty.
 export const rise = (frame: number, delay: number, fps = FPS) =>
-  spring({ frame: frame - delay, fps, config: { damping: 200, mass: 0.7 } });
+  spring({ frame: frame - delay, fps, config: { damping: 18, mass: 0.5, stiffness: 160 } });
 
 // Fade + slide-up reveal, returns style props.
 export const reveal = (frame: number, delay: number, dist = 24) => {
@@ -19,13 +20,13 @@ export const typed = (
   frame: number,
   start: number,
   text: string,
-  cps = 38,
+  cps = 56,
 ) => {
   const n = Math.floor(Math.max(0, frame - start) * (cps / FPS));
   return text.slice(0, Math.min(text.length, n));
 };
 
-export const charsDone = (start: number, text: string, cps = 38) =>
+export const charsDone = (start: number, text: string, cps = 56) =>
   start + Math.ceil((text.length / cps) * FPS);
 
 // Ease a number from->to over [a,b] frames.

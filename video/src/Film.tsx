@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Series, useCurrentFrame, interpolate } from "remotion";
+import { AbsoluteFill, Series, useCurrentFrame, interpolate, Easing } from "remotion";
 import { sec, color, FILM } from "./theme";
 import { CameraPush } from "./components/CameraPush";
 import { S1Hook } from "./scenes/film/S1Hook";
@@ -13,13 +13,15 @@ import { S8CTA } from "./scenes/film/S8CTA";
 
 const Cut: React.FC<{ children: React.ReactNode; from?: number; to?: number; driftY?: number }> = ({ children, from = 1.0, to = 1.04, driftY = -8 }) => {
   const frame = useCurrentFrame();
-  const fadeIn = interpolate(frame, [0, 9], [0, 1], { extrapolateRight: "clamp" });
+  const fadeIn = interpolate(frame, [0, 5], [0, 1], { extrapolateRight: "clamp" });
+  // quick punch-in on entry for energy
+  const punch = interpolate(frame, [0, 7], [1.03, 1], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   return (
-    <AbsoluteFill style={{ opacity: fadeIn }}>
+    <AbsoluteFill style={{ opacity: fadeIn, transform: `scale(${punch})` }}>
       <CameraPush from={from} to={to} driftY={driftY}>
         {children}
       </CameraPush>
-      <AbsoluteFill style={{ background: color.bgBase, opacity: interpolate(frame, [0, 7], [1, 0], { extrapolateRight: "clamp" }), pointerEvents: "none" }} />
+      <AbsoluteFill style={{ background: color.bgBase, opacity: interpolate(frame, [0, 4], [1, 0], { extrapolateRight: "clamp" }), pointerEvents: "none" }} />
     </AbsoluteFill>
   );
 };
