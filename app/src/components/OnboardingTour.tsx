@@ -52,8 +52,8 @@ export function OnboardingTour() {
 
   return (
     <>
-      {/* light scrim — unobtrusive */}
-      <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px] animate-[fadeUp_.3s_ease]" onClick={finish} />
+      {/* scrim — blur the page behind */}
+      <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-md animate-[fadeUp_.3s_ease]" onClick={finish} />
 
       <div className="fixed inset-x-0 bottom-24 z-50 flex flex-col items-center px-4 pointer-events-none">
         <div className="pointer-events-auto w-full max-w-sm rounded-2xl elev-card p-5">

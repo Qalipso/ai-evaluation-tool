@@ -101,7 +101,7 @@ export function CommandPalette() {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-start justify-center px-4 pt-[14vh]" onClick={() => setOpen(false)}>
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-[1px]" />
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-md" />
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-lg rounded-2xl elev-card overflow-hidden"
