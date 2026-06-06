@@ -1,5 +1,5 @@
 import React from "react";
-import { useCurrentFrame } from "remotion";
+import { useCurrentFrame, interpolate } from "remotion";
 import { color, font, sec } from "../../theme";
 import { ProductFrame } from "../../components/ProductFrame";
 import { FilmShell } from "./FilmShell";
@@ -13,9 +13,23 @@ export const S4Rubrics: React.FC<{ audio?: boolean }> = ({ audio }) => {
     <FilmShell scene="rubrics" audio={audio} pad="80px 200px 150px">
       <ProductFrame title="evaluators / areamosa-assistant" badge={{ text: "rubric v3", tone: "accent" }}>
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 20 }}>
-          <span style={{ fontFamily: font.sans, fontSize: 28, fontWeight: 600, color: color.text, ...reveal(frame, sec(0.2), 14) }}>
-            Define what <span style={{ color: color.accentBright }}>“good”</span> means.
-          </span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontFamily: font.sans, fontSize: 28, fontWeight: 600, color: color.text, ...reveal(frame, sec(0.2), 14) }}>
+              Define what <span style={{ color: color.accentBright }}>“good”</span> means.
+            </span>
+            {frame >= sec(3.6) && (
+              <span
+                style={{
+                  fontSize: 54,
+                  lineHeight: 1,
+                  transform: `scale(${0.6 + rise(frame, sec(3.6)) * 0.4}) rotate(${interpolate(rise(frame, sec(3.6)), [0, 1], [-18, 0])}deg)`,
+                  filter: `drop-shadow(0 0 18px ${color.accentGlow})`,
+                }}
+              >
+                👍
+              </span>
+            )}
+          </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             {rubricDims.map((d, i) => {
               const at = sec(0.6) + i * sec(0.55);

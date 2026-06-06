@@ -4,9 +4,8 @@ import { TransitionSeries, springTiming, linearTiming, type TransitionPresentati
 import { slide } from "@remotion/transitions/slide";
 import { wipe } from "@remotion/transitions/wipe";
 import { fade } from "@remotion/transitions/fade";
-import { clockWipe } from "@remotion/transitions/clock-wipe";
 import { flip } from "@remotion/transitions/flip";
-import { sec, color, WIDTH, HEIGHT, FILM } from "./theme";
+import { sec, color, FILM } from "./theme";
 import { CameraPush } from "./components/CameraPush";
 import { S1Hook } from "./scenes/film/S1Hook";
 import { S2Problem } from "./scenes/film/S2Problem";
@@ -59,7 +58,7 @@ const transitions: { dur: number; p: () => TransitionPresentation<any>; t: Retur
   { dur: 16, p: () => slide({ direction: "from-bottom" }), t: springTiming({ config: { damping: 200 } }) },
   { dur: 15, p: () => wipe({ direction: "from-left" }), t: linearTiming({ durationInFrames: 15 }) },
   { dur: 14, p: () => slide({ direction: "from-right" }), t: springTiming({ config: { damping: 200 } }) },
-  { dur: 13, p: () => clockWipe({ width: WIDTH, height: HEIGHT }), t: linearTiming({ durationInFrames: 13 }) },
+  { dur: 22, p: () => flip({ direction: "from-right", perspective: 1800 }), t: springTiming({ config: { damping: 14, mass: 0.8 }, durationInFrames: 22 }) },
   { dur: 11, p: () => wipe({ direction: "from-bottom" }), t: linearTiming({ durationInFrames: 11 }) },
   { dur: 10, p: () => flip(), t: springTiming({ config: { damping: 200 } }) },
   { dur: 12, p: () => fade(), t: linearTiming({ durationInFrames: 12 }) },
