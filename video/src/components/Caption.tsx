@@ -35,15 +35,21 @@ export const Caption: React.FC<{
           margin: 0,
           textAlign: "center",
           fontFamily: font.sans,
-          fontSize: 30,
-          lineHeight: 1.45,
-          fontWeight: 500,
-          letterSpacing: -0.2,
-          textShadow: "0 4px 30px rgba(0,0,0,0.9)",
+          fontSize: 33,
+          lineHeight: 1.4,
+          fontWeight: 600,
+          letterSpacing: -0.3,
+          textShadow: "0 4px 30px rgba(0,0,0,0.95)",
+          // legibility pill — keeps VO text readable over busy/aurora scenes
+          padding: "12px 26px",
+          borderRadius: 16,
+          background: "rgba(7,7,13,0.42)",
+          border: `1px solid ${color.hairline}`,
+          backdropFilter: "blur(8px)",
         }}
       >
         {words.map((w, i) => (
-          <span key={i} style={{ color: i < shownCount ? color.text : color.textMuted, transition: "color 0.2s", opacity: i < shownCount ? 1 : 0.5 }}>
+          <span key={i} style={{ color: i < shownCount ? color.text : color.textSecondary, transition: "color 0.2s", opacity: i < shownCount ? 1 : 0.55 }}>
             {w}{" "}
           </span>
         ))}

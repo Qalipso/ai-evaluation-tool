@@ -21,16 +21,17 @@ export const FilmShell: React.FC<{
   pad?: string;
   bg?: string; // generated asset under public/, e.g. "video/generated/hero-board.png"
   bgVideo?: boolean;
+  bgOpacity?: number;
   aurora?: boolean; // aurora-style animated gradient backdrop (title scenes)
   children: React.ReactNode;
-}> = ({ scene, audio, glow = "accent", pad = "80px 150px 150px", bg, bgVideo, aurora, children }) => {
+}> = ({ scene, audio, glow = "accent", pad = "80px 150px 150px", bg, bgVideo, bgOpacity, aurora, children }) => {
   const { durationInFrames } = useVideoConfig();
   const n = filmNarration[scene];
   return (
     <AbsoluteFill>
       {aurora ? <Aurora /> : <Backdrop glow={glow} />}
       {!aurora && <DepthBloom />}
-      <AssetBg src={bg} video={bgVideo} enabled={USE_GENERATED_ASSETS && !!bg} />
+      <AssetBg src={bg} video={bgVideo} opacity={bgOpacity} enabled={USE_GENERATED_ASSETS && !!bg} />
       {audio && <Audio src={staticFile(n.audio)} />}
       <AbsoluteFill style={{ padding: pad }}>{children}</AbsoluteFill>
       <LightSweep />
