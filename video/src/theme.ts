@@ -53,13 +53,13 @@ export const SCENE = {
 // 5+4+5+6+8+7+7+5 = 47s.
 export const FILM = {
   coldOpen: 2,
-  hook: 5,
-  problem: 4,
+  hook: 4,
+  problem: 6,
   reveal: 5,
-  rubrics: 6,
-  claims: 8,
-  safety: 7,
-  verdict: 7,
+  rubrics: 5,
+  claims: 7,
+  safety: 6,
+  verdict: 6,
   cta: 5,
 } as const;
 

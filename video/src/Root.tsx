@@ -34,7 +34,7 @@ export const RemotionRoot: React.FC = () => {
         {...base}
       />
       {/* Full 60s film */}
-      <Composition id="EvalFilm" component={Film} durationInFrames={FILM_FRAMES} defaultProps={{ audio: false }} {...base} />
+      <Composition id="EvalFilm" component={Film} durationInFrames={FILM_FRAMES} defaultProps={{ audio: true }} {...base} />
       {/* 15s teaser for README / quick demo */}
       <Composition id="Teaser15" component={Teaser} durationInFrames={TEASER_FRAMES} {...base} />
       {/* Standalone animated charts (README loops, 16:9 720p) */}

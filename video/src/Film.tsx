@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, useCurrentFrame, interpolate, Easing } from "remotion";
+import { AbsoluteFill, Audio, staticFile, useCurrentFrame, interpolate, Easing } from "remotion";
 import { TransitionSeries, springTiming, linearTiming, type TransitionPresentation } from "@remotion/transitions";
 import { slide } from "@remotion/transitions/slide";
 import { wipe } from "@remotion/transitions/wipe";
@@ -71,6 +71,7 @@ const transitions: { dur: number; p: () => TransitionPresentation<any>; t: Retur
 export const Film: React.FC<{ audio?: boolean }> = ({ audio = false }) => {
   return (
     <AbsoluteFill style={{ background: color.bgBase }}>
+      {audio && <Audio src={staticFile("audio/music-bed.mp3")} volume={0.75} />}
       <TransitionSeries>
         {Scenes.map(({ key, Comp }, i) => (
           <React.Fragment key={key}>

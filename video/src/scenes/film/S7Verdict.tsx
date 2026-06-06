@@ -1,5 +1,5 @@
 import React from "react";
-import { useCurrentFrame } from "remotion";
+import { useCurrentFrame, Audio, Sequence, staticFile } from "remotion";
 import { color, font, sec } from "../../theme";
 import { ProductFrame } from "../../components/ProductFrame";
 import { VerdictBadge } from "../../components/VerdictBadge";
@@ -18,6 +18,11 @@ export const S7Verdict: React.FC<{ audio?: boolean }> = ({ audio }) => {
   const badgeAt = sec(1.4);
   return (
     <FilmShell scene="verdict" audio={audio} pad="80px 180px 150px">
+      {audio && (
+        <Sequence from={badgeAt}>
+          <Audio src={staticFile("audio/sfx/chime.mp3")} volume={0.7} />
+        </Sequence>
+      )}
       <ProductFrame title="runs / areamosa · run #319 (re-evaluated)" badge={frame >= badgeAt ? { text: "Ship-ready", tone: "ok" } : { text: "deliberating…", tone: "accent" }}>
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 24, justifyContent: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 24 }}>

@@ -1,5 +1,5 @@
 import React from "react";
-import { useCurrentFrame } from "remotion";
+import { useCurrentFrame, Audio, Sequence, staticFile } from "remotion";
 import { color, font, sec } from "../../theme";
 import { ProductFrame } from "../../components/ProductFrame";
 import { SafetyGateGrid } from "../../components/SafetyGateGrid";
@@ -15,6 +15,11 @@ export const S6Safety: React.FC<{ audio?: boolean }> = ({ audio }) => {
   const glow = frame >= resolveAt && blocked ? "bad" : "accent";
   return (
     <FilmShell scene="safety" audio={audio} glow={glow} pad="80px 200px 150px" bg="video/generated/safety-gates.mp4" bgVideo>
+      {audio && (
+        <Sequence from={resolveAt}>
+          <Audio src={staticFile("audio/sfx/lock.mp3")} volume={0.8} />
+        </Sequence>
+      )}
       <ProductFrame title="safety / areamosa · gate run" badge={frame >= resolveAt ? { text: "1 blocked", tone: "bad" } : { text: "scanning…", tone: "accent" }}>
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 24, justifyContent: "center" }}>
           <span style={{ fontFamily: font.sans, fontSize: 26, fontWeight: 600, color: color.text, ...reveal(frame, sec(0.2), 12) }}>

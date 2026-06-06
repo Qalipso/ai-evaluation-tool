@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, useCurrentFrame, interpolate, Easing } from "remotion";
+import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame, interpolate, Easing } from "remotion";
 import { color, font, sec } from "../../theme";
 import { Backdrop } from "../../components/Backdrop";
 import { AssetBg } from "../../components/AssetBg";
@@ -12,7 +12,7 @@ import { USE_GENERATED_ASSETS } from "./FilmShell";
 
 // Cold open — grabs attention in the first second: huge claim slams in over
 // the ironic robots-café footage, then glitches into the story. ~2s.
-export const S0ColdOpen: React.FC = () => {
+export const S0ColdOpen: React.FC<{ audio?: boolean }> = ({ audio }) => {
   const frame = useCurrentFrame();
   const flash = interpolate(frame, [sec(1.3), sec(1.5)], [0, 0.5], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const out = interpolate(frame, [sec(1.5), sec(1.9)], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -35,6 +35,11 @@ export const S0ColdOpen: React.FC = () => {
         />
       </AbsoluteFill>
       <LightSweep delay={4} />
+      {audio && (
+        <Sequence from={sec(1.2)}>
+          <Audio src={staticFile("audio/sfx/thump.mp3")} volume={0.9} />
+        </Sequence>
+      )}
       <GlitchOverlay start={sec(1.25)} dur={14} />
       <AbsoluteFill style={{ background: color.bad, opacity: flash, mixBlendMode: "screen", pointerEvents: "none" }} />
       <Grain opacity={0.06} />
