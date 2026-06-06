@@ -4,6 +4,8 @@ import { loadFont as loadInter } from "@remotion/google-fonts/Inter";
 import { loadFont as loadMono } from "@remotion/google-fonts/JetBrainsMono";
 import { Reel, REEL_FRAMES } from "./Reel";
 import { Film, FILM_FRAMES } from "./Film";
+import { Teaser, TEASER_FRAMES } from "./Teaser";
+import { ChartPipeline, ChartGates, ChartRubric, ChartScore } from "./Charts";
 import { HookScene } from "./scenes/HookScene";
 import { LiveRunScene } from "./scenes/LiveRunScene";
 import { JudgeScene } from "./scenes/JudgeScene";
@@ -33,6 +35,13 @@ export const RemotionRoot: React.FC = () => {
       />
       {/* Full 60s film */}
       <Composition id="EvalFilm" component={Film} durationInFrames={FILM_FRAMES} defaultProps={{ audio: false }} {...base} />
+      {/* 15s teaser for README / quick demo */}
+      <Composition id="Teaser15" component={Teaser} durationInFrames={TEASER_FRAMES} {...base} />
+      {/* Standalone animated charts (README loops, 16:9 720p) */}
+      <Composition id="ChartPipeline" component={ChartPipeline} durationInFrames={sec(4)} fps={FPS} width={1280} height={720} />
+      <Composition id="ChartGates" component={ChartGates} durationInFrames={sec(5)} fps={FPS} width={1280} height={720} />
+      <Composition id="ChartRubric" component={ChartRubric} durationInFrames={sec(4)} fps={FPS} width={1280} height={720} />
+      <Composition id="ChartScore" component={ChartScore} durationInFrames={sec(3)} fps={FPS} width={1280} height={720} />
       {/* Film per-scene comps */}
       <Composition id="F1Hook" component={S1Hook} durationInFrames={sec(FILM.hook)} defaultProps={{ audio: false }} {...base} />
       <Composition id="F2Problem" component={S2Problem} durationInFrames={sec(FILM.problem)} defaultProps={{ audio: false }} {...base} />
