@@ -101,6 +101,22 @@ export default async function RunDetailPage({
         <StatCard label="Claims processed" value={allClaims.length} />
       </div>
 
+      {cases.length === 0 && (
+        <Card className="p-5">
+          <h2 className="text-base font-semibold mb-1">Per-case detail not available</h2>
+          <p className="text-sm text-text-secondary">
+            This seeded run stores summary totals only — no per-case rows in the public demo
+            dataset. For a fully populated walkthrough (dimension breakdown, claim heat map,
+            evidence chain), open the{" "}
+            <Link href="/runs/run-rag-qa-004" className="text-brand hover:underline">
+              RAG — Internal Docs QA
+            </Link>{" "}
+            run.
+          </p>
+        </Card>
+      )}
+
+      {cases.length > 0 && (
       <Card className="p-5">
         <h2 className="text-base font-semibold mb-1">Dimension breakdown</h2>
         <p className="text-xs text-text-muted mb-4">
@@ -113,7 +129,9 @@ export default async function RunDetailPage({
           <p className="text-sm text-text-muted">No rubric.</p>
         )}
       </Card>
+      )}
 
+      {cases.length > 0 && (
       <Card className="p-5">
         <h2 className="text-base font-semibold mb-3">Claim distribution</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -138,6 +156,7 @@ export default async function RunDetailPage({
           )}
         </div>
       </Card>
+      )}
 
       {cases.length > 1 && (
         <Card className="p-5">

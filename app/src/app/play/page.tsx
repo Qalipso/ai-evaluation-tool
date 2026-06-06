@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui";
 import {
@@ -25,9 +25,12 @@ type PlayerCase = {
 type Stage = "briefing" | "playing" | "result";
 
 const SHIFT_SIZE = 8;
+// Fixed seed for SSR + first client render so hydration matches (avoids React #418).
+// Client re-rolls a random shift on mount.
+const SSR_SEED = 1;
 
-function newShift(): Shift {
-  return sampleShift({ size: SHIFT_SIZE, minSafety: 1, minClean: 1 });
+function newShift(seed?: number): Shift {
+  return sampleShift({ size: SHIFT_SIZE, minSafety: 1, minClean: 1, seed });
 }
 
 function initState(shift: Shift): PlayerCase[] {
@@ -62,8 +65,15 @@ const TONE_RING_ACTIVE: Record<string, string> = {
 export default function PlayPage() {
   const [stage, setStage] = useState<Stage>("briefing");
   const [idx, setIdx] = useState(0);
-  const [shift, setShift] = useState<Shift>(() => newShift());
+  const [shift, setShift] = useState<Shift>(() => newShift(SSR_SEED));
   const [state, setState] = useState<PlayerCase[]>(() => initState(shift));
+
+  // Re-roll a random shift after mount (client only) — SSR uses fixed seed.
+  useEffect(() => {
+    const fresh = newShift();
+    setShift(fresh);
+    setState(initState(fresh));
+  }, []);
 
   const current = shift.cases[idx];
   const playerCase = state[idx];
