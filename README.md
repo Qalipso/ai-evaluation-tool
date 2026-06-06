@@ -8,6 +8,14 @@ This tool scores AI outputs against rubrics, checks claims against evidence, cat
 > Evaluate AI with evidence, not vibes.
 
 <p align="center">
+  <a href="https://github.com/Qalipso/ai-evaluation-tool/actions/workflows/ci.yml"><img src="https://github.com/Qalipso/ai-evaluation-tool/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <img src="https://img.shields.io/badge/tests-vitest-6E9F18" alt="Tests: Vitest" />
+  <img src="https://img.shields.io/badge/Next.js-15-black" alt="Next.js 15" />
+  <img src="https://img.shields.io/badge/React-19-149ECA" alt="React 19" />
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6" alt="TypeScript 5" />
+</p>
+
+<p align="center">
   <a href="https://ai-eval-tool.vercel.app/">
     <img src="./docs/media/teaser15.gif" alt="AI Evaluation Tool preview" width="100%" />
   </a>
@@ -15,6 +23,8 @@ This tool scores AI outputs against rubrics, checks claims against evidence, cat
 
 <p align="center">
   <a href="https://ai-eval-tool.vercel.app/">Live demo</a>
+  ·
+  <a href="./docs/DEMO.md">90-second demo path</a>
   ·
   <a href="https://github.com/Qalipso/ai-evaluation-tool">GitHub</a>
 </p>
@@ -69,7 +79,7 @@ The evaluation loop follows four stages:
   <img src="./docs/media/ChartRubric.gif" alt="Rubric breakdown" width="100%" />
 </p>
 
-Rubrics define dimensions, weights, thresholds, and scoring methods.
+Rubrics define dimensions, weights, thresholds, and scoring methods. The engine ships **14 reference dimensions** (`app/src/lib/eval/dimensions.ts`): accuracy, relevance, completeness, task_completion, hallucination_risk, groundedness, safety, consistency, tone_fit, actionability — plus extended ones for conversational/reflective products: helpfulness, emotional_nuance, non_judgmental_tone, useful_next_step.
 
 ### Claim pipeline
 
@@ -93,19 +103,44 @@ Some failures should block a run instead of being averaged into a score.
   <img src="./docs/media/ChartScore.gif" alt="Verdict score" width="100%" />
 </p>
 
-Every run ends with a verdict: `ship-ready`, `acceptable`, `needs-work`, or `blocked`.
+Every run ends with a verdict: **Ship-ready**, **Acceptable**, **Needs work**, or **Blocked**.
+
+Thresholds (see `app/src/lib/eval/aggregate.ts`):
+
+| Verdict | Rule |
+|---|---|
+| **Ship-ready** | overall ≥ 0.85 and no dimension below its threshold |
+| **Acceptable** | overall ≥ 0.70 |
+| **Needs work** | overall < 0.70 |
+| **Blocked** | any safety gate fails, regardless of score |
+
+---
+
+## 90-second demo path
+
+1. Open **Dashboard** — see quality health across projects.
+2. Open a **Customer Support** failed run — inspect an unsupported claim + safety finding.
+3. Open a **Shadow** run — inspect the claim heat map and partial grounding.
+4. Open **Regression** (`/compare`) — compare prompt/model changes.
+5. Open **Reports** — export a stakeholder-ready markdown summary.
+6. Open **Wiki → Outputs, Please** — practice claim labeling.
 
 ---
 
 ## What it does
 
 - **Rubric scoring** — evaluate AI outputs across weighted dimensions
-- **LLM-as-judge** — score subjective quality dimensions with rationale
-- **Claim grounding** — extract factual claims and compare them with evidence
-- **Deterministic checks** — catch pattern-based failures like PII or false confirmation
+- **LLM-as-judge** — score subjective quality dimensions with rationale (GPT-4o-mini)
+- **Claim pipeline** — extract factual claims and verify each against retrieved evidence
+- **Semantic similarity** — embedding cosine vs the expected behavior
+- **Deterministic checks** — pattern-based checks: PII, false confirmation, language match, length
 - **Safety gates** — block critical issues regardless of average score
-- **Human review** — inspect failed cases and calibrate judgment
-- **Reports** — export run summaries with scores, rationales, failures, and evidence
+- **Human review** — inspect failed cases, override scores, calibrate judgment
+- **Datasets** — versioned test sets for apples-to-apples regression across model/prompt changes
+- **Regression compare** — diff two runs and flag score drops
+- **Reports** — export run summaries (`.md` / `.txt`) with scores, rationales, failures, and evidence
+
+Five scoring methods are configurable per rubric dimension: `llm_judge`, `semantic_similarity`, `claim_pipeline`, `deterministic`, `human`. A dimension with no real scorer is reported as `unscored` — never coerced to a placeholder number.
 
 ---
 
@@ -180,13 +215,22 @@ Defines dimensions, weights, thresholds, and scoring methods.
 Extracts factual claims and labels them as:
 
 - `supported`
-- `partial`
+- `partially_supported`
 - `unsupported`
 - `contradicted`
 
 ### Safety layer
 
-Runs deterministic checks for high-risk failures.
+Runs deterministic checks for high-risk failures. Implemented checks:
+
+| Check | Severity | Blocks release |
+|---|---|---|
+| `pii_leakage` | critical | yes |
+| `false_confirmation` | critical | yes |
+| `booking_requires_calendar_write` | critical | yes |
+| `language_match` | critical | yes |
+| `manager_request_requires_handoff` | error | no |
+| `output_length_limit` | warning | no |
 
 ### Verdict
 
@@ -223,30 +267,42 @@ The goal is to explain:
 
 ## App surfaces
 
+### Primary views
+
 | Route | Purpose |
 |---|---|
-| `/` | Quality dashboard |
-| `/evaluators` | Configure scoring engines and checks |
-| `/runs/new` | Start a new evaluation run |
-| `/runs/[id]` | Inspect run results |
-| `/play` | Manual inspection / practice mode |
-| `/review` | Human review queue |
-| `/reports` | Exportable evaluation reports |
-| `/safety` | Safety layer |
-| `/wiki` | Evaluation knowledge base |
+| `/` | Quality dashboard across projects |
+| `/projects` · `/projects/[id]` · `/projects/new` | Project CRUD |
+| `/rubrics` · `/rubrics/[id]` · `/rubrics/new` | Rubric builder |
+| `/runs` · `/runs/new` · `/runs/[id]` | Run list, batch runner, run detail |
+| `/cases/[id]` | Case detail: scores, claim heat map, findings |
+| `/compare` | Regression comparison between two runs |
+| `/datasets` · `/datasets/[id]` | Versioned test sets |
+| `/evaluators` | Configure scoring engines + global settings |
+| `/play` | Manual case inspection / practice mode |
+| `/review` · `/review/[id]` | Human review queue + per-case scoring |
+| `/reports` · `/reports/[id]` | Exportable evaluation reports |
+| `/safety` | Safety findings and policy violations |
+| `/wiki` · `/wiki/[slug]` · `/wiki/start-here` | Evaluation knowledge base |
+| `/enter` | Demo access gate (when `DEMO_ACCESS_CODE` set) |
+
+### API routes
+
+`POST /api/eval/run/start` · `POST /api/eval/run/case` · `POST /api/eval/run/finalize` · `POST /api/eval/questions` · `POST /api/eval/answer` · `POST /api/eval/claims` · `POST /api/eval/deterministic` · `POST /api/rubric/score` · `GET /api/index` · `POST /api/enter`
+
+28 pages + 9 API routes total.
 
 ---
 
 ## Tech stack
 
-- Next.js 15
-- React 19
-- TypeScript
-- Tailwind CSS
-- Supabase
-- OpenAI SDK
-- Zod
-- Vitest
+- Next.js 15 · React 19
+- TypeScript 5
+- Tailwind CSS 3
+- Supabase (PostgreSQL) `@supabase/supabase-js` 2
+- OpenAI SDK 6
+- Zod 4
+- Vitest 2
 
 ---
 
@@ -256,26 +312,45 @@ The goal is to explain:
 git clone https://github.com/Qalipso/ai-evaluation-tool.git
 cd ai-evaluation-tool/app
 npm install
+cp .env.local.example .env.local   # fill OPENAI_API_KEY + SUPABASE_*
 npm run dev
 ```
 
-Open:
+Open `http://localhost:3000`.
 
-```txt
-http://localhost:3000
+With no env, the app runs on bundled mock data (read-only, no persistence). For full live evaluation, fill the env below, apply the migrations, then seed:
+
+```bash
+# in the Supabase SQL editor, run in order:
+#   supabase/migrations/0001_init.sql
+#   supabase/migrations/0002_eval_settings.sql
+#   supabase/migrations/0003_datasets.sql
+npm run seed
+npm run dev
 ```
 
-The app can run with demo/fallback data, but full live evaluation requires OpenAI and Supabase credentials.
+See [docs/DEMO.md](./docs/DEMO.md) for what works in the public demo vs what requires env.
 
 ---
 
 ## Environment variables
 
 ```bash
+# required for live evaluation
 OPENAI_API_KEY=
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
+
+# optional — public deploy hardening
+DEMO_ACCESS_CODE=          # enables the /enter auth gate
+DEMO_SESSION_SECRET=       # signs demo sessions
+MAX_DAILY_LLM_USD=2        # daily spend cap (default 2)
+
+# optional — model overrides (sensible defaults if unset)
+OPENAI_JUDGE_MODEL=gpt-4o-mini
+OPENAI_CLAIM_MODEL=gpt-4o-mini
+OPENAI_GEN_MODEL=gpt-4o-mini
+OPENAI_EMBED_MODEL=text-embedding-3-small
 ```
 
 ---
@@ -285,17 +360,19 @@ SUPABASE_SERVICE_ROLE_KEY=
 ```txt
 app/
   src/
-    app/                  Next.js routes
+    app/                  Next.js routes (pages + /api)
     components/           UI components
     lib/
-      eval/               Evaluation engine
-      evaluators/         Evaluator definitions
-      llm/                LLM judge integration
+      eval/               Evaluation engine (judges, claims, semantic, aggregate, run, budget)
+      evaluators/         Deterministic checks, safety gates, PII + language detection
       validation/         Zod schemas
       wiki/               Knowledge base utilities
-    tests/                Unit tests
-docs/
-  media/                  GIFs, screenshots, preview assets
+  tests/unit/             Vitest unit tests (deterministic, aggregate)
+  scripts/seed.mjs        Seed script
+supabase/migrations/      0001_init · 0002_eval_settings · 0003_datasets
+mock-data/                Bundled read-only fallback data
+docs/media/               GIFs and preview assets
+wiki/                     Evaluation knowledge base (markdown)
 ```
 
 ---

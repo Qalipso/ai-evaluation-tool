@@ -10,14 +10,14 @@ Versioning here is a product roadmap, not a release schedule. Each band describe
 
 ### In scope
 
-- **Rubric Builder** with 10 reference dimensions (accuracy, relevance, completeness, task completion, hallucination risk, groundedness, safety, consistency, tone fit, actionability).
-- **Evaluation Runner** for one case at a time.
-- **Scoring Engine** with three methods: deterministic, semantic similarity, LLM-as-judge.
+- **Rubric Builder** with 14 reference dimensions (10 core: accuracy, relevance, completeness, task completion, hallucination risk, groundedness, safety, consistency, tone fit, actionability — plus 4 extended: helpfulness, emotional nuance, non-judgmental tone, useful next step).
+- **Evaluation Runner** — single case and assisted batch runs.
+- **Scoring Engine** with five methods: deterministic, semantic similarity, LLM-as-judge, claim pipeline, human.
 - **Hallucination Heat Map** at span level over the AI output.
 - **Groundedness Audit** when retrieved context is supplied.
-- **Safety Layer** with PII detection, false-confirmation detection, and a small policy classifier.
-- **Evaluation Report** as exportable markdown.
-- **Results Storage** as immutable JSON snapshots on disk.
+- **Safety Layer** — implemented checks: PII, false-confirmation, booking-requires-calendar-write, language-match, manager-handoff, output-length. (General policy/toxicity/self-harm classifiers remain roadmap.)
+- **Evaluation Report** as exportable markdown / plain text.
+- **Results Storage** in Supabase (PostgreSQL); read-only mock fallback when env absent.
 - **5 project profiles** with starter rubrics: Shadow daily reflection, RAG QA, booking assistant, customer support, AI planner.
 - **In-product wiki** that documents the evaluation philosophy and how to use the tool responsibly.
 
@@ -45,15 +45,17 @@ Versioning here is a product roadmap, not a release schedule. Each band describe
 
 ### Capabilities
 
-- **Batch Evaluation Runner** for datasets up to ~500 cases.
-- **Dataset Manager.** Save, version, and reuse evaluation datasets per project.
-- **Regression Comparison** view: aggregate deltas, regressed cases, recovered cases, score-delta distribution, regression flag.
-- **Human Review Queue** with priority by safety findings and judge uncertainty.
-- **Override Store** with per-dimension override and required reason.
-- **Judge Calibration Log** showing systematic human-vs-judge gaps over time.
+> Several V1 items are already shipped — marked ✅ below.
+
+- ✅ **Assisted batch runner** — generate questions from a rubric, generate candidate answers, evaluate as one multi-case run.
+- ✅ **Dataset Manager** (`/datasets`) — save, version, and reuse evaluation datasets per project.
+- ✅ **Regression Comparison** (`/compare`) — aggregate deltas, regressed/recovered cases, regression flag.
+- ✅ **Human Review Queue** (`/review`) — priority by safety findings and judge uncertainty.
+- ✅ **Override Store** — per-dimension override with required reason.
+- **Judge Calibration Log** showing systematic human-vs-judge gaps over time. *(data captured; dashboard pending)*
 - **Project Profiles** become editable, not just starter content.
 - **Report templates** become themeable per project.
-- **PDF export** in addition to markdown.
+- **PDF export** in addition to markdown / plain text. *(not implemented)*
 
 ### Why this version is the credibility moment
 
@@ -79,7 +81,7 @@ V1 is the version where the tool stops being a single-case scorer and starts bei
 - **Active sampling.** The review queue prioritizes cases the judge is least confident on, growing a calibration set.
 - **API access** for evaluation from CI / test suites.
 - **Webhook reports.** A passing or failing run can notify Slack / a deploy bot.
-- **Custom dimension types** beyond the 10 reference dimensions, with shareable definitions.
+- **Custom dimension types** beyond the 14 reference dimensions, with shareable definitions.
 
 ### What "V2 done" looks like
 

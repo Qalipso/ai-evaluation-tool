@@ -30,7 +30,7 @@ A case may be evaluated:
 A **rubric** is a structured definition of how to score an output. It contains:
 
 - A list of **dimensions** (e.g. accuracy, groundedness, tone fit). See `wiki/scoring-rubrics.md`.
-- For each dimension: a **scoring method** (`deterministic`, `llm_judge`, `semantic_similarity`, `human`), a **weight**, a **pass threshold**, and a short prompt or rule.
+- For each dimension: a **scoring method** (`deterministic`, `llm_judge`, `semantic_similarity`, `claim_pipeline`, `human`), a **weight**, a **pass threshold**, and a short prompt or rule.
 - A rubric **version** and an **owner**.
 
 The same input + output evaluated against two different rubrics may produce two different scores. This is expected and correct — a rubric is an opinion about what "good" means in a context.
@@ -166,12 +166,15 @@ The following are explicit non-behaviors. They are listed to prevent scope drift
 
 Each dimension is scored by exactly one method.
 
-| Method | Used for | Output |
-|---|---|---|
-| `deterministic` | Format checks, regex match, length bounds, JSON shape, required keywords | Pass/fail or 0/10 |
-| `semantic_similarity` | "Similar to expected output" comparisons against a reference | 0–10 from cosine similarity |
-| `llm_judge` | Subjective dimensions: tone, completeness, relevance, nuance | 0–10 with rationale |
-| `human` | Safety-sensitive or high-stakes dimensions | Override score with reason |
+| Method | Used for | Output | Status |
+|---|---|---|---|
+| `deterministic` | PII, false-confirmation, language-match, length/conciseness | Pass/fail + severity | Real (selective) |
+| `semantic_similarity` | Output similarity vs expected behavior (embedding cosine) | 0–1 (normalized 0–10) | Real |
+| `llm_judge` | Subjective dimensions: tone, completeness, relevance, nuance | 0–10 + rationale | Real (GPT-4o-mini) |
+| `claim_pipeline` | Groundedness / hallucination via claim extraction + verification | 0–1 + claim labels | Real |
+| `human` | Safety-sensitive or high-stakes dimensions | Override score + reason | Manual |
+
+Deterministic scoring is selective: only the four check families above have real automators. A deterministic dimension with no real scorer is reported `unscored`, never coerced to a number.
 
 `llm_judge` runs receive a structured prompt that includes the dimension name, its rubric description, the input, expected behavior, output, and optional context. The judge returns score + rationale + evidence pointers. See `wiki/llm-as-judge.md` for prompt conventions.
 
@@ -247,15 +250,24 @@ Task completion is evaluated using `expected_behavior` as the ground truth. Pipe
 
 ## 7. How safety issues are flagged
 
-Safety runs independently of the rubric. It is not weight-able away. Pipeline:
+Safety runs independently of the rubric. It is not weight-able away. Implemented checks (`app/src/lib/evaluators/safetyGates.ts`):
 
-1. PII detector scans `ai_output` for emails, phones, IDs, addresses, credit-card-like numbers.
-2. Policy detector runs LLM-judge prompts for: harmful instructions, harassment, self-harm content, false action confirmations, regulated-domain advice without disclaimer.
-3. Each finding has a category, severity (`low`, `medium`, `high`, `critical`), and an evidence span in the output.
+| Check | Severity | Blocks release |
+|---|---|---|
+| `pii_leakage` | critical | yes |
+| `false_confirmation` | critical | yes |
+| `booking_requires_calendar_write` | critical | yes |
+| `language_match` | critical | yes |
+| `manager_request_requires_handoff` | error | no |
+| `output_length_limit` | warning | no |
 
-If any finding is `medium+`, the case is marked `safety_review_required: true` and added to the human review queue with priority.
+1. PII detector scans `ai_output` for emails and phone numbers.
+2. False-confirmation / booking checks: an output that confirms an action ("booked", "confirmed") passes only when the tool trace contains the matching calendar write.
+3. Language match: detected output language (en/es/ru) must match the expected language.
 
-A case cannot be marked `resolved` while it has an open `medium+` safety finding.
+A failing `blocksRelease` check forces the verdict to `blocked` regardless of the aggregate score.
+
+**Roadmap (not implemented):** general policy classifier for harassment, self-harm, regulated-domain advice, and prompt-injection-followed detection. Listed here as future work, not current behavior.
 
 ---
 

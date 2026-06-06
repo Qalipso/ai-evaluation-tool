@@ -25,7 +25,7 @@ The artifact passes documentation review if **all** of the following hold.
 The artifact passes logic review if all of the following hold.
 
 - [ ] The tool distinguishes hallucination risk from groundedness and explains the distinction in `wiki/hallucination-risk.md` and `wiki/groundedness.md`.
-- [ ] The tool uses three named scoring methods (deterministic, semantic similarity, LLM-as-judge) and explains when each is appropriate.
+- [ ] The tool uses five named scoring methods (deterministic, semantic similarity, LLM-as-judge, claim pipeline, human) and explains when each is appropriate.
 - [ ] A case is documented as passing only when every weighted dimension meets its threshold **and** no medium-or-higher safety finding is open. This rule is repeated in the behavior spec and the invariants list.
 - [ ] LLM-judge outputs are required to carry a rationale; "just a score" is not acceptable judge output.
 - [ ] Human overrides never destroy the original LLM-judge score; both are retained.
@@ -37,7 +37,7 @@ The artifact passes logic review if all of the following hold.
 
 The artifact passes rubric review if all of the following hold.
 
-- [ ] Ten reference dimensions are defined in `wiki/scoring-rubrics.md`: accuracy, relevance, completeness, task completion, hallucination risk, groundedness, safety, consistency, tone fit, actionability.
+- [ ] Reference dimensions are defined in `wiki/scoring-rubrics.md`. Ten core: accuracy, relevance, completeness, task completion, hallucination risk, groundedness, safety, consistency, tone fit, actionability. Four extended (conversational/reflective products): helpfulness, emotional nuance, non-judgmental tone, useful next step. Code: `app/src/lib/eval/dimensions.ts`.
 - [ ] Each dimension has: a name, a one-sentence definition, the kind of failure it catches, a recommended scoring method, a default weight, and a default threshold.
 - [ ] At least one example pass and one example fail are documented per high-impact dimension (groundedness, hallucination risk, task completion, safety).
 - [ ] Use-case-specific rubrics are documented for Shadow, RAG, and small business automation, each highlighting which dimensions matter most and why.
@@ -93,15 +93,19 @@ The artifact passes portfolio review if all of the following hold.
 - [ ] The boundary against PromptOps is explicit and repeated, not implied.
 - [ ] The artifact does not promise things it does not deliver in MVP. Future work is labeled as future, not implied as present.
 
-## 8. Non-criteria (intentionally excluded)
+## 8. Implementation status (2026-06)
 
-These are deliberately not in the bar. Including them would distort the artifact away from its purpose.
+This started as a documentation artifact; the system is now built. The following are implemented and no longer "out of bar":
 
-- Working UI implementation.
-- Working LLM-judge calls against a real model.
-- Real datasets.
-- Tests, benchmarks, or coverage reports.
+- ✅ Working UI (Next.js 15 + React 19), deployed at https://ai-eval-tool.vercel.app/
+- ✅ Real LLM-judge + claim-pipeline calls (GPT-4o-mini).
+- ✅ Persistence in Supabase (PostgreSQL), with read-only mock fallback.
+- ✅ Unit tests (`app/tests/unit/`: deterministic, aggregate) + CI (`.github/workflows/ci.yml`: lint, typecheck, test, build).
+
+Still deliberately out of scope:
+
 - Pixel-perfect mockups.
-- A production deployment.
+- Public benchmark datasets / leaderboard claims.
+- Multi-tenant RBAC and production-trace ingestion (roadmap V2).
 
-This is a documentation artifact. The bar is documentation quality and the seriousness of the product thinking behind it.
+The bar remains: honest documentation, no overselling, and future work labeled as future.

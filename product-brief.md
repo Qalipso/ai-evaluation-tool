@@ -39,27 +39,36 @@ When a user comes to this tool, they are hiring it to do one of these jobs:
 
 ## 4. MVP scope
 
+> **Status (2026-06):** the MVP is built and most items below shipped. Real LLM execution, dataset versioning, and an opt-in demo auth gate — originally deferred — are now live. See README + `architecture.md` for the current state.
+
 **In scope for MVP:**
 
-- Rubric Builder with the 10 core dimensions (see `wiki/scoring-rubrics.md`), customizable weights and thresholds, save per project.
+- Rubric Builder with 14 reference dimensions (10 core + 4 extended for conversational/reflective products; see `wiki/scoring-rubrics.md`), customizable weights and thresholds, save per project.
 - Evaluation Runner that accepts `(input, expected behavior, AI output, retrieved context)` tuples.
-- Scoring Engine combining:
-  - Deterministic checks (regex / contains / length / JSON-shape).
+- Scoring Engine combining five methods:
+  - Deterministic checks (PII, false-confirmation, language-match, length).
+  - Semantic similarity (embedding cosine vs expected behavior).
   - LLM-as-judge for subjective dimensions.
-- Hallucination Heat Map at span level: supported / partial / unsupported / contradicted.
+  - Claim pipeline for groundedness / hallucination.
+  - Human review / override.
+- Hallucination Heat Map at span level: supported / partially_supported / unsupported / contradicted.
 - Groundedness Audit: per-claim source mapping for RAG outputs.
-- Evaluation Report: markdown export with scores, failed cases, evidence snippets.
-- Storage of past evaluation runs.
-- 5 preloaded project profiles: Shadow daily reflection, RAG QA, booking assistant, customer support, AI planner.
+- Evaluation Report: `.md` / `.txt` export with scores, failed cases, evidence snippets.
+- Persistence in Supabase (PostgreSQL); read-only mock fallback when env absent.
+- Preloaded project profiles: Shadow daily reflection, RAG QA, booking assistant, customer support, AI planner.
 
-**Out of scope for MVP (deferred):**
+**Now shipped (originally deferred):**
 
-- Real LLM execution (MVP uses mock or pre-generated outputs).
-- Authentication, multi-user, multi-tenant.
+- Real LLM execution (GPT-4o-mini judge + claim pipeline + generation).
+- Dataset versioning (`/datasets`).
+- Opt-in demo auth gate (`/enter`, via `DEMO_ACCESS_CODE`).
+
+**Still out of scope (deferred):**
+
+- Full multi-user / multi-tenant RBAC.
 - Real-time / streaming evaluation.
 - Cross-model arena comparison.
 - Active learning from human review back into the LLM judge.
-- Dataset versioning.
 
 ## 5. Non-goals
 
@@ -145,10 +154,10 @@ Tool quality is **not** measured by user delight in the UI. It is measured by wh
 
 The tool ships with:
 
-- 10 reference dimensions (see `wiki/scoring-rubrics.md`).
+- 14 reference dimensions (see `wiki/scoring-rubrics.md`).
 - 5 project profiles with starter rubrics and sample test cases.
-- 4 evaluator types: deterministic, LLM-as-judge, semantic similarity, human.
-- Markdown report template.
+- 5 evaluator types: deterministic, semantic similarity, LLM-as-judge, claim pipeline, human.
+- Markdown / plain-text report template.
 - A wiki, surfaced inside the tool, that documents how to evaluate responsibly.
 
 The wiki is part of the product. A team that adopts this tool also adopts its evaluation philosophy.

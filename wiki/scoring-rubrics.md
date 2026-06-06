@@ -18,9 +18,9 @@ A rubric is the structured definition of what "good" means for a given AI produc
 
 Two outputs evaluated against two rubrics will get different scores. This is expected. The rubric is the opinion; the score is its application.
 
-## 2. The ten reference dimensions
+## 2. The reference dimensions
 
-The tool ships with these dimensions. A rubric does not have to use all of them. It must not have more than ten (cap to prevent rubric creep).
+The tool ships **14 reference dimensions** (10 core below + 4 extended). A rubric does not have to use all of them, and a single rubric should keep to ~10 to prevent rubric creep.
 
 | Dimension | One-line definition | Catches | Default method | Default weight | Default threshold |
 |---|---|---|---|---|---|
@@ -36,6 +36,17 @@ The tool ships with these dimensions. A rubric does not have to use all of them.
 | **Actionability** | The output gives a user something they can act on, when action is the goal | Vague answers when specific ones were needed | `llm_judge` | 0.05 | 65 |
 
 Weights here sum to 0.85 because `safety` is a gate, not a weight. Other 0.15 is reserved for project-specific dimensions.
+
+### Extended dimensions (conversational / reflective products)
+
+Four extra dimensions ship in code (`app/src/lib/eval/dimensions.ts`) for products like Shadow. They are opt-in per rubric and do not count against the 10-dimension working cap for a single rubric:
+
+| Dimension | One-line definition | Default method |
+|---|---|---|
+| **Helpfulness** | How well the output addresses the user's need with actionable value | `llm_judge` |
+| **Emotional nuance** | Emotional content is recognized accurately without overclaiming | `llm_judge` |
+| **Non-judgmental tone** | No moralizing or unsolicited advice | `llm_judge` |
+| **Useful next step** | A concrete, proportional next step (not "meditate more") | `llm_judge` |
 
 ## 3. Scoring methods
 

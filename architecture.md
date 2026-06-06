@@ -131,11 +131,14 @@ The diagram shows the eight layers and the direction of data. Storage is a sink 
 
 **Responsibility:** Produce per-dimension scores for a case against a rubric.
 
+Five scoring methods are configurable per dimension: `deterministic`, `semantic_similarity`, `llm_judge`, `claim_pipeline`, `human`.
+
 **Components:**
-- **Deterministic Checker.** Runs rule-based checks (regex, contains, length, JSON shape, required keywords). Cheap, fast, fully reproducible.
-- **Semantic Similarity.** Embedding-based comparison against a reference output. Used for dimensions like "matches expected behavior at a paraphrase level".
-- **LLM-as-Judge.** Per-dimension LLM call with a structured prompt. Returns score + rationale. Uses retries, parses JSON, falls back to `unscored` on persistent failure.
-- **Aggregator.** Normalizes weights, computes per-case overall, computes batch aggregates (mean, median, p25, p75, distribution).
+- **Deterministic Checker** (`evaluators/deterministicChecks.ts`). Real automators exist only for PII, false-confirmation, language-match, and length/conciseness. Other deterministic dimensions return `unscored`, never a placeholder number.
+- **Semantic Similarity** (`eval/semantic.ts`). Embedding cosine vs the expected behavior; hash-based fallback when no embedding provider.
+- **LLM-as-Judge** (`eval/judges.ts`). Per-dimension structured LLM call (GPT-4o-mini). Returns score + rationale; retries, parses JSON, falls back to `unscored` on persistent failure.
+- **Claim Pipeline** (`eval/claims.ts` + `evaluators/claimPipeline.ts`). Drives the groundedness/hallucination dimensions (see 2.4).
+- **Aggregator** (`eval/aggregate.ts`). Normalizes weights, computes per-case overall, batch aggregates, and the launch verdict.
 
 **Output:** A scored case with `{ dimension_id, score, rationale, evidence, method, threshold_passed }` per dimension.
 
@@ -161,12 +164,24 @@ The diagram shows the eight layers and the direction of data. Storage is a sink 
 
 **Responsibility:** Detect findings that cannot be scored away by other dimensions.
 
-**Components:**
-- **PII Detector.** Regex + entity recognition for emails, phones, IDs, addresses, card-number-like patterns.
-- **Policy Classifier.** LLM-judge prompts for harmful instruction following, harassment, self-harm content, false action confirmation, regulated advice without disclaimer.
-- **False-confirmation Detector.** Specific check for outputs that claim an action ("booked", "sent", "deleted") with no backing tool call in the metadata.
+**Implemented checks** (`app/src/lib/evaluators/safetyGates.ts`, single source of truth for engine + UI):
 
-**Output:** A `SafetyReport` with category, severity, evidence span. Sets `safety_review_required: true` when severity ≥ medium.
+| Check (`CheckType`) | Severity | Blocks release |
+|---|---|---|
+| `pii_leakage` | critical | yes |
+| `false_confirmation` | critical | yes |
+| `booking_requires_calendar_write` | critical | yes |
+| `language_match` | critical | yes |
+| `manager_request_requires_handoff` | error | no |
+| `output_length_limit` | warning | no |
+
+- **PII Detector** (`piiDetection.ts`) — regex for emails and phone numbers.
+- **False-confirmation Detector** — booking-phrase regex; passes only when the tool trace contains a calendar write.
+- **Language match** (`languageDetection.ts`) — en/es/ru detection vs the expected language.
+
+**Roadmap (not implemented):** general policy/toxicity/self-harm/regulated-advice classifiers. Documented here as future work, not current behavior.
+
+**Output:** A finding with category, severity, and evidence. A failing `blocksRelease` check forces the verdict to `blocked` regardless of score.
 
 **Why isolated:** Safety findings are not a dimension. They are a top-level signal that gates the case's `resolved` status. Mixing them into the rubric would let a team weight them down to zero, which is exactly what must not be possible.
 
@@ -190,9 +205,9 @@ The diagram shows the eight layers and the direction of data. Storage is a sink 
 **Components:**
 - **Run Snapshot Loader.** Loads an immutable run from storage.
 - **Aggregate Builder.** Computes summary numbers, distributions, top-failing-cases selection.
-- **Renderer.** Renders the markdown template; optionally renders markdown to PDF.
+- **Renderer.** Renders the report template to `.md` and `.txt`. (PDF rendering is roadmap, not implemented.)
 
-**Output:** Markdown + optional PDF. Stored in the report cache for re-download.
+**Output:** Markdown + plain-text export.
 
 **Why separate from scoring:** The report is the *external face* of the tool. Engineers see scores; everyone else sees the report. Keeping it isolated lets the template evolve without touching the scoring logic.
 
@@ -206,9 +221,13 @@ The diagram shows the eight layers and the direction of data. Storage is a sink 
 - **Override Store.** One row per dimension override.
 - **Report Cache.** Pre-rendered report markdown keyed by `(run_id, override_set_hash)`.
 
-**MVP implementation:** JSON files on disk, schema-validated on read.
-**V1:** SQLite or Postgres for query performance.
-**V2:** Object storage for run snapshots, relational store for indexing.
+**Current implementation:** Supabase (PostgreSQL). Three migrations under `supabase/migrations/`:
+- `0001_init.sql` — projects, rubrics, runs, cases, scores, claims, safety_findings, human_overrides, daily_spend, RLS policies + cost-cap RPC.
+- `0002_eval_settings.sql` — global evaluator settings (judge/claim model, claim threshold, deterministic toggles).
+- `0003_datasets.sql` — versioned datasets + dataset cases.
+
+**Fallback:** when `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` are absent, the app loads bundled mock JSON (`mock-data/`) read-only, with no persistence.
+**V2:** object storage for run snapshots, cross-model result caching, production-trace ingestion.
 
 **Why immutable runs:** Audit value is the entire reason this tool exists. A mutable run store cannot answer "what did we know at launch time".
 
