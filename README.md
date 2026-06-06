@@ -429,7 +429,7 @@ Before deploying publicly:
 
 ## Portfolio context
 
-Built by **Eduard Shatalov** as part of an AI automation / AI product engineering portfolio.
+Built by **Eduard Shatalov** as part of an AI product engineering portfolio.
 
 The project demonstrates:
 
