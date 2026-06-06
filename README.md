@@ -1,167 +1,542 @@
-# AI Evaluation — Wiki + Tool
+# AI Evaluation Tool
 
-> **Status: the evaluation engine is real and data flows end-to-end** (Next.js 15 + Supabase + OpenAI).
+**Evidence-backed quality control for LLM outputs.**
 
-## Demo
+AI products should not ship because an answer "looks good".
+This tool scores AI outputs against rubrics, checks claims against evidence, catches safety failures, and produces launch-ready evaluation reports.
 
-<video src="https://github.com/Qalipso/ai-evaluation-tool/raw/main/video/out/ai-eval-film.mp4" controls width="100%"></video>
+> **Evaluate AI with evidence, not vibes.**
 
-▶ [Watch the walkthrough](./video/out/ai-eval-film.mp4)
-
->
-
-> **Live features:**
-> - **Assisted batch runner** (`/runs/new`) — set a master prompt, let the rubric generate test questions, generate candidate answers with the chosen model, then evaluate all as one run (N cases). Per-run model selection (project default or override).
-> - **Real scoring methods, no fabrication** — LLM-as-judge (one structured call), **claim pipeline** (atomic claim extraction + verification against context → groundedness; persisted claims drive the heat map), **real semantic cosine** (embeddings vs the expected behavior), and deterministic checks that are genuinely real: PII, false-confirmation, language-match, and cost-efficiency (conciseness). Dimensions with no real scorer (`human`, generic deterministic) are left **unscored**, never given a placeholder number.
-> - **Evaluators hub** (`/evaluators`) — live, local pattern-based playground for the claim pipeline and deterministic checks: tool-trace editor, evidence sources, results tables, detail drawers, demo examples.
-> - **Safety gates** — a finding whose category is listed in the rubric's safety gates **blocks the verdict** even at a high score. Text-detectable gates: `pii_leakage`, `false_confirmation`, `admin_data_leak_to_client`, `operator_command_from_client`, `prompt_injection_followed`, `unsupported_price_claim`. Calendar/booking gates need a tool trace (see the data-skeleton plan).
-> - **Human review** (`/review/[case]`) and **inline scoring** — reviewers score `human` dimensions from the case text; the run page's **expandable dimension breakdown** shows per-case scores, judge rationales, and the claim/evidence chain, and lets you score human dimensions inline.
-> - **Datasets** (`/datasets`) — versioned test sets. Save the questions a rubric generates as a dataset, then re-run it across model/prompt versions for apples-to-apples regression.
-> - **Per-case run with progress** — the runner scores each case as a short request with a live progress bar (prod-timeout-safe), not one long action.
-> - **Command palette** (`Cmd/Ctrl+K`) — search and jump across nav, projects, rubrics, runs, and cases. **Cost meter** in the top bar (today's LLM spend vs the daily cap) and a **recent-activity** bell.
-> - **Demo auth gate** (opt-in) — public read by link, but evaluations/edits require a code at `/enter`; per-IP rate limit + server-side model whitelist + daily budget cap protect the cost surface.
-> - **Input validation** — garbage outputs (keyboard mashing, repeats, mostly non-letters) are rejected before any LLM call.
-> - **Reports** — structured `.txt` export per run; **theme toggle** (cream / dark), a macOS-style bottom dock, and a first-visit guided tour.
-> - Persistence in Supabase; graceful fallback to bundled mock data (read-only) when env is absent.
->
-> **Setup:** `cd app && cp .env.local.example .env.local` (fill `OPENAI_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) → apply `supabase/migrations/0001_init.sql`, `0002_eval_settings.sql`, `0003_datasets.sql` in the Supabase SQL editor → `npm run seed` → `npm run dev`.
->
-> **Public deploy:** set `DEMO_ACCESS_CODE` + `DEMO_SESSION_SECRET` (gate on), `MAX_DAILY_LLM_USD=2`, and rotate keys before going live.
-
-**An internal AI quality platform for teams shipping LLM-powered products.**
-
-> Most AI products fail not because the model is weak, but because the team has no honest way to answer one question:
-> *"Is this output any good?"*
->
-> This tool answers that question — systematically, repeatably, and with evidence.
+<p align="center">
+  <img src="./docs/media/teaser15.gif" alt="AI Evaluation Tool cinematic teaser" width="100%" />
+</p>
 
 ---
 
-## What this is
+## Why this exists
 
-A documentation-first design for an **AI Evaluation Tool** that scores LLM outputs against structured rubrics, flags hallucinations and ungrounded claims, surfaces regression risk over time, and produces evaluation reports a product team can act on.
+LLM outputs are fluent by default.
+That does not make them correct, safe, grounded, or ready for production.
 
-This is the **evaluation half** of an AI quality stack. It looks at outputs *after* they are generated.
+A single confident answer can hide:
 
-## What this is NOT
+- an unsupported claim
+- a hallucinated fact
+- a false confirmation
+- a broken business rule
+- a safety issue
+- a regression from the previous model or prompt version
 
-- **Not PromptOps.** It does not version prompts, manage prompt diffs, or run release pipelines. That belongs to a separate tool.
-- **Not a prompt library.** Prompts are inputs to evaluation, not the subject.
-- **Not a benchmark suite.** Public benchmarks measure model capability. This measures *your* product behavior on *your* data.
-- **Not an observability dashboard.** Production logs go elsewhere. This tool is for offline, structured quality runs.
+**AI Evaluation Tool** turns subjective review into a measurable quality-control loop:
 
-| | This tool | PromptOps | Logs/Observability |
-|---|---|---|---|
-| Question | "Is this output any good?" | "Will my prompt change break things?" | "What happened in prod last hour?" |
-| Time | After output is generated | Before deploy | Continuous |
-| Artifact | Scored evaluation report | Versioned prompt + test suite | Trace timeline |
-
----
-
-## Problem
-
-Teams shipping LLM-powered features almost always reach the same wall:
-
-1. *Vibes-based QA.* "It looks good." There is no shared definition of "good."
-2. *Hallucination blind spots.* Confident, fluent answers that are factually wrong slip past review.
-3. *No regression signal.* A new prompt or model lands; nobody notices that one capability quietly degraded.
-4. *No groundedness audit.* RAG systems cite sources that the answer does not actually use.
-5. *No way to compare runs.* Last week vs this week. v1 vs v2. Human vs AI judge. Apples and oranges.
-
-Evaluation is treated as a one-off spreadsheet, not as a product surface.
-
-## What this tool does about it
-
-- Defines **rubrics as first-class assets** — versioned, reusable, project-scoped.
-- Runs **structured scoring across 10 dimensions** (accuracy, groundedness, hallucination risk, completeness, task completion, safety, consistency, tone fit, actionability, relevance).
-- **Detects unsupported claims** at the span level, with a heat map over the output text.
-- Combines **deterministic checks + LLM-as-judge + human review** in one pipeline.
-- Compares runs and **flags regressions** between versions, datasets, and models.
-- Produces a **shareable evaluation report** that engineers, PMs, and reviewers can all read.
+```txt
+AI Output → Rubric → Claim Pipeline → Safety Gates → Verdict → Report
+```
 
 ---
 
-## Target users
+## What it does
 
-| User | Why they care |
-|---|---|
-| AI Product Manager | Needs a defensible quality story before launch. Needs to spot regressions before users do. |
-| AI Engineer / Prompt Engineer | Wants fast feedback on whether a prompt or model change made things worse. |
-| QA / AI Reviewer | Needs a structured queue of outputs to review, not a Notion list. |
-| Compliance / Trust & Safety | Needs evidence that safety, groundedness, and accuracy were measured. |
-| Engineering leadership | Needs one number to look at per project. And the receipts behind it. |
+AI Evaluation Tool helps answer one simple question:
 
----
+> **Is this AI output good enough to ship?**
 
-## Core features
+It evaluates outputs through multiple layers:
 
-1. **Rubric Builder** — define dimensions, weights, scoring methods (deterministic / LLM-judge / human), and pass thresholds. Save rubrics per project.
-2. **Evaluation Runner** — submit (input, expected behavior, AI output, optional retrieved context) tuples. Run against a rubric. Get per-dimension scores.
-3. **Hallucination Heat Map** — span-level highlighting in the output text: supported / partially supported / unsupported / contradicted by context.
-4. **Groundedness Audit** — for RAG outputs, show which retrieved chunks each claim is anchored in, and which claims have no source.
-5. **Output Reviewer Queue** — a human-in-the-loop view for borderline cases, with override and reason capture.
-6. **Report Generator** — markdown / PDF export with score breakdown, failed cases, sample evidence, recommendations.
-7. **Regression Comparison** — run the same evaluation set against two versions or two models. Surface "was passing, now failing" and score deltas.
-8. **Project Profiles** — preloaded rubrics for common LLM product shapes (RAG, classification, agent, conversational, generative).
+* **Rubric scoring** — define what "good" means for each use case
+* **LLM judge** — score subjective dimensions like tone, helpfulness, and conversation quality
+* **Claim pipeline** — extract factual claims and check them against retrieved evidence
+* **Safety gates** — block high-risk failures before users see them
+* **Human review** — inspect, override, and learn from edge cases
+* **Reports** — export run summaries with scores, failures, rationales, and evidence
 
 ---
 
-## Example use cases
+## Product film
 
-### 1. Shadow — daily reflection analysis
+The visual story of the product:
 
-A personal life-analytics app generates reflective summaries of a user's day from journal entries. Evaluation focuses on:
-- **Life-area classification accuracy** (career, relationships, health, etc.)
-- **Emotional nuance** — does it pick up grief, frustration, hope without overclaiming?
-- **Non-judgmental tone** — no moralizing, no advice-giving the user did not ask for.
-- **Useful next step** — actionable and proportional, not "you should meditate more."
-- **Memory relevance** — does it correctly pull from prior reflections?
+```txt
+Confidence → Evidence → Gates → Verdict
+```
 
-Outcome: a weekly evaluation run that catches when a model update starts producing toxic-positivity outputs.
+| Stage              | What happens                                 |
+| ------------------ | -------------------------------------------- |
+| **Rubrics**        | Define the evaluation rules                  |
+| **Claim Pipeline** | Break answers into claims and check evidence |
+| **Safety Gates**   | Block failures that should never reach users |
+| **Verdict**        | Decide whether the output is ship-ready      |
 
-### 2. RAG answer groundedness
-
-A documentation assistant retrieves chunks from internal docs and answers questions. Evaluation focuses on:
-- **Grounded in retrieved context** — every claim traces to a source chunk.
-- **No unsupported claims** — model does not invent API names or argument types.
-- **Correct use of sources** — answer does not misrepresent what the doc says.
-- **Context relevance** — were the retrieved chunks actually useful for this question?
-- **Citation quality** — citations point to the chunks that actually carry the claim.
-
-Outcome: a groundedness report per retrieval strategy. Switching the retriever now has a measurable quality consequence.
-
-### 3. Small business booking assistant
-
-A WhatsApp bot for a hair salon detects booking intent, picks a time slot, confirms with the client. Evaluation focuses on:
-- **Intent detection** — booking vs FAQ vs complaint.
-- **Clear answer** — no robotic preamble, no over-explaining.
-- **Booking readiness** — does it have all required slots (service, date, time, stylist)?
-- **No false confirmation** — never says "booked" without a calendar write.
-- **Proper human handoff** — when confused, routes to a human, does not improvise.
-
-Outcome: a quality gate before pushing a new prompt or model to the live bot.
-
-### 4. AI planning assistant
-
-An agent decomposes a high-level objective into a step plan, dispatches sub-tasks, and produces a final report. Evaluation focuses on:
-- **Task completion** — was the original objective actually accomplished?
-- **Plan coherence** — do the steps make sense together?
-- **No invented tools / files / facts** — the plan does not reference things that do not exist.
-- **Safety** — does not silently take destructive actions.
-- **Actionability** — final report is usable, not just descriptive.
-
-Outcome: an evaluation harness that catches "plausible-looking but useless" outputs that pass vibes-based review.
+▶ [Watch the walkthrough film](./video/out/ai-eval-film.mp4)
 
 ---
 
-## Roadmap (summary)
+## Rubric breakdown
 
-- **MVP** — Rubric Builder, Evaluation Runner, Hallucination Heat Map, basic report.
-- **V1** — Regression Comparison, Human Review Queue, Project Profiles, export.
-- **V2** — Cross-model evaluation, dataset management, automated dataset growth from production traces.
-- **Future** — Live evaluation hooks for streaming production traffic, evaluator-of-evaluators (LLM judge calibration), red-team rubric library.
+Rubrics define what quality means for a specific AI use case.
 
-Full version in [`roadmap.md`](./roadmap.md).
+<p align="center">
+  <img src="./docs/media/ChartRubric.gif" alt="Rubric breakdown animation" width="100%" />
+</p>
+
+Example dimensions:
+
+```txt
+Accuracy
+Conversation quality
+Hallucination risk
+Tone fit
+Multilingual behavior
+State management
+Handoff intelligence
+```
+
+Each dimension can have:
+
+* scoring method
+* weight
+* threshold
+* rationale
+* pass/fail behavior
+
+This avoids the classic problem of judging AI output by vibes.
+
+---
+
+## Claim pipeline
+
+Every confident answer is decomposed into claims.
+
+<p align="center">
+  <img src="./docs/media/ChartPipeline.gif" alt="Claim pipeline animation" width="100%" />
+</p>
+
+The claim pipeline checks whether each factual statement is:
+
+```txt
+SUPPORTED
+PARTIAL
+UNSUPPORTED
+CONTRADICTED
+```
+
+This is the core idea:
+
+> **Every claim needs proof.**
+
+Instead of asking "does this answer sound good?", the system asks:
+
+```txt
+What did the AI claim?
+Where is the evidence?
+Is the claim supported?
+Should this affect the verdict?
+```
+
+---
+
+## Safety gates
+
+Some failures should not be averaged into a score.
+They should block the run.
+
+<p align="center">
+  <img src="./docs/media/ChartGates.gif" alt="Safety gates animation" width="100%" />
+</p>
+
+Safety gates can catch:
+
+* PII exposure
+* false confirmations
+* prompt injection behavior
+* unsupported pricing
+* language mismatch
+* policy violations
+* unauthorized actions
+
+A high average score should not hide a critical safety issue.
+
+---
+
+## Verdict score
+
+Every evaluation run ends with a launch verdict.
+
+<p align="center">
+  <img src="./docs/media/ChartScore.gif" alt="Verdict score animation" width="100%" />
+</p>
+
+Example output:
+
+```txt
+Verdict: Ship-ready
+Score: 0.94 / 1.0
+Pass rate: 100%
+Safety findings: 0
+Claims processed: 9
+```
+
+Verdicts make evaluation actionable:
+
+| Verdict      | Meaning                                       |
+| ------------ | --------------------------------------------- |
+| `ship-ready` | Output passed quality and safety requirements |
+| `acceptable` | Good enough, but with minor review points     |
+| `needs-work` | Quality issues require iteration              |
+| `blocked`    | Critical safety or evidence failure           |
+
+---
+
+## How it works
+
+```txt
+Input
+  ↓
+Rubric Engine
+  ↓
+LLM Judge
+  ↓
+Claim Extraction
+  ↓
+Evidence Matching
+  ↓
+Deterministic Safety Checks
+  ↓
+Human Review
+  ↓
+Report Generator
+```
+
+### 1. Input
+
+A test case includes:
+
+```txt
+user input
+expected behavior
+AI output
+retrieved context
+metadata
+```
+
+### 2. Rubric engine
+
+The rubric defines dimensions, weights, thresholds, and scoring methods.
+
+### 3. Scoring
+
+The system can combine:
+
+* LLM-as-judge scoring
+* semantic checks
+* deterministic safety checks
+* claim-level groundedness checks
+* human review
+
+### 4. Aggregation
+
+The run is aggregated into:
+
+```txt
+overall score
+dimension scores
+safety findings
+claim verdicts
+rationale
+final launch verdict
+```
+
+### 5. Report
+
+Each run can produce an exportable report for QA, product review, or prompt/model iteration.
+
+---
+
+## Example use case
+
+### AreaMosa Assistant
+
+A WhatsApp booking assistant replies:
+
+```txt
+"Your appointment is confirmed for 18:00."
+```
+
+But the evidence says:
+
+```txt
+No available calendar slot found at 18:00.
+```
+
+The evaluation catches:
+
+```txt
+False confirmation
+Unsupported claim
+Safety gate failure
+Verdict: blocked
+```
+
+After the assistant is fixed, it asks a clarifying question, checks availability, and confirms only after evidence exists.
+
+```txt
+Verdict: ship-ready
+```
+
+---
+
+## Quick start
+
+```bash
+git clone https://github.com/Qalipso/ai-evaluation-tool.git
+cd ai-evaluation-tool/app
+npm install
+```
+
+Create environment variables:
+
+```bash
+cp .env.local.example .env.local
+```
+
+Required for full live evaluation:
+
+```bash
+OPENAI_API_KEY=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+```
+
+Apply the migrations in the Supabase SQL editor:
+
+```txt
+supabase/migrations/0001_init.sql
+supabase/migrations/0002_eval_settings.sql
+supabase/migrations/0003_datasets.sql
+```
+
+Seed and run locally:
+
+```bash
+npm run seed
+npm run dev
+```
+
+Open:
+
+```txt
+http://localhost:3000
+```
+
+---
+
+## Local demo mode
+
+The app can be explored with demo/fallback data before connecting real providers.
+When env is absent it falls back to bundled mock data (read-only).
+
+Useful routes:
+
+```txt
+/                         Dashboard
+/evaluators               Configure evaluators
+/runs/new                 Start a new run
+/datasets                 Versioned test sets
+/reports                  Reports
+/review                   Human review
+/safety                   Safety layer
+/wiki                     Evaluation knowledge base
+```
+
+---
+
+## Tech stack
+
+```txt
+Next.js 15
+React 19
+TypeScript
+Tailwind CSS
+Supabase
+OpenAI SDK
+Zod
+Vitest
+```
+
+---
+
+## Project structure
+
+```txt
+app/
+  src/
+    app/                  Next.js routes
+    lib/
+      eval/               Evaluation engine
+      evaluators/         Evaluator definitions
+      llm/                LLM judge integration
+      validation/         Zod schemas
+      wiki/               Knowledge base utilities
+    components/           UI components
+    tests/                Unit tests
+```
+
+---
+
+## Core concepts
+
+### Rubric
+
+A structured definition of quality.
+
+```txt
+dimension
+weight
+threshold
+scoring method
+rationale
+```
+
+### Claim
+
+A factual statement extracted from an AI output.
+
+```txt
+"The appointment is confirmed for 18:00."
+```
+
+### Evidence
+
+Retrieved context used to verify claims.
+
+```txt
+Calendar availability
+Policy text
+Source documents
+Business rules
+```
+
+### Safety gate
+
+A blocking rule for high-risk behavior.
+
+```txt
+false confirmation
+PII exposure
+prompt injection
+unauthorized action
+```
+
+### Verdict
+
+The final launch decision.
+
+```txt
+ship-ready
+acceptable
+needs-work
+blocked
+```
+
+---
+
+## Why not just use an LLM judge?
+
+An LLM judge is useful, but it is not enough.
+
+This tool combines multiple evaluation layers:
+
+```txt
+LLM judgment      → subjective quality
+Claim checking    → factual grounding
+Safety gates      → non-negotiable risk checks
+Human review      → calibration and judgment
+Reports           → repeatability and accountability
+```
+
+The goal is not just to produce a score.
+The goal is to explain:
+
+```txt
+what passed
+what failed
+why it failed
+whether it is safe to ship
+what should be fixed next
+```
+
+---
+
+## Roadmap
+
+* [ ] Better run comparison
+* [ ] Golden dataset support
+* [ ] Judge calibration dashboard
+* [ ] Prompt/model regression tracking
+* [ ] More deterministic safety checks
+* [ ] Video report generation from evaluation runs
+* [ ] CI integration for AI output regression tests
+* [ ] Public demo dataset
+* [ ] More test coverage for scoring and reports
+
+---
+
+## Motion assets
+
+Asset paths used in this README:
+
+```txt
+docs/media/teaser15.gif
+docs/media/ChartRubric.gif
+docs/media/ChartPipeline.gif
+docs/media/ChartGates.gif
+docs/media/ChartScore.gif
+docs/media/teaser15.mp4
+video/out/ai-eval-film.mp4
+```
+
+They explain the product flow visually:
+
+```txt
+Rubric → Claim Pipeline → Safety Gates → Verdict
+```
+
+---
+
+## Development
+
+Run tests:
+
+```bash
+npm run test
+```
+
+Run linting:
+
+```bash
+npm run lint
+```
+
+Build:
+
+```bash
+npm run build
+```
+
+---
+
+## Security notes
+
+Do not expose server-side keys to the browser.
+Recommended checks before deploying publicly:
+
+* keep `SUPABASE_SERVICE_ROLE_KEY` server-only
+* review RLS policies
+* avoid logging raw private user data
+* redact sensitive input/output from reports when needed
+* separate demo data from production data
+* set `DEMO_ACCESS_CODE` + `DEMO_SESSION_SECRET` (auth gate on), `MAX_DAILY_LLM_USD=2`, and rotate keys before going live
 
 ---
 
@@ -179,8 +554,26 @@ Full version in [`roadmap.md`](./roadmap.md).
 
 ---
 
-## Reading order
+## Positioning
 
-If you have 10 minutes: `README.md` → `product-brief.md` → `architecture.md`.
-If you have 30 minutes: add `behavior-spec.md` and any two wiki pages.
-If you are evaluating this for hiring: read `wiki/evaluation-principles.md`, `wiki/llm-as-judge.md`, and `acceptance-criteria.md`. That is where the opinions live.
+```txt
+AI Evaluation Tool is evidence-backed quality control for LLM outputs.
+```
+
+Short version:
+
+```txt
+Score it. Ground it. Gate it. Ship it.
+```
+
+Brand line:
+
+```txt
+Evaluate AI with evidence, not vibes.
+```
+
+---
+
+## Author
+
+Built by **Eduard Shatalov** as part of an AI automation / AI product engineering portfolio.
