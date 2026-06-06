@@ -1,5 +1,6 @@
 // Domain types, display maps, and PURE compute helpers.
 // Client-safe: no JSON imports, no fs, no Supabase. Data fetching lives in db.ts.
+import { isRegression } from "./eval/regression";
 
 export interface Project {
   id: string;
@@ -246,12 +247,22 @@ export function calculateRecentQuality(runs: Run[]): RecentQuality {
   );
   const last = sorted[0] ?? null;
   const prev = sorted[1] ?? null;
+  const deltaRegression =
+    last && prev
+      ? isRegression({
+          baselineScore: prev.overall_score,
+          currentScore: last.overall_score,
+          baselineSafetyFindings: prev.safety_findings,
+          currentSafetyFindings: last.safety_findings,
+          sameRubric: last.rubric_id === prev.rubric_id,
+        }).flagged
+      : false;
   return {
     totalRuns: runs.length,
     lastScore: last?.overall_score ?? null,
     prevScore: prev?.overall_score ?? null,
     delta: last && prev ? +(last.overall_score - prev.overall_score).toFixed(1) : null,
-    hasRegression: runs.some((r) => r.regression_flag),
+    hasRegression: runs.some((r) => r.regression_flag) || deltaRegression,
     lastRunAt: last?.started_at ?? null,
   };
 }

@@ -2,6 +2,7 @@ import "server-only";
 import OpenAI from "openai";
 import { z } from "zod";
 import { assertWithinBudget, addDailySpend } from "./budget";
+import { scoreGroundedness } from "./groundedness";
 import type { EvalInput } from "./deterministic";
 
 // Claim pipeline: extract atomic factual claims from the AI output and verify
@@ -30,14 +31,6 @@ const ClaimSchema = z.object({
   evidence: z.string().max(500),
 });
 const ResponseSchema = z.object({ claims: z.array(ClaimSchema).max(30) });
-
-// Score weight per label — groundedness contribution.
-const LABEL_WEIGHT: Record<ClaimLabel, number> = {
-  supported: 1,
-  partially_supported: 0.6,
-  unsupported: 0.2,
-  contradicted: 0,
-};
 
 export interface ClaimPipelineResult {
   claims: VerifiedClaim[];
@@ -101,11 +94,7 @@ export async function runClaimPipeline(input: EvalInput, model?: string): Promis
     evidence: c.evidence,
   }));
 
-  // No factual claims → nothing ungrounded → full groundedness.
-  const score =
-    claims.length === 0
-      ? 1
-      : claims.reduce((s, c) => s + LABEL_WEIGHT[c.label], 0) / claims.length;
+  const score = scoreGroundedness(claims.map((c) => c.label));
 
-  return { claims, score: Math.round(score * 100) / 100, cost_usd };
+  return { claims, score, cost_usd };
 }
