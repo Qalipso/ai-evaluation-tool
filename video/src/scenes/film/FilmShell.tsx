@@ -1,6 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Audio, staticFile, useVideoConfig } from "remotion";
 import { Backdrop } from "../../components/Backdrop";
+import { Aurora } from "../../components/Aurora";
 import { AssetBg } from "../../components/AssetBg";
 import { Grain } from "../../components/Grain";
 import { ScanLines, LightSweep, DepthBloom } from "../../components/Atmosphere";
@@ -20,14 +21,15 @@ export const FilmShell: React.FC<{
   pad?: string;
   bg?: string; // generated asset under public/, e.g. "video/generated/hero-board.png"
   bgVideo?: boolean;
+  aurora?: boolean; // aurora-style animated gradient backdrop (title scenes)
   children: React.ReactNode;
-}> = ({ scene, audio, glow = "accent", pad = "80px 150px 150px", bg, bgVideo, children }) => {
+}> = ({ scene, audio, glow = "accent", pad = "80px 150px 150px", bg, bgVideo, aurora, children }) => {
   const { durationInFrames } = useVideoConfig();
   const n = filmNarration[scene];
   return (
     <AbsoluteFill>
-      <Backdrop glow={glow} />
-      <DepthBloom />
+      {aurora ? <Aurora /> : <Backdrop glow={glow} />}
+      {!aurora && <DepthBloom />}
       <AssetBg src={bg} video={bgVideo} enabled={USE_GENERATED_ASSETS && !!bg} />
       {audio && <Audio src={staticFile(n.audio)} />}
       <AbsoluteFill style={{ padding: pad }}>{children}</AbsoluteFill>

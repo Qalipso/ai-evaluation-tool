@@ -11,7 +11,7 @@ export const S8CTA: React.FC<{ audio?: boolean }> = ({ audio }) => {
   const frame = useCurrentFrame();
   const mark = rise(frame, sec(0.2));
   return (
-    <FilmShell scene="cta" audio={audio}>
+    <FilmShell scene="cta" audio={audio} aurora>
       <AbsoluteFill style={{ alignItems: "center", justifyContent: "center" }}>
         <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
           <div
