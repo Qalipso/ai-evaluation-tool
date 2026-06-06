@@ -17,7 +17,7 @@ This tool scores AI outputs against rubrics, checks claims against evidence, cat
 
 <p align="center">
   <a href="https://ai-eval-tool.vercel.app/">
-    <img src="./docs/media/teaser15.gif" alt="AI Evaluation Tool preview" width="100%" />
+    <img src="./docs/assets/teaser15.gif" alt="AI Evaluation Tool preview" width="100%" />
   </a>
 </p>
 
@@ -28,6 +28,18 @@ This tool scores AI outputs against rubrics, checks claims against evidence, cat
   ·
   <a href="https://github.com/Qalipso/ai-evaluation-tool">GitHub</a>
 </p>
+
+---
+
+## Product preview
+
+A walkthrough of the dark evaluation cockpit — rubric scoring, claim grounding,
+safety gates, and the ship/block verdict — lives on the portfolio project page:
+
+- **Project page:** [shatalov.dev](https://shatalov.dev)
+- **Live app:** [ai-eval-tool.vercel.app](https://ai-eval-tool.vercel.app/)
+
+The rest of this README stays focused on proof, architecture, and setup.
 
 ---
 
@@ -76,7 +88,7 @@ The evaluation loop follows four stages:
 ### Rubric breakdown
 
 <p align="center">
-  <img src="./docs/media/ChartRubric.gif" alt="Rubric breakdown" width="100%" />
+  <img src="./docs/assets/ChartRubric.gif" alt="Rubric breakdown" width="100%" />
 </p>
 
 Rubrics define dimensions, weights, thresholds, and scoring methods. The engine ships **14 reference dimensions** (`app/src/lib/eval/dimensions.ts`): accuracy, relevance, completeness, task_completion, hallucination_risk, groundedness, safety, consistency, tone_fit, actionability — plus extended ones for conversational/reflective products: helpfulness, emotional_nuance, non_judgmental_tone, useful_next_step.
@@ -84,7 +96,7 @@ Rubrics define dimensions, weights, thresholds, and scoring methods. The engine 
 ### Claim pipeline
 
 <p align="center">
-  <img src="./docs/media/ChartPipeline.gif" alt="Claim pipeline" width="100%" />
+  <img src="./docs/assets/ChartPipeline.gif" alt="Claim pipeline" width="100%" />
 </p>
 
 The system extracts claims from the AI output and checks them against retrieved evidence.
@@ -92,7 +104,7 @@ The system extracts claims from the AI output and checks them against retrieved 
 ### Safety gates
 
 <p align="center">
-  <img src="./docs/media/ChartGates.gif" alt="Safety gates" width="100%" />
+  <img src="./docs/assets/ChartGates.gif" alt="Safety gates" width="100%" />
 </p>
 
 Some failures should block a run instead of being averaged into a score.
@@ -100,7 +112,7 @@ Some failures should block a run instead of being averaged into a score.
 ### Verdict score
 
 <p align="center">
-  <img src="./docs/media/ChartScore.gif" alt="Verdict score" width="100%" />
+  <img src="./docs/assets/ChartScore.gif" alt="Verdict score" width="100%" />
 </p>
 
 Every run ends with a verdict: **Ship-ready**, **Acceptable**, **Needs work**, or **Blocked**.
@@ -371,7 +383,7 @@ app/
   scripts/seed.mjs        Seed script
 supabase/migrations/      0001_init · 0002_eval_settings · 0003_datasets
 mock-data/                Bundled read-only fallback data
-docs/media/               GIFs and preview assets
+docs/assets/              Motion assets (teaser + chart GIFs)
 wiki/                     Evaluation knowledge base (markdown)
 ```
 
