@@ -1,7 +1,15 @@
 # AI Evaluation — Wiki + Tool
 
 > **Status: the evaluation engine is real and data flows end-to-end** (Next.js 15 + Supabase + OpenAI).
+
+## Demo
+
+<video src="https://github.com/Qalipso/ai-evaluation-tool/raw/main/video/out/ai-eval-film.mp4" controls width="100%"></video>
+
+▶ [Watch the walkthrough](./video/out/ai-eval-film.mp4)
+
 >
+
 > **Live features:**
 > - **Assisted batch runner** (`/runs/new`) — set a master prompt, let the rubric generate test questions, generate candidate answers with the chosen model, then evaluate all as one run (N cases). Per-run model selection (project default or override).
 > - **Real scoring methods, no fabrication** — LLM-as-judge (one structured call), **claim pipeline** (atomic claim extraction + verification against context → groundedness; persisted claims drive the heat map), **real semantic cosine** (embeddings vs the expected behavior), and deterministic checks that are genuinely real: PII, false-confirmation, language-match, and cost-efficiency (conciseness). Dimensions with no real scorer (`human`, generic deterministic) are left **unscored**, never given a placeholder number.
