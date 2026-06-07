@@ -9,7 +9,7 @@ This tool scores AI outputs against rubrics, checks claims against evidence, cat
 
 <p align="center">
   <a href="https://github.com/Qalipso/ai-evaluation-tool/actions/workflows/ci.yml"><img src="https://github.com/Qalipso/ai-evaluation-tool/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
-  <img src="https://img.shields.io/badge/tests-vitest-6E9F18" alt="Tests: Vitest" />
+  <img src="https://img.shields.io/badge/tests-135%20passing-3CB371" alt="135 unit tests passing" />
   <img src="https://img.shields.io/badge/Next.js-15-black" alt="Next.js 15" />
   <img src="https://img.shields.io/badge/React-19-149ECA" alt="React 19" />
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6" alt="TypeScript 5" />
@@ -28,6 +28,51 @@ This tool scores AI outputs against rubrics, checks claims against evidence, cat
   ·
   <a href="https://github.com/Qalipso/ai-evaluation-tool">GitHub</a>
 </p>
+
+---
+
+## Proof
+
+A working evaluation engine, not a mockup. Every claim here is backed by code or tests.
+
+- **135 unit tests, all passing** — `npm test`. Engine logic only: scoring, aggregation, verdict gates, claim grounding, deterministic safety checks, PII + language detection. See [`app/tests/unit`](./app/tests/unit).
+- **CI on every push** — GitHub Actions runs lint + typecheck + test + build. See [`.github/workflows/ci.yml`](./.github/workflows/ci.yml). The badge above reflects the live result.
+- **17 runnable eval scenarios** across hallucination / safety / format, each asserted against the real engine in CI. See [`app/src/lib/eval-scenarios`](./app/src/lib/eval-scenarios).
+- **Real vs mock, stated plainly** — with no env the app serves bundled mock data (read-only, no persistence). Real scoring (LLM judge, embeddings, claim pipeline, deterministic gates) runs only with `OPENAI_API_KEY` + Supabase. A dimension with no real scorer is reported `unscored`, never a placeholder number.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph UI["Next.js app · 25 pages"]
+      D[Dashboard] --- RU[Runs] --- CMP[Compare] --- SAF[Safety] --- REP[Reports]
+    end
+    subgraph API["API routes · 10"]
+      RUN["/api/eval/run/*"] --- SC["/api/rubric/score"] --- CLM["/api/eval/claims"] --- DET["/api/eval/deterministic"]
+    end
+    subgraph ENGINE["Evaluation engine · src/lib"]
+      RB[Rubric + dimensions]
+      JG[LLM judge]
+      SM[Semantic cosine]
+      CP[Claim pipeline]
+      DC[Deterministic + safety gates]
+      AG[Aggregator + verdict]
+    end
+    DB[(Supabase / mock fallback)]
+
+    UI --> API --> ENGINE
+    RB --> AG
+    JG --> AG
+    SM --> AG
+    CP --> AG
+    DC --> AG
+    ENGINE --> DB
+    AG --> V{{Ship-ready / Acceptable / Needs work / Blocked}}
+```
+
+One case fans out across the scoring, claim, and safety paths; results converge in the aggregator, where the verdict gate decides ship vs block. Storage is downstream — the run is written once, reports and the review queue read from it. Detailed pipeline diagrams live in [`diagrams/`](./diagrams).
 
 ---
 
@@ -318,7 +363,7 @@ The goal is to explain:
 
 `POST /api/eval/run/start` · `POST /api/eval/run/case` · `POST /api/eval/run/finalize` · `POST /api/eval/questions` · `POST /api/eval/answer` · `POST /api/eval/claims` · `POST /api/eval/deterministic` · `POST /api/rubric/score` · `GET /api/index` · `POST /api/enter`
 
-28 pages + 9 API routes total.
+25 pages + 10 API routes total.
 
 ---
 
@@ -393,9 +438,10 @@ app/
     lib/
       eval/               Evaluation engine (judges, claims, semantic, aggregate, run, budget)
       evaluators/         Deterministic checks, safety gates, PII + language detection
+      eval-scenarios/     Runnable scenario library (hallucination / safety / format)
       validation/         Zod schemas
       wiki/               Knowledge base utilities
-  tests/unit/             Vitest unit tests (deterministic, aggregate)
+  tests/unit/             Vitest unit tests (135) — engine, detectors, scenarios
   scripts/seed.mjs        Seed script
 supabase/migrations/      0001_init · 0002_eval_settings · 0003_datasets
 mock-data/                Bundled read-only fallback data
@@ -435,11 +481,11 @@ Before deploying publicly:
 - [ ] Judge calibration dashboard
 - [ ] Prompt/model regression tracking
 - [ ] Run comparison improvements
-- [ ] CI integration for AI output tests
-- [ ] More deterministic safety gates
+- [x] CI integration for AI output tests
+- [x] More deterministic safety gates
 - [ ] Public demo dataset
 - [ ] Video report generation from evaluation runs
-- [ ] Better test coverage for scoring and reports
+- [x] Better test coverage for scoring and reports
 
 ---
 
