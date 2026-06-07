@@ -21,7 +21,10 @@ for k in "${!L[@]}"; do
   python3 -m edge_tts --voice "$VOICE" --rate=-6% --text "${L[$k]}" --write-media "public/audio/film/$k.mp3"
 done
 
-# Music — Am cinematic chord progression (A minor: Am-F-C-G) + sub + reverb.
+# Music bed is now an external licensed track (monume-advertising) trimmed to
+# the film length — kept in repo at public/audio/music-bed.mp3. Skip regen.
+# Legacy procedural generator below (disabled). To use it, set GEN_MUSIC=1.
+if [ "${GEN_MUSIC:-0}" = "1" ]; then
 tmp=$(mktemp -d)
 mkchord(){ ffmpeg -y -loglevel error -f lavfi -i "sine=$1:d=3" -f lavfi -i "sine=$2:d=3" -f lavfi -i "sine=$3:d=3" \
   -filter_complex "[0][1][2]amix=inputs=3:weights=0.5 0.9 0.7,afade=t=in:st=0:d=0.4,afade=t=out:st=2.4:d=0.6" "$tmp/$4.wav"; }
@@ -33,6 +36,7 @@ ffmpeg -y -loglevel error -stream_loop 3 -i "$tmp/prog.wav" -f lavfi -i "sine=55
   "$tmp/music.mp3"
 ffmpeg -y -loglevel error -i "$tmp/music.mp3" -af "volume=6dB" public/audio/music-bed.mp3
 rm -rf "$tmp"
+fi
 
 # SFX
 ffmpeg -y -loglevel error -f lavfi -i "sine=58:d=0.6" -af "afade=t=out:st=0.06:d=0.54,volume=1.4,lowpass=f=200" public/audio/sfx/thump.mp3

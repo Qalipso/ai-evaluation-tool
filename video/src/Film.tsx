@@ -71,7 +71,7 @@ const transitions: { dur: number; p: () => TransitionPresentation<any>; t: Retur
 export const Film: React.FC<{ audio?: boolean }> = ({ audio = false }) => {
   return (
     <AbsoluteFill style={{ background: color.bgBase }}>
-      {audio && <Audio src={staticFile("audio/music-bed.mp3")} volume={0.75} />}
+      {audio && <Audio src={staticFile("audio/music-bed.mp3")} volume={0.55} />}
       <TransitionSeries>
         {Scenes.map(({ key, Comp }, i) => (
           <React.Fragment key={key}>

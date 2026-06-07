@@ -52,7 +52,7 @@ export const SCENE = {
 // Tightened cut — trimmed dead air after animations land. Snappier pacing.
 // 5+4+5+6+8+7+7+5 = 47s.
 export const FILM = {
-  coldOpen: 2,
+  coldOpen: 3.5,
   hook: 4,
   problem: 6,
   reveal: 5,

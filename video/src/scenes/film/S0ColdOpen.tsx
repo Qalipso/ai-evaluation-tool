@@ -14,17 +14,20 @@ import { USE_GENERATED_ASSETS } from "./FilmShell";
 // the ironic robots-café footage, then glitches into the story. ~2s.
 export const S0ColdOpen: React.FC<{ audio?: boolean }> = ({ audio }) => {
   const frame = useCurrentFrame();
-  const flash = interpolate(frame, [sec(1.3), sec(1.5)], [0, 0.5], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const out = interpolate(frame, [sec(1.5), sec(1.9)], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const kick = 1 + rise(frame, 0) * 0.0; // hold
+  const flash = interpolate(frame, [sec(1.4), sec(1.6)], [0, 0.5], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const out = interpolate(frame, [sec(3.0), sec(3.5)], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // slow push-in on the robots close-up before the line hits
+  const kick = interpolate(frame, [0, sec(1.4)], [1.12, 1.0], { extrapolateRight: "clamp" });
 
   return (
     <AbsoluteFill style={{ background: color.bgBase, opacity: out }}>
       <Backdrop glow="bad" />
-      <AssetBg src="video/generated/hook-robots.mp4" video enabled={USE_GENERATED_ASSETS} opacity={0.4} />
-      <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", padding: "0 120px", transform: `scale(${kick})` }}>
+      <AbsoluteFill style={{ transform: `scale(${kick})` }}>
+        <AssetBg src="video/generated/hook-robots.mp4" video enabled={USE_GENERATED_ASSETS} opacity={0.92} />
+      </AbsoluteFill>
+      <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", padding: "0 120px" }}>
         <KineticType
-          start={2}
+          start={sec(1.3)}
           step={5}
           words={[
             { text: "AI", size: 150, weight: 800 },
@@ -34,13 +37,13 @@ export const S0ColdOpen: React.FC<{ audio?: boolean }> = ({ audio }) => {
           ]}
         />
       </AbsoluteFill>
-      <LightSweep delay={4} />
+      <LightSweep delay={sec(1.3)} />
       {audio && (
-        <Sequence from={sec(1.2)}>
+        <Sequence from={sec(1.3)}>
           <Audio src={staticFile("audio/sfx/thump.mp3")} volume={0.9} />
         </Sequence>
       )}
-      <GlitchOverlay start={sec(1.25)} dur={14} />
+      <GlitchOverlay start={sec(1.35)} dur={14} />
       <AbsoluteFill style={{ background: color.bad, opacity: flash, mixBlendMode: "screen", pointerEvents: "none" }} />
       <Grain opacity={0.06} />
     </AbsoluteFill>
